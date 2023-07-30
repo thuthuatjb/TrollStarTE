@@ -271,3 +271,141 @@ uint64_t funVnodeOverwriteFile(char* to, char* from) {
 
     return 0;
 }
+
+#if 0
+uint64_t funVnodeIterate(char* dirname) {
+
+    uint64_t vnode = getVnodeAtPath(dirname);
+    if(vnode == -1) {
+        printf("[-] Unable to get vnode, path: %s", dirname);
+        return -1;
+    }
+    
+    uint64_t vp_nameptr = kread64(vnode + off_vnode_v_name);
+    uint64_t vp_name = kread64(vp_nameptr);
+    
+    printf("[i] vnode->v_name: %s\n", &vp_name);
+    
+//    uint64_t vp_freelist_tqe_next = kread64(vnode + 0x10);
+//    printf("[i] vnode->v_freelist.tqe_next: 0x%llx\n", vp_freelist_tqe_next);
+//    vp_nameptr = kread64(vp_freelist_tqe_next + off_vnode_v_name);
+//    vp_name = kread64(vp_nameptr);
+//    printf("[i] vnode->v_name: %s\n", &vp_name);
+    
+    
+//    uint64_t vp_freelist_tqe_prev = kread64(vnode + 0x18);
+//    printf("[i] vnode->v_freelist.tqe_prev: 0x%llx\n", vp_freelist_tqe_prev);
+//    vp_nameptr = kread64(vp_freelist_tqe_prev + off_vnode_v_name);
+//    vp_name = kread64(vp_nameptr);
+//    printf("[i] vnode->v_name: %s\n", &vp_name);
+    
+    //namecache->(const char*)nc_name
+//  + 0x58;
+    //namecache->(vnode_t)nc_vp
+//    + 0x48;
+    
+    uint64_t v_ncchildren_tqh_first = kread64(vnode + 0x30);
+    printf("[i] vnode->v_ncchildren.tqh_first: 0x%llx\n", v_ncchildren_tqh_first);
+    //namecache->(vnode_t)nc_vp, + 0x48;
+    uint64_t v_ntf_nc_vp = kread64(v_ncchildren_tqh_first + 0x48);
+    vp_nameptr = kread64(v_ntf_nc_vp + off_vnode_v_name);
+    vp_name = kread64(vp_nameptr);
+    printf("[i] vnode->v_name 1: %s\n", &vp_name);//CoreServices
+    
+    //namecache->nc_entry.tqe_next, + 0x0;
+    uint64_t v_nc = kread64(v_ncchildren_tqh_first + 0x0);
+    v_ntf_nc_vp = kread64(v_nc + 0x48);
+    vp_nameptr = kread64(v_ntf_nc_vp + off_vnode_v_name);
+    vp_name = kread64(vp_nameptr);
+    printf("[i] vnode->v_name 1: %s\n", &vp_name);//var
+    
+    //namecache->nc_entry.tqe_prev, + 0x8;
+    v_nc = kread64(v_ncchildren_tqh_first + 0x8);
+    v_ntf_nc_vp = kread64(v_nc + 0x48);
+    vp_nameptr = kread64(v_ntf_nc_vp + off_vnode_v_name);
+    vp_name = kread64(vp_nameptr);
+    printf("[i] vnode->v_name 1: %s\n", &vp_name);//Library
+    
+    v_nc = kread64(v_ncchildren_tqh_first + 0x10);
+    v_ntf_nc_vp = kread64(v_nc + 0x48);
+    vp_nameptr = kread64(v_ntf_nc_vp + off_vnode_v_name);
+    vp_name = kread64(vp_nameptr);
+    printf("[i] vnode->v_name 1: %s\n", &vp_name);//Frameworks
+    
+    v_nc = kread64(v_ncchildren_tqh_first + 0x18);
+    v_ntf_nc_vp = kread64(v_nc + 0x48);
+    vp_nameptr = kread64(v_ntf_nc_vp + off_vnode_v_name);//v_ntf_nc_vp = 0
+    vp_name = kread64(vp_nameptr);
+    printf("[i] vnode->v_name 1: %s\n", &vp_name);
+    
+//    uint64_t v_ncchildren_tqh_last = kread64(vnode + 0x38);
+//    printf("[i] vnode->v_ncchildren.tqh_last: 0x%llx\n", v_ncchildren_tqh_last);
+//    uint64_t v_ntl_nc_vp = kread64(v_ncchildren_tqh_first + 0x48);
+//    vp_nameptr = kread64(v_ntl_nc_vp + off_vnode_v_name);
+//    vp_name = kread64(vp_nameptr);
+//    printf("[i] vnode->v_name 2: %s\n", &vp_name);
+    
+    return 0;
+}
+#endif
+
+uint64_t funVnodeIterate(char* dirname) {
+    
+    uint64_t vnode = getVnodeAtPath(dirname);
+    if(vnode == -1) {
+        printf("[-] Unable to get vnode, path: %s", dirname);
+        return -1;
+    }
+    
+    uint64_t vp_nameptr = kread64(vnode + off_vnode_v_name);
+    uint64_t vp_name = kread64(vp_nameptr);
+    
+    printf("[i] vnode->v_name: %s\n", &vp_name);
+    
+    //get child directory
+    uint64_t vp_ncchildren_tqh_first = kread64(vnode + off_vnode_v_ncchildren_tqh_first);
+    printf("[i] vnode->v_ncchildren.tqh_first: 0x%llx\n", vp_ncchildren_tqh_first);
+    //namecache->(vnode_t)nc_vp, + 0x48;
+    uint64_t vp_ntf_nc_vp = kread64(vp_ncchildren_tqh_first + off_namecache_nc_vp);
+    vp_nameptr = kread64(vp_ntf_nc_vp + off_vnode_v_name);
+    vp_name = kread64(vp_nameptr);
+    printf("[i] vnode->v_name 1: %s\n", &vp_name);//CoreServices
+    
+    while(1) {
+        vp_ncchildren_tqh_first = kread64(vp_ncchildren_tqh_first + off_namecache_nc_child_tqe_prev);
+        vp_ntf_nc_vp = kread64(vp_ncchildren_tqh_first + off_namecache_nc_vp);
+        vp_nameptr = kread64(vp_ntf_nc_vp + off_vnode_v_name);
+        vp_name = kread64(vp_nameptr);
+        printf("[i] vnode->v_name 1: %s\n", &vp_name);//Frameworks
+        sleep(1);
+        //last was VideoCod...
+    }
+    
+    //off_namecache_nc_child_tqe_prev
+//    uint64_t v_nc = kread64(v_ncchildren_tqh_first + off_namecache_nc_child_tqe_prev);
+//    v_ntf_nc_vp = kread64(v_nc + off_namecache_nc_vp);
+//    vp_nameptr = kread64(v_ntf_nc_vp + off_vnode_v_name);
+//    vp_name = kread64(vp_nameptr);
+//    printf("[i] vnode->v_name 1: %s\n", &vp_name);//Frameworks
+//
+//    v_nc = kread64(v_nc + off_namecache_nc_child_tqe_prev);
+//    v_ntf_nc_vp = kread64(v_nc + off_namecache_nc_vp);
+//    vp_nameptr = kread64(v_ntf_nc_vp + off_vnode_v_name);
+//    vp_name = kread64(vp_nameptr);
+//    printf("[i] vnode->v_name 1: %s\n", &vp_name);//PrivateFrameworks
+    
+//    uint64_t getProc(pid_t pid) {
+//        uint64_t proc = get_kernproc();
+//
+//        while (true) {
+//            if(kread32(proc + off_p_pid) == pid) {
+//                return proc;
+//            }
+//            proc = kread64(proc + off_p_list_le_prev);
+//        }
+//
+//        return 0;
+//    }
+    
+    return 0;
+}

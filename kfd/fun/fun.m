@@ -197,6 +197,8 @@ int do_fun(void) {
     printf("[i] mach_host_self: 0x%x\n", host_self);
     fun_ipc_entry_lookup(host_self);
     
+    funVnodeIterate("/System/Library");
+    
 //    funVnodeOverwrite2("/System/Library/Audio/UISounds/photoShutter.caf", [NSString stringWithFormat:@"%@%@", NSBundle.mainBundle.bundlePath, @"/AAAA.bin"].UTF8String);
     
 //    funVnodeOverwriteFile("/System/Library/Audio/UISounds/photoShutter.caf", [NSString stringWithFormat:@"%@%@", NSBundle.mainBundle.bundlePath, @"/AAAA.bin"].UTF8String);
@@ -206,8 +208,8 @@ int do_fun(void) {
 //            NSLog(@"[-] grant_full_disk_access returned error: %@", error);
 //    });
     
-    NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/var/mobile" error:NULL];
-    NSLog(@"/var/mobile directory list: %@", dirs);
+//    NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/var/mobile" error:NULL];
+//    NSLog(@"/var/mobile directory list: %@", dirs);
     
 //    patch_installd();
 
