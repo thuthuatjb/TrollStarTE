@@ -35,6 +35,7 @@ uint64_t funVnodeChmod(char* filename, mode_t mode);
 Description:
   Redirect directory to another directory.
   Only work when mount points of directories are same.
+  Can be escaped out of sandbox.
 */
 uint64_t funVnodeRedirectFolder(char* to, char* from);
 
@@ -42,5 +43,6 @@ uint64_t funVnodeRedirectFolder(char* to, char* from);
 Description:
   Perform overwrite file data to file.
   Only work when file size is 'lower or same' than original file size.
+  Overwriting executable file also works, but executing will not work anymore. just hang or crash.
 */
 uint64_t funVnodeOverwriteFile(char* to, char* from);
