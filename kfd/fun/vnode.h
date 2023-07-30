@@ -40,6 +40,7 @@ Description:
   Redirect directory to another directory.
   Only work when mount points of directories are same.
   Can be escaped out of sandbox.
+  If succeeds, return value to_vnode->v_data (for unredirect)
 */
 uint64_t funVnodeRedirectFolder(char* to, char* from);
 
@@ -51,8 +52,30 @@ Description:
 */
 uint64_t funVnodeOverwriteFile(char* to, char* from);
 
+/*
+Description:
+  Iterating sub directory or file at dirname.
+*/
 uint64_t funVnodeIterateByPath(char* dirname);
 
+/*
+Description:
+  Iterating sub directory or file at vnode.
+*/
 uint64_t funVnodeIterateByVnode(uint64_t vnode);
 
+/*
+Description:
+  Redirect directory to another directory using vnode.
+  Only work when mount points of directories are same.
+  Can be escaped out of sandbox.
+  If succeeds, return value to_vnode->v_data (for unredirect)
+*/
 uint64_t funVnodeRedirectFolderFromVnode(char* to, uint64_t from_vnode);
+
+/*
+Description:
+  UnRedirect directory to another directory.
+  It needs orig_to_v_data, ususally you can get return value of funVnodeRedirectFolder / funVnodeRedirectFolderByVnode
+*/
+uint64_t funVnodeUnRedirectFolder(char* to, uint64_t orig_to_v_data);
