@@ -16,6 +16,7 @@ uint64_t getVnodeVar(void);
 uint64_t getVnodeVarMobile(void);
 uint64_t getVnodeVarTmp(void);
 uint64_t getVnodePreferences(void);
+uint64_t getVnodeLibrary(void);
 uint64_t findChildVnodeByVnode(uint64_t vnode, char* childname);
 
 /*

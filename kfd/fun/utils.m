@@ -88,3 +88,33 @@ int ResSet16(void) {
     
     return 0;
 }
+
+int removeSMSCache(void) {
+    uint64_t library_vnode = getVnodeLibrary();
+    uint64_t sms_vnode = findChildVnodeByVnode(library_vnode, "SMS");
+    
+    //retry find SMS vnode
+    while(1) {
+        if(sms_vnode != 0)
+            break;
+        library_vnode = getVnodeLibrary();
+        sms_vnode = findChildVnodeByVnode(library_vnode, "SMS");
+    }
+    printf("[i] /var/mobile/Library/SMS vnode: 0x%llx\n", sms_vnode);
+    
+    uint64_t orig_to_v_data = createFolderAndRedirect(sms_vnode);
+    
+    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    
+    NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+    NSLog(@"/var/mobile/Library/SMS directory list: %@", dirs);
+    
+    remove([mntPath stringByAppendingString:@"/com.apple.messages.geometrycache_v7.plist"].UTF8String);
+    
+    dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+    NSLog(@"/var/mobile/Library/SMS directory list: %@", dirs);
+    
+    UnRedirectAndRemoveFolder(orig_to_v_data);
+    
+    return 0;
+}

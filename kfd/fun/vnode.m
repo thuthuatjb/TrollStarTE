@@ -30,7 +30,6 @@ uint64_t getVnodeAtPath(char* filename) {
     uint64_t vnode_pac = kread64(fileglob + off_fg_data);
     uint64_t vnode = vnode_pac | 0xffffff8000000000;
     
-    printf("[i] %s vnode: 0x%llx\n", filename, vnode);
     close(file_index);
     
     return vnode;
@@ -410,6 +409,26 @@ uint64_t getVnodePreferences(void) {
         parent_vnode = kread64(parent_vnode + off_vnode_v_parent) | 0xffffff8000000000;
     }
 
+    return parent_vnode;
+}
+
+uint64_t getVnodeLibrary(void) {
+    
+    //path: /var/mobile/Library/Preferences/.GlobalPreferences.plist
+    //2 upward, /var/mobile/Library
+    const char* path = "/var/mobile/Library/Preferences/.GlobalPreferences.plist";
+    
+    uint64_t vnode = getVnodeAtPath(path);
+    if(vnode == -1) {
+        printf("[-] Unable to get vnode, path: %s\n", path);
+        return -1;
+    }
+
+    uint64_t parent_vnode = vnode;
+    for(int i = 0; i < 2; i++) {
+        parent_vnode = kread64(parent_vnode + off_vnode_v_parent) | 0xffffff8000000000;
+    }
+    
     return parent_vnode;
 }
 
