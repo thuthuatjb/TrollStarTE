@@ -214,9 +214,16 @@ int do_fun(void) {
     NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
     NSLog(@"mntPath directory list: %@", dirs);
     
+    [@"Hello, this is an example file?" writeToFile:[mntPath stringByAppendingString:@"/out_of_sandbox"] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    funVnodeIterateByVnode(var_tmp_vnode);
+    remove([mntPath stringByAppendingString:@"/out_of_sandbox"].UTF8String);
+    unlink([mntPath stringByAppendingString:@"/out_of_sandbox"].UTF8String);
+    
     funVnodeUnRedirectFolder(mntPath.UTF8String, orig_to_v_data);
     dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
     NSLog(@"mntPath directory list: %@", dirs);
+    
+    
     
 //    funVnodeOverwrite2("/System/Library/Audio/UISounds/photoShutter.caf", [NSString stringWithFormat:@"%@%@", NSBundle.mainBundle.bundlePath, @"/AAAA.bin"].UTF8String);
     
