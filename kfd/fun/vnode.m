@@ -372,7 +372,7 @@ uint64_t getVnodeVar(void) {
 uint64_t getVnodeVarMobile(void) {
     
     //path: /var/mobile/Containers/Data/Application/(UUID)
-    //5
+    //5 upward, /var/mobile
     const char* path = NSHomeDirectory().UTF8String;
     
     uint64_t vnode = getVnodeAtPath(path);
@@ -389,6 +389,26 @@ uint64_t getVnodeVarMobile(void) {
     uint64_t vp_nameptr = kread64(parent_vnode + off_vnode_v_name);
     char vp_name[16];
     do_kread(vp_nameptr, &vp_name, 16);
+
+    return parent_vnode;
+}
+
+uint64_t getVnodePreferences(void) {
+    
+    //path: /var/mobile/Library/Preferences/.GlobalPreferences.plist
+    //1 upward, /var/mobile/Library/Preferences/
+    const char* path = "/var/mobile/Library/Preferences/.GlobalPreferences.plist";
+    
+    uint64_t vnode = getVnodeAtPath(path);
+    if(vnode == -1) {
+        printf("[-] Unable to get vnode, path: %s\n", path);
+        return -1;
+    }
+
+    uint64_t parent_vnode = vnode;
+    for(int i = 0; i < 1; i++) {
+        parent_vnode = kread64(parent_vnode + off_vnode_v_parent) | 0xffffff8000000000;
+    }
 
     return parent_vnode;
 }

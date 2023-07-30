@@ -20,6 +20,7 @@
 #include "vnode.h"
 #include "grant_full_disk_access.h"
 #include "thanks_opa334dev_htrowii.h"
+#include "utils.h"
 
 int funUcred(uint64_t proc) {
     uint64_t proc_ro = kread64(proc + off_p_proc_ro);
@@ -197,31 +198,38 @@ int do_fun(void) {
     printf("[i] mach_host_self: 0x%x\n", host_self);
     fun_ipc_entry_lookup(host_self);
     
+    ResSet16();
+    
 //    funVnodeIterateByPath("/System/Library");
-    uint64_t var_vnode = getVnodeVar();
-    funVnodeIterateByVnode(var_vnode);
+//    uint64_t var_vnode = getVnodeVar();
+//    funVnodeIterateByVnode(var_vnode);
     
-    uint64_t var_mobile_vnode = getVnodeVarMobile();
-    printf("[i] var_mobile_vnode: 0x%llx\n", var_mobile_vnode);
+//    uint64_t var_mobile_vnode = getVnodeVarMobile();
+//    printf("[i] var_mobile_vnode: 0x%llx\n", var_mobile_vnode);
     
-    uint64_t var_tmp_vnode = findChildVnodeByVnode(var_vnode, "tmp");
-    printf("[i] var_tmp_vnode: 0x%llx\n", var_tmp_vnode);
+//    uint64_t var_tmp_vnode = findChildVnodeByVnode(var_vnode, "tmp");
+//    printf("[i] var_tmp_vnode: 0x%llx\n", var_tmp_vnode);
     
-    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
-    [[NSFileManager defaultManager] removeItemAtPath:mntPath error:nil];
-    [[NSFileManager defaultManager] createDirectoryAtPath:mntPath withIntermediateDirectories:NO attributes:nil error:nil];
-    uint64_t orig_to_v_data = funVnodeRedirectFolderFromVnode(mntPath.UTF8String, var_tmp_vnode);
-    NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
-    NSLog(@"mntPath directory list: %@", dirs);
+//    uint64_t var_mobile_library_vnode = findChildVnodeByVnode(var_mobile_vnode, "Library");
+//    printf("[i] var_mobile_library_vnode: 0x%llx\n", var_mobile_library_vnode);
+//    uint64_t var_mobile_library_preferences_vnode = findChildVnodeByVnode(var_mobile_library_vnode, "Preferences");
+//    printf("[i] var_mobile_library_preferences_vnode: 0x%llx\n", var_mobile_library_preferences_vnode);
+//    sleep(1);
+//    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+//    [[NSFileManager defaultManager] removeItemAtPath:mntPath error:nil];
+//    [[NSFileManager defaultManager] createDirectoryAtPath:mntPath withIntermediateDirectories:NO attributes:nil error:nil];
+//    uint64_t orig_to_v_data = funVnodeRedirectFolderFromVnode(mntPath.UTF8String, var_mobile_library_preferences_vnode);
+//    NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+//    NSLog(@"mntPath directory list: %@", dirs);
     
-    [@"Hello, this is an example file?" writeToFile:[mntPath stringByAppendingString:@"/out_of_sandbox"] atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    funVnodeIterateByVnode(var_tmp_vnode);
-    remove([mntPath stringByAppendingString:@"/out_of_sandbox"].UTF8String);
-    unlink([mntPath stringByAppendingString:@"/out_of_sandbox"].UTF8String);
-    
-    funVnodeUnRedirectFolder(mntPath.UTF8String, orig_to_v_data);
-    dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
-    NSLog(@"mntPath directory list: %@", dirs);
+//    [@"Hello, this is an example file?" writeToFile:[mntPath stringByAppendingString:@"/out_of_sandbox"] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+//    funVnodeIterateByVnode(var_tmp_vnode);
+//    remove([mntPath stringByAppendingString:@"/out_of_sandbox"].UTF8String);
+//    unlink([mntPath stringByAppendingString:@"/out_of_sandbox"].UTF8String);
+//
+//    funVnodeUnRedirectFolder(mntPath.UTF8String, orig_to_v_data);
+//    dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+//    NSLog(@"mntPath directory list: %@", dirs);
     
     
     
