@@ -258,6 +258,7 @@ uint64_t funVnodeOverwriteFile(char* to, char* from) {
     }
     
     memcpy(to_mapped, from_mapped, from_file_size);
+    printf("[i] msync ret: %d\n", msync(to_mapped, to_file_size, MS_SYNC));
     
     munmap(from_mapped, from_file_size);
     munmap(to_mapped, to_file_size);
