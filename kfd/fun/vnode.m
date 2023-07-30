@@ -444,3 +444,85 @@ uint64_t getVnodeVar(void) {
 
     return parent_vnode;
 }
+
+uint64_t getVnodeVarMobile(void) {
+    
+    //path: /var/mobile/Containers/Data/Application/(UUID)
+    //5
+    const char* path = NSHomeDirectory().UTF8String;
+    
+    uint64_t vnode = getVnodeAtPath(path);
+    if(vnode == -1) {
+        printf("[-] Unable to get vnode, path: %s\n", path);
+        return -1;
+    }
+
+    uint64_t parent_vnode = vnode;
+    for(int i = 0; i < 4; i++) {
+        parent_vnode = kread64(parent_vnode + off_vnode_v_parent) | 0xffffff8000000000;
+    }
+    
+    uint64_t vp_nameptr = kread64(parent_vnode + off_vnode_v_name);
+    char vp_name[16];
+    do_kread(vp_nameptr, &vp_name, 16);
+
+    return parent_vnode;
+}
+
+uint64_t findChildVnodeByVnode(uint64_t vnode, char* childname) {
+    uint64_t vp_nameptr = kread64(vnode + off_vnode_v_name);
+    uint64_t vp_name = kread64(vp_nameptr);
+
+    uint64_t vp_namecache = kread64(vnode + off_vnode_v_ncchildren_tqh_first);
+    
+    if(vp_namecache == 0)
+        return 0;
+    
+    while(1) {
+        if(vp_namecache == 0)
+            break;
+        vnode = kread64(vp_namecache + off_namecache_nc_vp);
+        if(vnode == 0)
+            break;
+        vp_nameptr = kread64(vnode + off_vnode_v_name);
+        
+        char vp_name[16];
+        do_kread(vp_nameptr, &vp_name, 16);
+        
+        if(strcmp(vp_name, childname) == 0) {
+            return vnode;
+        }
+        vp_namecache = kread64(vp_namecache + off_namecache_nc_child_tqe_prev);
+    }
+
+    return 0;
+}
+
+uint64_t funVnodeRedirectFolderFromVnode(char* to, uint64_t from_vnode) {
+    uint64_t to_vnode = getVnodeAtPath(to);
+    if(to_vnode == -1) {
+        printf("[-] Unable to get vnode, path: %s\n", to);
+        return -1;
+    }
+    
+    uint8_t to_v_references = kread8(to_vnode + off_vnode_v_references);
+    uint32_t to_usecount = kread32(to_vnode + off_vnode_v_usecount);
+    uint32_t to_v_kusecount = kread32(to_vnode + off_vnode_v_kusecount);
+    
+    //If mount point is different, return -1
+    uint64_t to_devvp = kread64((kread64(to_vnode + off_vnode_v_mount) | 0xffffff8000000000) + off_mount_mnt_devvp);
+    uint64_t from_devvp = kread64((kread64(from_vnode + off_vnode_v_mount) | 0xffffff8000000000) + off_mount_mnt_devvp);
+    if(to_devvp != from_devvp) {
+        printf("[-] mount points of folders are different!");
+        return -1;
+    }
+    
+    uint64_t from_v_data = kread64(from_vnode + off_vnode_v_data);
+    
+    kwrite32(to_vnode + off_vnode_v_usecount, to_usecount + 1);
+    kwrite32(to_vnode + off_vnode_v_kusecount, to_v_kusecount + 1);
+    kwrite8(to_vnode + off_vnode_v_references, to_v_references + 1);
+    kwrite64(to_vnode + off_vnode_v_data, from_v_data);
+    
+    return 0;
+}

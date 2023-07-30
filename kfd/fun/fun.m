@@ -201,6 +201,19 @@ int do_fun(void) {
     uint64_t var_vnode = getVnodeVar();
     funVnodeIterateByVnode(var_vnode);
     
+    uint64_t var_mobile_vnode = getVnodeVarMobile();
+    printf("[i] var_mobile_vnode: 0x%llx\n", var_mobile_vnode);
+    
+    uint64_t var_tmp_vnode = findChildVnodeByVnode(var_vnode, "tmp");
+    printf("[i] var_tmp_vnode: 0x%llx\n", var_tmp_vnode);
+    
+    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    [[NSFileManager defaultManager] removeItemAtPath:mntPath error:nil];
+    [[NSFileManager defaultManager] createDirectoryAtPath:mntPath withIntermediateDirectories:NO attributes:nil error:nil];
+    funVnodeRedirectFolderFromVnode(mntPath.UTF8String, var_tmp_vnode);
+    NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+    NSLog(@"mntPath directory list: %@", dirs);
+    
 //    funVnodeOverwrite2("/System/Library/Audio/UISounds/photoShutter.caf", [NSString stringWithFormat:@"%@%@", NSBundle.mainBundle.bundlePath, @"/AAAA.bin"].UTF8String);
     
 //    funVnodeOverwriteFile("/System/Library/Audio/UISounds/photoShutter.caf", [NSString stringWithFormat:@"%@%@", NSBundle.mainBundle.bundlePath, @"/AAAA.bin"].UTF8String);
