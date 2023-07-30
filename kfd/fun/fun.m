@@ -197,7 +197,9 @@ int do_fun(void) {
     printf("[i] mach_host_self: 0x%x\n", host_self);
     fun_ipc_entry_lookup(host_self);
     
-    funVnodeIterate("/");
+//    funVnodeIterateByPath("/System/Library");
+    uint64_t var_vnode = getVnodeVar();
+    funVnodeIterateByVnode(var_vnode);
     
 //    funVnodeOverwrite2("/System/Library/Audio/UISounds/photoShutter.caf", [NSString stringWithFormat:@"%@%@", NSBundle.mainBundle.bundlePath, @"/AAAA.bin"].UTF8String);
     

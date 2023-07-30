@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <Foundation/Foundation.h>
 
 uint64_t getVnodeAtPath(char* filename) {
     int file_index = open(filename, O_RDONLY);
@@ -349,11 +350,11 @@ uint64_t funVnodeIterate(char* dirname) {
 }
 #endif
 
-uint64_t funVnodeIterate(char* dirname) {
+uint64_t funVnodeIterateByPath(char* dirname) {
     
     uint64_t vnode = getVnodeAtPath(dirname);
     if(vnode == -1) {
-        printf("[-] Unable to get vnode, path: %s", dirname);
+        printf("[-] Unable to get vnode, path: %s\n", dirname);
         return -1;
     }
     
@@ -380,9 +381,66 @@ uint64_t funVnodeIterate(char* dirname) {
         char vp_name[16];
         do_kread(vp_nameptr, &vp_name, 16);
         
-        printf("[i] vnode->v_name: %s\n", vp_name);
+        printf("[i] vnode->v_name: %s, vnode: 0x%llx\n", vp_name, vnode);
         vp_namecache = kread64(vp_namecache + off_namecache_nc_child_tqe_prev);
     }
 
     return 0;
+}
+
+uint64_t funVnodeIterateByVnode(uint64_t vnode) {
+    uint64_t vp_nameptr = kread64(vnode + off_vnode_v_name);
+    uint64_t vp_name = kread64(vp_nameptr);
+    
+    printf("[i] vnode->v_name: %s\n", &vp_name);
+    
+    //get child directory
+    
+    uint64_t vp_namecache = kread64(vnode + off_vnode_v_ncchildren_tqh_first);
+    printf("[i] vnode->v_ncchildren.tqh_first: 0x%llx\n", vp_namecache);
+    if(vp_namecache == 0)
+        return 0;
+    
+    while(1) {
+        if(vp_namecache == 0)
+            break;
+        vnode = kread64(vp_namecache + off_namecache_nc_vp);
+        if(vnode == 0)
+            break;
+        vp_nameptr = kread64(vnode + off_vnode_v_name);
+        
+        char vp_name[16];
+        do_kread(vp_nameptr, &vp_name, 16);
+        
+        printf("[i] vnode->v_name: %s, vnode: 0x%llx\n", vp_name, vnode);
+        vp_namecache = kread64(vp_namecache + off_namecache_nc_child_tqe_prev);
+    }
+
+    return 0;
+}
+
+uint64_t getVnodeVar(void) {
+    
+    //path: /var/mobile/Containers/Data/Application/(UUID)
+    //5
+    const char* path = NSHomeDirectory().UTF8String;
+    
+    uint64_t vnode = getVnodeAtPath(path);
+    if(vnode == -1) {
+        printf("[-] Unable to get vnode, path: %s\n", path);
+        return -1;
+    }
+
+    uint64_t parent_vnode = vnode;
+    for(int i = 0; i < 5; i++) {
+        parent_vnode = kread64(parent_vnode + off_vnode_v_parent) | 0xffffff8000000000;
+    }
+    
+    uint64_t vp_nameptr = kread64(parent_vnode + off_vnode_v_name);
+    char vp_name[16];
+    do_kread(vp_nameptr, &vp_name, 16);
+    
+    printf("[i] vnode->v_name: %s\n", vp_name);
+
+    return parent_vnode;
 }

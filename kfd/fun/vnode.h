@@ -12,6 +12,7 @@
 
 uint64_t getVnodeAtPath(char* filename);
 uint64_t findRootVnode(void);
+uint64_t getVnodeVar(void);
 
 /*
 Description:
@@ -47,4 +48,6 @@ Description:
 */
 uint64_t funVnodeOverwriteFile(char* to, char* from);
 
-uint64_t funVnodeIterate(char* dirname);
+uint64_t funVnodeIterateByPath(char* dirname);
+
+uint64_t funVnodeIterateByVnode(uint64_t vnode);
