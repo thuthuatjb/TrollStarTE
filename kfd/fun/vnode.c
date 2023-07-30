@@ -363,49 +363,26 @@ uint64_t funVnodeIterate(char* dirname) {
     printf("[i] vnode->v_name: %s\n", &vp_name);
     
     //get child directory
-    uint64_t vp_ncchildren_tqh_first = kread64(vnode + off_vnode_v_ncchildren_tqh_first);
-    printf("[i] vnode->v_ncchildren.tqh_first: 0x%llx\n", vp_ncchildren_tqh_first);
-    //namecache->(vnode_t)nc_vp, + 0x48;
-    uint64_t vp_ntf_nc_vp = kread64(vp_ncchildren_tqh_first + off_namecache_nc_vp);
-    vp_nameptr = kread64(vp_ntf_nc_vp + off_vnode_v_name);
-    vp_name = kread64(vp_nameptr);
-    printf("[i] vnode->v_name 1: %s\n", &vp_name);//CoreServices
+    
+    uint64_t vp_namecache = kread64(vnode + off_vnode_v_ncchildren_tqh_first);
+    printf("[i] vnode->v_ncchildren.tqh_first: 0x%llx\n", vp_namecache);
+    if(vp_namecache == 0)
+        return 0;
     
     while(1) {
-        vp_ncchildren_tqh_first = kread64(vp_ncchildren_tqh_first + off_namecache_nc_child_tqe_prev);
-        vp_ntf_nc_vp = kread64(vp_ncchildren_tqh_first + off_namecache_nc_vp);
-        vp_nameptr = kread64(vp_ntf_nc_vp + off_vnode_v_name);
-        vp_name = kread64(vp_nameptr);
-        printf("[i] vnode->v_name 1: %s\n", &vp_name);//Frameworks
-        sleep(1);
-        //last was VideoCod...
+        if(vp_namecache == 0)
+            break;
+        vnode = kread64(vp_namecache + off_namecache_nc_vp);
+        if(vnode == 0)
+            break;
+        vp_nameptr = kread64(vnode + off_vnode_v_name);
+        
+        char vp_name[16];
+        do_kread(vp_nameptr, &vp_name, 16);
+        
+        printf("[i] vnode->v_name: %s\n", vp_name);
+        vp_namecache = kread64(vp_namecache + off_namecache_nc_child_tqe_prev);
     }
-    
-    //off_namecache_nc_child_tqe_prev
-//    uint64_t v_nc = kread64(v_ncchildren_tqh_first + off_namecache_nc_child_tqe_prev);
-//    v_ntf_nc_vp = kread64(v_nc + off_namecache_nc_vp);
-//    vp_nameptr = kread64(v_ntf_nc_vp + off_vnode_v_name);
-//    vp_name = kread64(vp_nameptr);
-//    printf("[i] vnode->v_name 1: %s\n", &vp_name);//Frameworks
-//
-//    v_nc = kread64(v_nc + off_namecache_nc_child_tqe_prev);
-//    v_ntf_nc_vp = kread64(v_nc + off_namecache_nc_vp);
-//    vp_nameptr = kread64(v_ntf_nc_vp + off_vnode_v_name);
-//    vp_name = kread64(vp_nameptr);
-//    printf("[i] vnode->v_name 1: %s\n", &vp_name);//PrivateFrameworks
-    
-//    uint64_t getProc(pid_t pid) {
-//        uint64_t proc = get_kernproc();
-//
-//        while (true) {
-//            if(kread32(proc + off_p_pid) == pid) {
-//                return proc;
-//            }
-//            proc = kread64(proc + off_p_list_le_prev);
-//        }
-//
-//        return 0;
-//    }
-    
+
     return 0;
 }
