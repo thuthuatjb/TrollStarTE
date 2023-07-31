@@ -180,6 +180,7 @@ int do_fun(void) {
     funUcred(selfProc);
     funProc(selfProc);
     uint64_t photoShutter_vnode = funVnodeHide("/System/Library/Audio/UISounds/photoShutter.caf");
+    funVnodeReveal(photoShutter_vnode);
     funCSFlags("launchd");
     funTask("kfd");
     
@@ -197,8 +198,6 @@ int do_fun(void) {
     mach_port_t host_self = mach_host_self();
     printf("[i] mach_host_self: 0x%x\n", host_self);
     fun_ipc_entry_lookup(host_self);
-    
-    funVnodeReveal(photoShutter_vnode);
     
 //    ResSet16();
 //    removeSMSCache();
