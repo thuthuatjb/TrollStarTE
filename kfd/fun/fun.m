@@ -179,7 +179,7 @@ int do_fun(void) {
     
     funUcred(selfProc);
     funProc(selfProc);
-    funVnodeHide("/System/Library/Audio/UISounds/photoShutter.caf");
+    uint64_t photoShutter_vnode = funVnodeHide("/System/Library/Audio/UISounds/photoShutter.caf");
     funCSFlags("launchd");
     funTask("kfd");
     
@@ -198,13 +198,15 @@ int do_fun(void) {
     printf("[i] mach_host_self: 0x%x\n", host_self);
     fun_ipc_entry_lookup(host_self);
     
+    funVnodeReveal(photoShutter_vnode);
+    
 //    ResSet16();
 //    removeSMSCache();
 
 
-    VarMobileWriteTest();
+//    VarMobileWriteTest();
     //How to Remove: If write succeed, first REBOOT. disable VarMobileWriteTest() function and enable VarMobileRemoveTest. it should work remove file.
-    VarMobileRemoveTest();
+//    VarMobileRemoveTest();
     
 //    funVnodeIterateByPath("/System/Library");
 //    uint64_t var_vnode = getVnodeVar();

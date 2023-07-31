@@ -10,20 +10,27 @@
 #define MNT_RDONLY      0x00000001      /* read only filesystem */
 #define VISSHADOW       0x008000        /* vnode is a shadow file */
 
-uint64_t getVnodeAtPath(char* filename);
-uint64_t findRootVnode(void);
-uint64_t getVnodeVar(void);
-uint64_t getVnodeVarMobile(void);
-uint64_t getVnodeVarTmp(void);
-uint64_t getVnodePreferences(void);
-uint64_t getVnodeLibrary(void);
-uint64_t findChildVnodeByVnode(uint64_t vnode, char* childname);
+uint64_t getVnodeAtPath(char* filename);    /* return vnode of path, if open(filename, RD_ONLY) returned -1, it fails */
+uint64_t findRootVnode(void);   /* return root vnode as is */
+uint64_t getVnodeVar(void); /* return /var vnode as is */
+uint64_t getVnodeVarMobile(void);   /* return /var/mobile vnode as is */
+uint64_t getVnodeVarTmp(void);  /* return /var/tmp vnode as is */
+uint64_t getVnodePreferences(void); /* return /var/mobile/Library/Preferences vnode as is */
+uint64_t getVnodeLibrary(void); /* return /var/mobile/Library vnode as is */
 
 /*
 Description:
-  Hide and reveal file or directory.
+  Hide file or directory.
+  Return vnode value for restore.
 */
 uint64_t funVnodeHide(char* filename);
+
+/*
+Description:
+  Reveal file or directory.
+  Required vnode value to restore.
+*/
+uint64_t funVnodeReveal(uint64_t vnode);
 
 /*
 Description:
@@ -81,3 +88,11 @@ Description:
   It needs orig_to_v_data, ususally you can get return value of funVnodeRedirectFolder / funVnodeRedirectFolderByVnode
 */
 uint64_t funVnodeUnRedirectFolder(char* to, uint64_t orig_to_v_data);
+
+/*
+Description:
+  Return vnode of subdirectory or sub file in vnode.
+  childname can be what you want to find subdirectory or file name.
+  vnode should be vnode of root directory.
+*/
+uint64_t findChildVnodeByVnode(uint64_t vnode, char* childname);
