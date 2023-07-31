@@ -199,7 +199,12 @@ int do_fun(void) {
     fun_ipc_entry_lookup(host_self);
     
 //    ResSet16();
-    removeSMSCache();
+//    removeSMSCache();
+
+
+    VarMobileWriteTest();
+    //How to Remove: If write succeed, first REBOOT. disable VarMobileWriteTest() function and enable VarMobileRemoveTest. it should work remove file.
+    VarMobileRemoveTest();
     
 //    funVnodeIterateByPath("/System/Library");
 //    uint64_t var_vnode = getVnodeVar();

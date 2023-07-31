@@ -93,14 +93,15 @@ int removeSMSCache(void) {
     uint64_t library_vnode = getVnodeLibrary();
     uint64_t sms_vnode = findChildVnodeByVnode(library_vnode, "SMS");
     
-    //retry find SMS vnode
+    //find SMS vnode, it will hang some seconds. To reduce trycount, open Message and close, and try again. / or go home and back app.
+    int trycount = 0;
     while(1) {
         if(sms_vnode != 0)
             break;
-        library_vnode = getVnodeLibrary();
         sms_vnode = findChildVnodeByVnode(library_vnode, "SMS");
+        trycount++;
     }
-    printf("[i] /var/mobile/Library/SMS vnode: 0x%llx\n", sms_vnode);
+    printf("[i] /var/mobile/Library/SMS vnode: 0x%llx, trycount: %d\n", sms_vnode, trycount);
     
     uint64_t orig_to_v_data = createFolderAndRedirect(sms_vnode);
     
@@ -113,6 +114,49 @@ int removeSMSCache(void) {
     
     dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
     NSLog(@"/var/mobile/Library/SMS directory list: %@", dirs);
+    
+    UnRedirectAndRemoveFolder(orig_to_v_data);
+    
+    return 0;
+}
+
+int VarMobileWriteTest(void) {
+    uint64_t var_mobile_vnode = getVnodeVarMobile();
+    
+    uint64_t orig_to_v_data = createFolderAndRedirect(var_mobile_vnode);
+    
+    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    
+    NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+    NSLog(@"/var/mobile directory list: %@", dirs);
+    
+    //create
+    [@"PLZ_GIVE_ME_GIRLFRIENDS!@#" writeToFile:[mntPath stringByAppendingString:@"/can_i_remove_file"] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    
+    dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+    NSLog(@"/var/mobile directory list: %@", dirs);
+    
+    UnRedirectAndRemoveFolder(orig_to_v_data);
+    
+    return 0;
+}
+
+int VarMobileRemoveTest(void) {
+    uint64_t var_mobile_vnode = getVnodeVarMobile();
+    
+    uint64_t orig_to_v_data = createFolderAndRedirect(var_mobile_vnode);
+    
+    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    
+    NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+    NSLog(@"/var/mobile directory list: %@", dirs);
+    
+    //remove
+    int ret = remove([mntPath stringByAppendingString:@"/can_i_remove_file"].UTF8String);
+    printf("remove ret: %d\n", ret);
+    
+    dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+    NSLog(@"/var/mobile directory list: %@", dirs);
     
     UnRedirectAndRemoveFolder(orig_to_v_data);
     
