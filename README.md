@@ -1,4 +1,4 @@
-# kfd
+# kfd (Post-Exploitation)
 
 kfd, short for kernel file descriptor, is a project to read and write kernel memory on Apple
 devices. It leverages various vulnerabilities that can be exploited to obtain dangling PTEs, which
