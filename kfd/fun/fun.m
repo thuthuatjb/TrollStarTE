@@ -142,6 +142,7 @@ uint64_t fun_ipc_entry_lookup(mach_port_name_t port_name) {
         printf("[-] invalid port name 0x%x\n", port_name);
     }
     
+    //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/osfmk/ipc/ipc_space.h#L128C14-L128C31
     //0x20 = IPC_SPACE_IS_TABLE_OFF
     uint64_t is_table = kread64_smr(itk_space + 0x20);
     printf("[i] self task->itk_space->is_table: 0x%llx\n", is_table);
@@ -149,10 +150,14 @@ uint64_t fun_ipc_entry_lookup(mach_port_name_t port_name) {
     uint64_t entry = is_table + port_index * 0x18/*SIZE(ipc_entry)*/;
     printf("[i] entry: 0x%llx\n", entry);
     
+    //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/osfmk/ipc/ipc_entry.h#L113
     uint64_t object_pac = kread64(entry + 0x0/*OFFSET(ipc_entry, ie_object)*/);
     uint64_t object = object_pac | 0xffffff8000000000;
+    
+    //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/osfmk/ipc/ipc_object.h#L120
     uint32_t ip_bits = kread32(object + 0x0/*OFFSET(ipc_port, ip_bits)*/);
     uint32_t ip_refs = kread32(object + 0x4/*OFFSET(ipc_port, ip_references)*/);
+    //https://github.com/0x7ff/dimentio/blob/main/libdimentio.c#L973C1-L973C7
     uint64_t kobject_pac = kread64(object + 0x48/*OFFSET(ipc_port, ip_kobject)*/);
     uint64_t kobject = kobject_pac | 0xffffff8000000000;
     printf("[i] ipc_port: ip_bits 0x%x, ip_refs 0x%x\n", ip_bits, ip_refs);
