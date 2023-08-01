@@ -61,6 +61,14 @@ uint64_t kread64(uint64_t where) {
     return out;
 }
 
+//Thanks @jmpews
+uint64_t kread64_smr(uint64_t where) {
+    uint64_t value = kread64(where) | 0xffffff8000000000;
+    if((value & 0x400000000000) != 0)
+        value &= 0xFFFFFFFFFFFFFFE0;
+    return value;
+}
+
 void kwrite8(uint64_t where, uint8_t what) {
     uint8_t _buf[8] = {};
     _buf[0] = what;
