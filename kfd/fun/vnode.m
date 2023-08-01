@@ -15,7 +15,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <Foundation/Foundation.h>
-#include <aio.h>
+#include "thanks_opa334dev_htrowii.h"
 
 uint64_t getVnodeAtPath(char* filename) {
     int file_index = open(filename, O_RDONLY);
@@ -319,8 +319,8 @@ uint64_t funVnodeIterateByPath(char* dirname) {
             break;
         vp_nameptr = kread64(vnode + off_vnode_v_name);
         
-        char vp_name[16];
-        do_kread(vp_nameptr, &vp_name, 16);
+        char vp_name[256];
+        kreadbuf(vp_nameptr, &vp_name, 256);
         
         printf("[i] vnode->v_name: %s, vnode: 0x%llx\n", vp_name, vnode);
         vp_namecache = kread64(vp_namecache + off_namecache_nc_child_tqe_prev);
@@ -350,8 +350,8 @@ uint64_t funVnodeIterateByVnode(uint64_t vnode) {
             break;
         vp_nameptr = kread64(vnode + off_vnode_v_name);
         
-        char vp_name[16];
-        do_kread(vp_nameptr, &vp_name, 16);
+        char vp_name[256];
+        kreadbuf(vp_nameptr, &vp_name, 256);
         
         printf("[i] vnode->v_name: %s, vnode: 0x%llx\n", vp_name, vnode);
         vp_namecache = kread64(vp_namecache + off_namecache_nc_child_tqe_prev);
@@ -450,6 +450,26 @@ uint64_t getVnodeLibrary(void) {
     return parent_vnode;
 }
 
+uint64_t getVnodeSystemGroup(void) {
+    
+    //path: /var/containers/Shared/SystemGroup/systemgroup.com.apple.mobilegestaltcache/Library/Caches/com.apple.MobileGestalt.plist
+    //4 upward, /var/containers/Shared/SystemGroup
+    const char* path = "/var/containers/Shared/SystemGroup/systemgroup.com.apple.mobilegestaltcache/Library/Caches/com.apple.MobileGestalt.plist";
+    
+    uint64_t vnode = getVnodeAtPath(path);
+    if(vnode == -1) {
+        printf("[-] Unable to get vnode, path: %s\n", path);
+        return -1;
+    }
+
+    uint64_t parent_vnode = vnode;
+    for(int i = 0; i < 4; i++) {
+        parent_vnode = kread64(parent_vnode + off_vnode_v_parent) | 0xffffff8000000000;
+    }
+    
+    return parent_vnode;
+}
+
 uint64_t findChildVnodeByVnode(uint64_t vnode, char* childname) {
     uint64_t vp_nameptr = kread64(vnode + off_vnode_v_name);
     uint64_t vp_name = kread64(vp_nameptr);
@@ -467,8 +487,9 @@ uint64_t findChildVnodeByVnode(uint64_t vnode, char* childname) {
             break;
         vp_nameptr = kread64(vnode + off_vnode_v_name);
         
-        char vp_name[16];
-        do_kread(vp_nameptr, &vp_name, 16);
+        char vp_name[256];
+        kreadbuf(vp_nameptr, &vp_name, 256);
+//        printf("vp_name: %s\n", vp_name);
         
         if(strcmp(vp_name, childname) == 0) {
             return vnode;

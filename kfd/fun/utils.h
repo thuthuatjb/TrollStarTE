@@ -6,7 +6,8 @@
 //
 
 #include <stdio.h>
-int ResSet16(void);
+int ResSet16(NSInteger height, NSInteger width);
 int removeSMSCache(void);
 int VarMobileWriteTest(void);
 int VarMobileRemoveTest(void);
+int setSuperviseMode(bool enable);

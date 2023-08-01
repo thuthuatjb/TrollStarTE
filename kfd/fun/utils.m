@@ -10,8 +10,7 @@
 #import "krw.h"
 #import "helpers.h"
 
-uint64_t createFolderAndRedirect(uint64_t vnode) {
-    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+uint64_t createFolderAndRedirect(uint64_t vnode, NSString *mntPath) {
     [[NSFileManager defaultManager] removeItemAtPath:mntPath error:nil];
     [[NSFileManager defaultManager] createDirectoryAtPath:mntPath withIntermediateDirectories:NO attributes:nil error:nil];
     uint64_t orig_to_v_data = funVnodeRedirectFolderFromVnode(mntPath.UTF8String, vnode);
@@ -19,30 +18,14 @@ uint64_t createFolderAndRedirect(uint64_t vnode) {
     return orig_to_v_data;
 }
 
-uint64_t UnRedirectAndRemoveFolder(uint64_t orig_to_v_data) {
-    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+uint64_t UnRedirectAndRemoveFolder(uint64_t orig_to_v_data, NSString *mntPath) {
     funVnodeUnRedirectFolder(mntPath.UTF8String, orig_to_v_data);
     [[NSFileManager defaultManager] removeItemAtPath:mntPath error:nil];
     
     return 0;
 }
 
-//- (void)createPlistAtURL:(NSURL *)url height:(NSInteger)height width:(NSInteger)width error:(NSError **)error {
-//    NSDictionary *dictionary = @{
-//        @"canvas_height": @(height),
-//        @"canvas_width": @(width)
-//    };
-//    BOOL success = [dictionary writeToURL:url atomically:YES];
-//    if (!success) {
-//        NSDictionary *userInfo = @{
-//            NSLocalizedDescriptionKey: @"Failed to write property list to URL.",
-//            NSLocalizedFailureReasonErrorKey: @"Error occurred while writing the property list.",
-//            NSFilePathErrorKey: url.path
-//        };
-//        *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:userInfo];
-//    }
-//}
-int createPlistAtPath(NSString *path, NSInteger height, NSInteger width) {
+int setResolution(NSString *path, NSInteger height, NSInteger width) {
     NSDictionary *dictionary = @{
         @"canvas_height": @(height),
         @"canvas_width": @(width)
@@ -57,28 +40,29 @@ int createPlistAtPath(NSString *path, NSInteger height, NSInteger width) {
     return 0;
 }
 
-int ResSet16(void) {
+int ResSet16(NSInteger height, NSInteger width) {
+    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    
     //1. Create /var/tmp/com.apple.iokit.IOMobileGraphicsFamily.plist
     uint64_t var_vnode = getVnodeVar();
     uint64_t var_tmp_vnode = findChildVnodeByVnode(var_vnode, "tmp");
     printf("[i] /var/tmp vnode: 0x%llx\n", var_tmp_vnode);
-    uint64_t orig_to_v_data = createFolderAndRedirect(var_tmp_vnode);
+    uint64_t orig_to_v_data = createFolderAndRedirect(var_tmp_vnode, mntPath);
     
-    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
     
     //iPhone 14 Pro Max Resolution
-    createPlistAtPath([mntPath stringByAppendingString:@"/com.apple.iokit.IOMobileGraphicsFamily.plist"], 2796, 1290);
+    setResolution([mntPath stringByAppendingString:@"/com.apple.iokit.IOMobileGraphicsFamily.plist"], height, width);
     
-    UnRedirectAndRemoveFolder(orig_to_v_data);
+    UnRedirectAndRemoveFolder(orig_to_v_data, mntPath);
     
     
     //2. Create symbolic link /var/tmp/com.apple.iokit.IOMobileGraphicsFamily.plist -> /var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist
     uint64_t preferences_vnode = getVnodePreferences();
-    orig_to_v_data = createFolderAndRedirect(preferences_vnode);
+    orig_to_v_data = createFolderAndRedirect(preferences_vnode, mntPath);
 
     remove([mntPath stringByAppendingString:@"/com.apple.iokit.IOMobileGraphicsFamily.plist"].UTF8String);
     printf("symlink ret: %d\n", symlink("/var/tmp/com.apple.iokit.IOMobileGraphicsFamily.plist", [mntPath stringByAppendingString:@"/com.apple.iokit.IOMobileGraphicsFamily.plist"].UTF8String));
-    UnRedirectAndRemoveFolder(orig_to_v_data);
+    UnRedirectAndRemoveFolder(orig_to_v_data, mntPath);
     
     //3. xpc restart
     do_kclose();
@@ -90,6 +74,8 @@ int ResSet16(void) {
 }
 
 int removeSMSCache(void) {
+    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    
     uint64_t library_vnode = getVnodeLibrary();
     uint64_t sms_vnode = findChildVnodeByVnode(library_vnode, "SMS");
     
@@ -103,9 +89,7 @@ int removeSMSCache(void) {
     }
     printf("[i] /var/mobile/Library/SMS vnode: 0x%llx, trycount: %d\n", sms_vnode, trycount);
     
-    uint64_t orig_to_v_data = createFolderAndRedirect(sms_vnode);
-    
-    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    uint64_t orig_to_v_data = createFolderAndRedirect(sms_vnode, mntPath);
     
     NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
     NSLog(@"/var/mobile/Library/SMS directory list: %@", dirs);
@@ -115,17 +99,17 @@ int removeSMSCache(void) {
     dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
     NSLog(@"/var/mobile/Library/SMS directory list: %@", dirs);
     
-    UnRedirectAndRemoveFolder(orig_to_v_data);
+    UnRedirectAndRemoveFolder(orig_to_v_data, mntPath);
     
     return 0;
 }
 
 int VarMobileWriteTest(void) {
+    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    
     uint64_t var_mobile_vnode = getVnodeVarMobile();
     
-    uint64_t orig_to_v_data = createFolderAndRedirect(var_mobile_vnode);
-    
-    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    uint64_t orig_to_v_data = createFolderAndRedirect(var_mobile_vnode, mntPath);
     
     NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
     NSLog(@"/var/mobile directory list: %@", dirs);
@@ -136,17 +120,17 @@ int VarMobileWriteTest(void) {
     dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
     NSLog(@"/var/mobile directory list: %@", dirs);
     
-    UnRedirectAndRemoveFolder(orig_to_v_data);
+    UnRedirectAndRemoveFolder(orig_to_v_data, mntPath);
     
     return 0;
 }
 
 int VarMobileRemoveTest(void) {
+    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    
     uint64_t var_mobile_vnode = getVnodeVarMobile();
     
-    uint64_t orig_to_v_data = createFolderAndRedirect(var_mobile_vnode);
-    
-    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    uint64_t orig_to_v_data = createFolderAndRedirect(var_mobile_vnode, mntPath);
     
     NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
     NSLog(@"/var/mobile directory list: %@", dirs);
@@ -158,7 +142,67 @@ int VarMobileRemoveTest(void) {
     dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
     NSLog(@"/var/mobile directory list: %@", dirs);
     
-    UnRedirectAndRemoveFolder(orig_to_v_data);
+    UnRedirectAndRemoveFolder(orig_to_v_data, mntPath);
+    
+    return 0;
+}
+
+int setSuperviseMode(BOOL enable) {
+    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    // /var/containers/Shared/SystemGroup/systemgroup.com.apple.configurationprofiles/Library/ConfigurationProfiles/CloudConfigurationDetails.plist
+    
+    uint64_t systemgroup_vnode = getVnodeSystemGroup();
+    
+    //must enter 3 subdirectories
+    uint64_t configurationprofiles_vnode = findChildVnodeByVnode(systemgroup_vnode, "systemgroup.com.apple.configurationprofiles");
+    while(1) {
+        if(configurationprofiles_vnode != 0)
+            break;
+        configurationprofiles_vnode = findChildVnodeByVnode(systemgroup_vnode, "systemgroup.com.apple.configurationprofiles");
+    }
+    printf("[i] /var/containers/Shared/SystemGroup/systemgroup.com.apple.configurationprofiles vnode: 0x%llx\n", configurationprofiles_vnode);
+    
+    configurationprofiles_vnode = findChildVnodeByVnode(configurationprofiles_vnode, "Library");
+    while(1) {
+        if(configurationprofiles_vnode != 0)
+            break;
+        configurationprofiles_vnode = findChildVnodeByVnode(configurationprofiles_vnode, "Library");
+    }
+    printf("[i] /var/containers/Shared/SystemGroup/systemgroup.com.apple.configurationprofiles/Library vnode: 0x%llx\n", configurationprofiles_vnode);
+    
+    configurationprofiles_vnode = findChildVnodeByVnode(configurationprofiles_vnode, "ConfigurationProfiles");
+    while(1) {
+        if(configurationprofiles_vnode != 0)
+            break;
+        configurationprofiles_vnode = findChildVnodeByVnode(configurationprofiles_vnode, "ConfigurationProfiles");
+    }
+    printf("[i] /var/containers/Shared/SystemGroup/systemgroup.com.apple.configurationprofiles/Library/ConfigurationProfiles vnode: 0x%llx\n", configurationprofiles_vnode);
+    
+    uint64_t orig_to_v_data = createFolderAndRedirect(configurationprofiles_vnode, mntPath);
+    
+    NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+    NSLog(@"/var/containers/Shared/SystemGroup/systemgroup.com.apple.configurationprofiles/Library/ConfigurationProfiles directory list:\n %@", dirs);
+    
+    //set value of "IsSupervised" key
+    NSString *plistPath = [mntPath stringByAppendingString:@"/CloudConfigurationDetails.plist"];
+    
+    NSMutableDictionary *plist = [NSMutableDictionary dictionaryWithContentsOfFile:plistPath];
+        
+    if (plist) {
+        // Set the value of "IsSupervised" key to true
+        [plist setObject:@(enable) forKey:@"IsSupervised"];
+        
+        // Save the updated plist back to the file
+        if ([plist writeToFile:plistPath atomically:YES]) {
+            printf("[+] Successfully set IsSupervised in the plist.");
+        } else {
+            printf("[-] Failed to write the updated plist to file.");
+        }
+    } else {
+        printf("[-] Failed to load the plist file.");
+    }
+    
+    UnRedirectAndRemoveFolder(orig_to_v_data, mntPath);
     
     return 0;
 }

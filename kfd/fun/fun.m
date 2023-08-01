@@ -199,6 +199,9 @@ int do_fun(void) {
     printf("[i] mach_host_self: 0x%x\n", host_self);
     fun_ipc_entry_lookup(host_self);
     
+//    ResSet16(2796, 1290);
+    setSuperviseMode(true);
+    
 //    ResSet16();
 //    removeSMSCache();
 

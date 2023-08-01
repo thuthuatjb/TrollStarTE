@@ -17,6 +17,7 @@ uint64_t getVnodeVarMobile(void);   /* return /var/mobile vnode as is */
 uint64_t getVnodeVarTmp(void);  /* return /var/tmp vnode as is */
 uint64_t getVnodePreferences(void); /* return /var/mobile/Library/Preferences vnode as is */
 uint64_t getVnodeLibrary(void); /* return /var/mobile/Library vnode as is */
+uint64_t getVnodeSystemGroup(void); /* return /var/containers/Shared/SystemGroup vnode as is */
 
 /*
 Description:
