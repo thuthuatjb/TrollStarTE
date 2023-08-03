@@ -11,3 +11,5 @@ int removeSMSCache(void);
 int VarMobileWriteTest(void);
 int VarMobileRemoveTest(void);
 int setSuperviseMode(bool enable);
+int removeKeyboardCache(void);
+int regionChanger(NSString *country_value, NSString *region_value);

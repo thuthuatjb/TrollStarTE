@@ -9,6 +9,7 @@
 #import "vnode.h"
 #import "krw.h"
 #import "helpers.h"
+#import "offsets.h"
 
 uint64_t createFolderAndRedirect(uint64_t vnode, NSString *mntPath) {
     [[NSFileManager defaultManager] removeItemAtPath:mntPath error:nil];
@@ -203,6 +204,55 @@ int setSuperviseMode(BOOL enable) {
     }
     
     UnRedirectAndRemoveFolder(orig_to_v_data, mntPath);
+    
+    return 0;
+}
+
+int removeKeyboardCache(void) {
+    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    
+    uint64_t vnode = getVnodeAtPath("/var/mobile/Library/Caches/com.apple.keyboards/images");
+    if(vnode == -1) return 0;
+    
+    uint64_t orig_to_v_data = createFolderAndRedirect(vnode, mntPath);
+    
+    NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+    NSLog(@"/var/mobile/Library/Caches/com.apple.keyboards/images directory list:\n %@", dirs);
+    
+    for(NSString *dir in dirs) {
+        NSString *path = [NSString stringWithFormat:@"%@/%@", mntPath, dir];
+        [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
+    }
+    
+    dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+    NSLog(@"/var/mobile/Library/Caches/com.apple.keyboards/images directory list:\n %@", dirs);
+    
+    UnRedirectAndRemoveFolder(orig_to_v_data, mntPath);
+    
+    return 0;
+}
+
+#define COUNTRY_KEY @"h63QSdBCiT/z0WU6rdQv6Q"
+#define REGION_KEY @"zHeENZu+wbg7PUprwNwBWg"
+int regionChanger(NSString *country_value, NSString *region_value) {
+    NSString *plistPath = @"/var/containers/Shared/SystemGroup/systemgroup.com.apple.mobilegestaltcache/Library/Caches/com.apple.MobileGestalt.plist";
+    NSString *rewrittenPlistPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/com.apple.MobileGestalt.plist"];
+    
+    remove(rewrittenPlistPath.UTF8String);
+    
+    NSDictionary *dict1 = [NSDictionary dictionaryWithContentsOfFile:plistPath];
+    NSMutableDictionary *mdict1 = dict1 ? [dict1 mutableCopy] : [NSMutableDictionary dictionary];
+    NSDictionary *dict2 = dict1[@"CacheExtra"];
+    
+    NSMutableDictionary *mdict2 = dict2 ? [dict2 mutableCopy] : [NSMutableDictionary dictionary];
+    mdict2[COUNTRY_KEY] = country_value;
+    mdict2[REGION_KEY] = region_value;
+    [mdict1 setObject:mdict2 forKey:@"CacheExtra"];
+    
+    NSData *binaryData = [NSPropertyListSerialization dataWithPropertyList:mdict1 format:NSPropertyListBinaryFormat_v1_0 options:0 error:nil];
+    [binaryData writeToFile:rewrittenPlistPath atomically:YES];
+    
+    funVnodeOverwriteFile(plistPath.UTF8String, rewrittenPlistPath.UTF8String);
     
     return 0;
 }
