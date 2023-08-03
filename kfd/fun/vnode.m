@@ -552,3 +552,55 @@ uint64_t funVnodeUnRedirectFolder (char* to, uint64_t orig_to_v_data) {
     
     return 0;
 }
+
+uint64_t funVnodeOverwriteFileUnlimitSize(char* to, char* from) {
+
+    int to_file_index = open(to, O_RDONLY);
+    if (to_file_index == -1) return -1;
+    
+    int from_file_index = open(from, O_RDONLY);
+    if (from_file_index == -1) return -1;
+    off_t from_file_size = lseek(from_file_index, 0, SEEK_END);
+    
+    uint64_t proc = getProc(getpid());
+    
+    //get vnode
+    uint64_t filedesc_pac = kread64(proc + off_p_pfd);
+    uint64_t filedesc = filedesc_pac | 0xffffff8000000000;
+    uint64_t openedfile = kread64(filedesc + (8 * to_file_index));
+    uint64_t fileglob_pac = kread64(openedfile + off_fp_glob);
+    uint64_t fileglob = fileglob_pac | 0xffffff8000000000;
+    uint64_t vnode_pac = kread64(fileglob + off_fg_data);
+    uint64_t to_vnode = vnode_pac | 0xffffff8000000000;
+    printf("[i] %s to_vnode: 0x%llx\n", to, to_vnode);
+    
+    kwrite32(fileglob + off_fg_flag, O_ACCMODE);
+    
+    uint32_t to_vnode_v_writecount =  kread32(to_vnode + off_vnode_v_writecount);
+    printf("[i] %s Increasing to_vnode->v_writecount: %d\n", to, to_vnode_v_writecount);
+    if(to_vnode_v_writecount <= 0) {
+        kwrite32(to_vnode + off_vnode_v_writecount, to_vnode_v_writecount + 1);
+        printf("[+] %s Increased to_vnode->v_writecount: %d\n", to, kread32(to_vnode + off_vnode_v_writecount));
+    }
+    
+
+    char* from_mapped = mmap(NULL, from_file_size, PROT_READ, MAP_PRIVATE, from_file_index, 0);
+    if (from_mapped == MAP_FAILED) {
+        perror("[-] Failed mmap (from_mapped)");
+        close(from_file_index);
+        close(to_file_index);
+        return -1;
+    }
+    
+    printf("[i] ftruncate ret: %d\n", ftruncate(to_file_index, 0));
+    printf("[i] write: %zd\n", write(to_file_index, from_mapped, from_file_size));
+    
+    munmap(from_mapped, from_file_size);
+    
+    kwrite32(fileglob + off_fg_flag, O_RDONLY);
+    
+    close(from_file_index);
+    close(to_file_index);
+
+    return 0;
+}

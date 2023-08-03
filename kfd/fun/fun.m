@@ -203,12 +203,14 @@ int do_fun(void) {
     printf("[i] mach_host_self: 0x%x\n", host_self);
     fun_ipc_entry_lookup(host_self);
     
+    funVnodeOverwriteFileUnlimitSize("/var/mobile/Library/Caches/com.apple.keyboards/version", "/System/Library/PrivateFrameworks/TCC.framework/Support/tccd");
+    
 //    removeKeyboardCache();
     
     //Patch
 //    regionChanger(@"US", @"LL/A");
     //Restore (KOREAN) KH,KH/A
-    regionChanger(@"KH", @"KH/A");
+//    regionChanger(@"KH", @"KH/A");
     
 //    ResSet16(2796, 1290);
 //    setSuperviseMode(true);
