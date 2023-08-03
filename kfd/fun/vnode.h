@@ -102,7 +102,6 @@ uint64_t findChildVnodeByVnode(uint64_t vnode, char* childname);
 Description:
   Perform overwrite file data to file.
   You can overwrite file data without file size limit! but only works on /var files.
-  Only work when file size is 'lower or same' than original file size.
-  Overwriting executable file also works, but executing will not work anymore. just freeze or crash.
+  Overwriting executable file also works, but executing will not work anymore?
 */
 uint64_t funVnodeOverwriteFileUnlimitSize(char* to, char* from);
