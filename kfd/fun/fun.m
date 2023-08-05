@@ -202,7 +202,8 @@ int do_fun(void) {
     mach_port_t host_self = mach_host_self();
     printf("[i] mach_host_self: 0x%x\n", host_self);
     fun_ipc_entry_lookup(host_self);
-    removeSMSCache();
+//    setSuperviseMode(true);
+//    removeSMSCache();
     
 //    removeKeyboardCache();
     
