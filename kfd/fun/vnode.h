@@ -7,8 +7,18 @@
 
 #include <stdio.h>
 
+//https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/bsd/sys/mount.h#L293
 #define MNT_RDONLY      0x00000001      /* read only filesystem */
+#define MNT_NOSUID      0x00000008      /* don't honor setuid bits on fs */
+#define MNT_ROOTFS      0x00004000      /* identifies the root filesystem */
+#define MNT_UPDATE      0x00010000      /* not a real mount, just an update */
+//https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/bsd/sys/vnode_internal.h#L297
 #define VISSHADOW       0x008000        /* vnode is a shadow file */
+
+//https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/bsd/sys/fcntl.h#L112
+//https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/bsd/sys/fcntl.h#L231
+#define FREAD           0x00000001
+#define FWRITE          0x00000002
 
 uint64_t getVnodeAtPath(char* filename);    /* return vnode of path, if open(filename, RD_ONLY) returned -1, it fails */
 uint64_t findRootVnode(void);   /* return root vnode as is */

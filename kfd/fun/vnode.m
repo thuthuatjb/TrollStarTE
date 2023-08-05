@@ -248,7 +248,7 @@ uint64_t funVnodeOverwriteFile(char* to, char* from) {
     uint32_t rootvnode_mnt_flag = kread32(rootvnode_mount + off_mount_mnt_flag);
     
     kwrite32(rootvnode_mount + off_mount_mnt_flag, rootvnode_mnt_flag & ~MNT_RDONLY);
-    kwrite32(fileglob + off_fg_flag, O_ACCMODE);
+    kwrite32(fileglob + off_fg_flag, FREAD | FWRITE);
     
     uint32_t to_vnode_v_writecount =  kread32(to_vnode + off_vnode_v_writecount);
     printf("[i] %s Increasing to_vnode->v_writecount: %d\n", to, to_vnode_v_writecount);
@@ -282,12 +282,12 @@ uint64_t funVnodeOverwriteFile(char* to, char* from) {
     munmap(from_mapped, from_file_size);
     munmap(to_mapped, to_file_size);
     
-    kwrite32(fileglob + off_fg_flag, O_RDONLY);
+    kwrite32(fileglob + off_fg_flag, FREAD);
     kwrite32(rootvnode_mount + off_mount_mnt_flag, rootvnode_mnt_flag);
     
     close(from_file_index);
     close(to_file_index);
-
+    
     return 0;
 }
 
@@ -574,7 +574,7 @@ uint64_t funVnodeOverwriteFileUnlimitSize(char* to, char* from) {
     uint64_t to_vnode = vnode_pac | 0xffffff8000000000;
     printf("[i] %s to_vnode: 0x%llx\n", to, to_vnode);
     
-    kwrite32(fileglob + off_fg_flag, O_ACCMODE);
+    kwrite32(fileglob + off_fg_flag, FREAD | FWRITE);
     
     uint32_t to_vnode_v_writecount =  kread32(to_vnode + off_vnode_v_writecount);
     printf("[i] %s Increasing to_vnode->v_writecount: %d\n", to, to_vnode_v_writecount);
@@ -597,7 +597,7 @@ uint64_t funVnodeOverwriteFileUnlimitSize(char* to, char* from) {
     
     munmap(from_mapped, from_file_size);
     
-    kwrite32(fileglob + off_fg_flag, O_RDONLY);
+    kwrite32(fileglob + off_fg_flag, FREAD);
     
     close(from_file_index);
     close(to_file_index);

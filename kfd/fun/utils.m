@@ -10,6 +10,7 @@
 #import "krw.h"
 #import "helpers.h"
 #import "offsets.h"
+#import "thanks_opa334dev_htrowii.h"
 
 uint64_t createFolderAndRedirect(uint64_t vnode, NSString *mntPath) {
     [[NSFileManager defaultManager] removeItemAtPath:mntPath error:nil];
@@ -252,7 +253,39 @@ int regionChanger(NSString *country_value, NSString *region_value) {
     NSData *binaryData = [NSPropertyListSerialization dataWithPropertyList:mdict1 format:NSPropertyListBinaryFormat_v1_0 options:0 error:nil];
     [binaryData writeToFile:rewrittenPlistPath atomically:YES];
     
-    funVnodeOverwriteFile(plistPath.UTF8String, rewrittenPlistPath.UTF8String);
+    funVnodeOverwriteFileUnlimitSize(plistPath.UTF8String, rewrittenPlistPath.UTF8String);
     
     return 0;
+}
+
+void HexDump(uint64_t addr, size_t size) {
+    void *data = malloc(size);
+    kreadbuf(addr, data, size);
+    char ascii[17];
+    size_t i, j;
+    ascii[16] = '\0';
+    for (i = 0; i < size; ++i) {
+        printf("%02X ", ((unsigned char*)data)[i]);
+        if (((unsigned char*)data)[i] >= ' ' && ((unsigned char*)data)[i] <= '~') {
+            ascii[i % 16] = ((unsigned char*)data)[i];
+        } else {
+            ascii[i % 16] = '.';
+        }
+        if ((i+1) % 8 == 0 || i+1 == size) {
+            printf(" ");
+            if ((i+1) % 16 == 0) {
+                printf("|  %s \n", ascii);
+            } else if (i+1 == size) {
+                ascii[(i+1) % 16] = '\0';
+                if ((i+1) % 16 <= 8) {
+                    printf(" ");
+                }
+                for (j = (i+1) % 16; j < 16; ++j) {
+                    printf("   ");
+                }
+                printf("|  %s \n", ascii);
+            }
+        }
+    }
+    free(data);
 }

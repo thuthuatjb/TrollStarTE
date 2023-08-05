@@ -59,6 +59,7 @@ extern uint32_t off_vnode_v_label;
 extern uint32_t off_vnode_v_cred;
 extern uint32_t off_vnode_v_writecount;
 extern uint32_t off_vnode_v_type;
+extern uint32_t off_vnode_vu_ubcinfo;
 extern uint32_t off_mount_mnt_data;
 extern uint32_t off_mount_mnt_fsowner;
 extern uint32_t off_mount_mnt_fsgroup;

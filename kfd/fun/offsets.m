@@ -61,6 +61,7 @@ uint32_t off_vnode_v_label = 0;
 uint32_t off_vnode_v_cred = 0;
 uint32_t off_vnode_v_writecount = 0;
 uint32_t off_vnode_v_type = 0;
+uint32_t off_vnode_vu_ubcinfo = 0;
 uint32_t off_mount_mnt_data = 0;
 uint32_t off_mount_mnt_fsowner = 0;
 uint32_t off_mount_mnt_fsgroup = 0;
@@ -147,6 +148,7 @@ void _offsets_init(void) {
         off_vnode_v_cred = 0x98;
         off_vnode_v_writecount = 0xb0;
         off_vnode_v_type = 0x70;
+        off_vnode_vu_ubcinfo = 0x78;
         
         //https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/mount_internal.h#L108
         off_mount_mnt_data = 0x11F;
