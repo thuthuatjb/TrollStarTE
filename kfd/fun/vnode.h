@@ -25,7 +25,6 @@ uint64_t getVnodeAtPathByChdir(char *path); /* return vnode of path, but only di
 uint64_t findRootVnode(void);   /* return root vnode as is */
 uint64_t getVnodeVar(void); /* return /var vnode as is */
 uint64_t getVnodeVarMobile(void);   /* return /var/mobile vnode as is */
-uint64_t getVnodeVarTmp(void);  /* return /var/tmp vnode as is */
 uint64_t getVnodePreferences(void); /* return /var/mobile/Library/Preferences vnode as is */
 uint64_t getVnodeLibrary(void); /* return /var/mobile/Library vnode as is */
 uint64_t getVnodeSystemGroup(void); /* return /var/containers/Shared/SystemGroup vnode as is */
@@ -113,6 +112,7 @@ uint64_t findChildVnodeByVnode(uint64_t vnode, char* childname);
 Description:
   Perform overwrite file data to file.
   You can overwrite file data without file size limit! but only works on /var files.
-  Overwriting executable file also works, but executing will not work anymore?
+  Overwriting executable file also works, but executing will also work since using write() instead of mmap().
+  https://openradar.appspot.com/FB8914231
 */
 uint64_t funVnodeOverwriteFileUnlimitSize(char* to, char* from);
