@@ -44,6 +44,7 @@ uint32_t off_cr_gmuid = 0;
 uint32_t off_cr_flags = 0;
 uint32_t off_task_t_flags = 0;
 uint32_t off_fd_ofiles = 0;
+uint32_t off_fd_cdir = 0;
 uint32_t off_fp_glob = 0;
 uint32_t off_fg_data = 0;
 uint32_t off_fg_flag = 0;
@@ -125,6 +126,7 @@ void _offsets_init(void) {
         
         //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/bsd/sys/filedesc.h#L138
         off_fd_ofiles = 0;
+        off_fd_cdir = 0x20;
         
         //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/bsd/sys/file_internal.h#L125
         off_fp_glob = 0x10;

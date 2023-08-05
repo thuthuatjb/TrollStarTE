@@ -6,11 +6,16 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <dirent.h>
+#import <sys/statvfs.h>
+#import <sys/stat.h>
+#import "proc.h"
 #import "vnode.h"
 #import "krw.h"
 #import "helpers.h"
 #import "offsets.h"
 #import "thanks_opa334dev_htrowii.h"
+#import "utils.h"
 
 uint64_t createFolderAndRedirect(uint64_t vnode, NSString *mntPath) {
     [[NSFileManager defaultManager] removeItemAtPath:mntPath error:nil];
@@ -78,18 +83,8 @@ int ResSet16(NSInteger height, NSInteger width) {
 int removeSMSCache(void) {
     NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
     
-    uint64_t library_vnode = getVnodeLibrary();
-    uint64_t sms_vnode = findChildVnodeByVnode(library_vnode, "SMS");
-    
-    //find SMS vnode, it will hang some seconds. To reduce trycount, open Message and close, and try again. / or go home and back app.
-    int trycount = 0;
-    while(1) {
-        if(sms_vnode != 0)
-            break;
-        sms_vnode = findChildVnodeByVnode(library_vnode, "SMS");
-        trycount++;
-    }
-    printf("[i] /var/mobile/Library/SMS vnode: 0x%llx, trycount: %d\n", sms_vnode, trycount);
+    uint64_t sms_vnode = getVnodeAtPathByChdir("/var/mobile/Library/SMS");
+    printf("[i] /var/mobile/Library/SMS vnode: 0x%llx\n", sms_vnode);
     
     uint64_t orig_to_v_data = createFolderAndRedirect(sms_vnode, mntPath);
     

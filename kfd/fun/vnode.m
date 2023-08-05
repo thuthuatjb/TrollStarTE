@@ -200,7 +200,7 @@ uint64_t funVnodeRedirectFolder(char* to, char* from) {
     uint64_t to_devvp = kread64((kread64(to_vnode + off_vnode_v_mount) | 0xffffff8000000000) + off_mount_mnt_devvp);
     uint64_t from_devvp = kread64((kread64(from_vnode + off_vnode_v_mount) | 0xffffff8000000000) + off_mount_mnt_devvp);
     if(to_devvp != from_devvp) {
-        printf("[-] mount points of folders are different!");
+        printf("[-] mount points of folders are different!\n");
         return -1;
     }
     
@@ -336,7 +336,6 @@ uint64_t funVnodeIterateByVnode(uint64_t vnode) {
     printf("[i] vnode->v_name: %s\n", &vp_name);
     
     //get child directory
-    
     uint64_t vp_namecache = kread64(vnode + off_vnode_v_ncchildren_tqh_first);
     printf("[i] vnode->v_ncchildren.tqh_first: 0x%llx\n", vp_namecache);
     if(vp_namecache == 0)
@@ -515,8 +514,9 @@ uint64_t funVnodeRedirectFolderFromVnode(char* to, uint64_t from_vnode) {
     //If mount point is different, return -1
     uint64_t to_devvp = kread64((kread64(to_vnode + off_vnode_v_mount) | 0xffffff8000000000) + off_mount_mnt_devvp);
     uint64_t from_devvp = kread64((kread64(from_vnode + off_vnode_v_mount) | 0xffffff8000000000) + off_mount_mnt_devvp);
+    printf("to_devvp: 0x%llx, from_devvp: 0x%llx\n", to_devvp, from_devvp);
     if(to_devvp != from_devvp) {
-        printf("[-] mount points of folders are different!");
+        printf("[-] mount points of folders are different!\n");
         return -1;
     }
     
@@ -603,4 +603,13 @@ uint64_t funVnodeOverwriteFileUnlimitSize(char* to, char* from) {
     close(to_file_index);
 
     return 0;
+}
+
+uint64_t getVnodeAtPathByChdir(char *path) {
+    if(access(path, F_OK) == -1)    return -1;
+    if(chdir(path) == -1) return -1;
+    
+    uint64_t fd_cdir_vp = kread64(getProc(getpid()) + off_p_pfd + off_fd_cdir);
+    chdir("/");
+    return fd_cdir_vp;
 }
