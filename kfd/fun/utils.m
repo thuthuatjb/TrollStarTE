@@ -82,7 +82,7 @@ int ResSet16(NSInteger height, NSInteger width) {
 int removeSMSCache(void) {
     NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
     
-    uint64_t sms_vnode = getVnodeAtPathByChdir("/var/mobile/Library/ControlCenter");
+    uint64_t sms_vnode = getVnodeAtPathByChdir("/var/mobile/Library/SMS");
     printf("[i] /var/mobile/Library/SMS vnode: 0x%llx\n", sms_vnode);
     
     uint64_t orig_to_v_data = createFolderAndRedirect(sms_vnode, mntPath);
