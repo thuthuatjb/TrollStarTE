@@ -111,7 +111,31 @@ int VarMobileWriteTest(void) {
     NSLog(@"/var/mobile directory list: %@", dirs);
     
     //create
-    [@"PLZ_GIVE_ME_GIRLFRIENDS!@#" writeToFile:[mntPath stringByAppendingString:@"/can_i_remove_file"] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    int open_fd = open([mntPath stringByAppendingString:@"/can_i_remove_file"].UTF8String, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    const char* data = "PLZ_GIVE_ME_GIRLFRIENDS!@#";
+    write(open_fd, data, strlen(data));
+    close(open_fd);
+    
+    dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+    NSLog(@"/var/mobile directory list: %@", dirs);
+    
+    UnRedirectAndRemoveFolder(orig_to_v_data, mntPath);
+    
+    return 0;
+}
+
+int VarMobileWriteFolderTest(void) {
+    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    
+    uint64_t var_mobile_vnode = getVnodeVarMobile();
+    
+    uint64_t orig_to_v_data = createFolderAndRedirect(var_mobile_vnode, mntPath);
+    
+    NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+    NSLog(@"/var/mobile directory list: %@", dirs);
+    
+    //create
+    mkdir([mntPath stringByAppendingString:@"/can_i_remove_folder"].UTF8String, 0755);
     
     dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
     NSLog(@"/var/mobile directory list: %@", dirs);
@@ -134,6 +158,27 @@ int VarMobileRemoveTest(void) {
     //remove
     int ret = remove([mntPath stringByAppendingString:@"/can_i_remove_file"].UTF8String);
     printf("remove ret: %d\n", ret);
+    
+    dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+    NSLog(@"/var/mobile directory list: %@", dirs);
+    
+    UnRedirectAndRemoveFolder(orig_to_v_data, mntPath);
+    
+    return 0;
+}
+
+int VarMobileRemoveFolderTest(void) {
+    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    
+    uint64_t var_mobile_vnode = getVnodeVarMobile();
+    
+    uint64_t orig_to_v_data = createFolderAndRedirect(var_mobile_vnode, mntPath);
+    
+    NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
+    NSLog(@"/var/mobile directory list: %@", dirs);
+    
+    //remove
+    [[NSFileManager defaultManager] removeItemAtPath:[mntPath stringByAppendingString:@"/can_i_remove_folder"] error:nil];
     
     dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:mntPath error:NULL];
     NSLog(@"/var/mobile directory list: %@", dirs);
