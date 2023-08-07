@@ -203,13 +203,16 @@ int do_fun(void) {
     printf("[i] mach_host_self: 0x%x\n", host_self);
     fun_ipc_entry_lookup(host_self);
     
-    VarMobileWriteTest();
-    VarMobileRemoveTest();
-    VarMobileWriteFolderTest();
-    VarMobileRemoveFolderTest();
+    printf("sandbox_escape_can_i_access_file ret: %d\n", sandbox_escape_can_i_access_file("/var/mobile/Library/ControlCenter/ModuleConfiguration.plist", R_OK | W_OK));
+    printf("sandbox_escape_can_i_access_file ret: %d\n", sandbox_escape_can_i_access_file("/var/mobile/Library/ControlCenter/ModuleConfiguration.plist", R_OK));
+    
+//    VarMobileWriteTest();
+//    VarMobileRemoveTest();
+//    VarMobileWriteFolderTest();
+//    VarMobileRemoveFolderTest();
     
 //    setSuperviseMode(true);
-//    removeSMSCache();
+    removeSMSCache();
     
 //    removeKeyboardCache();
     

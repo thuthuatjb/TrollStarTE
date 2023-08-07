@@ -57,6 +57,8 @@ uint32_t off_vnode_v_mount = 0;
 uint32_t off_vnode_v_data = 0;
 uint32_t off_vnode_v_kusecount = 0;
 uint32_t off_vnode_v_references = 0;
+uint32_t off_vnode_v_lflag = 0;
+uint32_t off_vnode_v_owner = 0;
 uint32_t off_vnode_v_parent = 0;
 uint32_t off_vnode_v_label = 0;
 uint32_t off_vnode_v_cred = 0;
@@ -145,6 +147,8 @@ void _offsets_init(void) {
         off_vnode_v_data = 0xe0;
         off_vnode_v_kusecount = 0x5c;
         off_vnode_v_references = 0x5b;
+        off_vnode_v_lflag = 0x58;
+        off_vnode_v_owner = 0x68;
         off_vnode_v_parent = 0xc0;
         off_vnode_v_label = 0xe8;
         off_vnode_v_cred = 0x98;

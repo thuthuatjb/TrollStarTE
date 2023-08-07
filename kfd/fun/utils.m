@@ -9,6 +9,7 @@
 #import <dirent.h>
 #import <sys/statvfs.h>
 #import <sys/stat.h>
+#import <dlfcn.h>
 #import "proc.h"
 #import "vnode.h"
 #import "krw.h"
@@ -302,4 +303,22 @@ void HexDump(uint64_t addr, size_t size) {
         }
     }
     free(data);
+}
+
+bool sandbox_escape_can_i_access_file(char* path, int mode) {
+    NSString *mntPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/mounted"];
+    uint64_t vnode = getVnodeAtPathByChdir([[NSString stringWithUTF8String:path] stringByDeletingLastPathComponent].UTF8String);
+    uint64_t orig_to_v_data = createFolderAndRedirect(vnode, mntPath);
+    
+    NSString *mountedPath = [NSString stringWithFormat:@"%@/%@", mntPath, [[NSString stringWithUTF8String:path] lastPathComponent]];
+    
+    bool ret = false;
+    
+    if(access(mountedPath.UTF8String, mode) == 0) {
+        ret = true;
+    }
+
+    UnRedirectAndRemoveFolder(orig_to_v_data, mntPath);
+    
+    return ret;
 }

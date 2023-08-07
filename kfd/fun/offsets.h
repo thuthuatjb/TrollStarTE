@@ -55,6 +55,8 @@ extern uint32_t off_vnode_v_mount;
 extern uint32_t off_vnode_v_data;
 extern uint32_t off_vnode_v_kusecount;
 extern uint32_t off_vnode_v_references;
+extern uint32_t off_vnode_v_lflag;
+extern uint32_t off_vnode_v_owner;
 extern uint32_t off_vnode_v_parent;
 extern uint32_t off_vnode_v_label;
 extern uint32_t off_vnode_v_cred;
