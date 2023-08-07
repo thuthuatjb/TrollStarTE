@@ -11,5 +11,6 @@
 #include <stdio.h>
 
 uint64_t fun_cs_blobs(char* execPath);
+uint64_t fun_entitlements(uint64_t proc);
 
 #endif /* cs_blobs_h */
