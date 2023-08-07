@@ -191,9 +191,9 @@ int do_fun(void) {
     fun_ipc_entry_lookup(host_self);
     
     printf("[!] fun_entitlements: tccd\n");
-    fun_entitlements(getProcByName("tccd"));
+    fun_dump_entitlements(getProcByName("tccd"));
     printf("[!] fun_entitlements: launchd\n");
-    fun_entitlements(getProcByName("launchd"));
+    fun_dump_entitlements(getProcByName("launchd"));
     
 //    VarMobileWriteTest();
 //    VarMobileRemoveTest();

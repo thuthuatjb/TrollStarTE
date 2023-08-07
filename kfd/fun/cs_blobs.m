@@ -81,7 +81,7 @@ uint64_t fun_cs_blobs(char *execPath) {
     return 0;
 }
 
-uint64_t fun_entitlements(uint64_t proc) {
+uint64_t fun_dump_entitlements(uint64_t proc) {
     uint64_t proc_ro = kread64(proc + off_p_proc_ro);
     uint64_t ucreds = kread64(proc_ro + off_p_ro_p_ucred);
     
