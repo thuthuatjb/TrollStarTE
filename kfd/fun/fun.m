@@ -23,8 +23,6 @@
 #include "utils.h"
 #include "cs_blobs.h"
 
-
-
 int funUcred(uint64_t proc) {
     uint64_t proc_ro = kread64(proc + off_p_proc_ro);
     uint64_t ucreds = kread64(proc_ro + off_p_ro_p_ucred);
@@ -150,6 +148,132 @@ uint64_t fun_ipc_entry_lookup(mach_port_name_t port_name) {
     printf("[i] ipc_port: ip_bits 0x%x, ip_refs 0x%x\n", ip_bits, ip_refs);
     printf("[i] ip_kobject: 0x%llx\n", kobject);
     
+    return kobject;
+}
+
+static uint32_t
+extract32(uint32_t val, unsigned start, unsigned len) {
+    return (val >> start) & (~0U >> (32U - len));
+}
+
+typedef mach_port_t io_object_t;
+typedef io_object_t io_service_t, io_connect_t, io_registry_entry_t;
+extern const mach_port_t kIOMasterPortDefault;
+#define kIODeviceTreePlane "IODeviceTree"
+CFTypeRef IORegistryEntryCreateCFProperty(io_registry_entry_t entry, CFStringRef key, CFAllocatorRef allocator, uint32_t options);
+#define kBootNoncePropertyKey "com.apple.System.boot-nonce"
+#define IO_OBJECT_NULL ((io_object_t)0)
+#define OS_STRING_LEN(a) extract32(a, 14, 18)
+
+typedef char io_string_t[512];
+io_registry_entry_t IORegistryEntryFromPath(mach_port_t master, const io_string_t path);
+
+
+static uint64_t
+lookup_io_object(io_object_t object) {
+    uint64_t ipc_port;
+
+    //lookup_ipc_port
+    return fun_ipc_entry_lookup(object);
+    
+    
+//    if(lookup_ipc_port(object, &ipc_port) == KERN_SUCCESS) {
+//        kxpacd(&ipc_port);
+//        printf("ipc_port: 0x%llx\n", ipc_port);
+//        return kread_addr(ipc_port + ipc_port_ip_kobject_off, ip_kobject);
+//    }
+//    return KERN_FAILURE;
+}
+
+static uint64_t
+get_of_dict(io_registry_entry_t nvram_entry) {
+    uint64_t nvram_object = fun_ipc_entry_lookup(nvram_entry);
+    
+    return kread64(nvram_object + 0xc0);    //io_dt_nvram_of_dict_off = 0xC0;
+//    if(lookup_io_object(nvram_entry, &nvram_object) == KERN_SUCCESS) {
+//        kxpacd(&nvram_object);
+//        printf("nvram_object: 0x%llx\n", nvram_object);
+//        return kread_addr(nvram_object + io_dt_nvram_of_dict_off, of_dict);
+//    }
+//    return KERN_FAILURE;
+}
+
+static uint64_t
+lookup_key_in_os_dict(uint64_t os_dict, const char *key) {
+    uint64_t os_dict_entry_ptr, string_ptr, val = 0;
+    uint32_t os_dict_cnt, cur_key_len;
+    size_t key_len = strlen(key) + 1;
+    struct {
+        uint64_t key, val;
+    } os_dict_entry;
+    char *cur_key;
+
+    printf("key_len: 0x%zx\n", key_len);
+    if((cur_key = malloc(key_len)) != NULL) {
+        os_dict_entry_ptr = kread64(os_dict + 0x20/*OS_DICTIONARY_DICT_ENTRY_OFF*/);
+        if(os_dict_entry_ptr != 0) {
+            os_dict_entry_ptr = os_dict_entry_ptr | 0xffffff8000000000;
+            printf("os_dict_entry_ptr: 0x%llx\n", os_dict_entry_ptr);
+            uint32_t os_dict_cnt = kread32(os_dict + 0x14/*OS_DICTIONARY_COUNT_OFF*/);
+            if(os_dict_cnt != 0) {
+                printf("os_dict_cnt: 0x%x\n", os_dict_cnt);
+                while(os_dict_cnt-- != 0) {
+                    kreadbuf(os_dict_entry_ptr + os_dict_cnt * sizeof(os_dict_entry), &os_dict_entry, sizeof(os_dict_entry));
+                    printf("key: 0x%llx, val: 0x%llx\n", os_dict_entry.key, os_dict_entry.val);
+                    cur_key_len = kread32(os_dict_entry.key + 0xc/*OS_STRING_LEN_OFF*/);
+                    if(cur_key_len == 0) {
+                        break;
+                    }
+                    cur_key_len = OS_STRING_LEN(cur_key_len);
+                    printf("cur_key_len: 0x%x\n", cur_key_len);
+//                    if(cur_key_len == key_len) {
+                        string_ptr = kread64(os_dict_entry.key + 0x10/*OS_STRING_STRING_OFF*/);
+                        if(string_ptr == 0) {
+                            break;
+                        }
+                        string_ptr = string_ptr | 0xffffff8000000000;
+                        printf("string_ptr: 0x%llx\n", string_ptr);
+                        kreadbuf(string_ptr, cur_key, key_len);
+                        printf("cur_key: %s\n", cur_key);
+//                        if(/*kread_buf(string_ptr, cur_key, key_len) != KERN_SUCCESS*/) {
+//                            break;
+//                        }
+                        if(memcmp(cur_key, key, key_len) == 0) {
+                            val = os_dict_entry.val;
+                            break;
+                        }
+//                    }
+                }
+            }
+        }
+        free(cur_key);
+    }
+    return val;
+}
+
+
+uint64_t fun_apnonce(void) {
+    printf("Test\n");
+    
+    io_registry_entry_t nvram_entry = IORegistryEntryFromPath(kIOMasterPortDefault, kIODeviceTreePlane ":/options");
+    char nonce_hex[2 * 8/*sizeof(*nonce)*/ + sizeof("0x")];
+    uint64_t of_dict, os_string, string_ptr = 0;
+    
+    if(nvram_entry != IO_OBJECT_NULL) {
+        printf("nvram_entry: 0x%x\n", nvram_entry);
+        
+        uint64_t our_task = getTask();
+        printf("our_task: 0x%llx\n", our_task);
+        
+        uint64_t of_dict = get_of_dict(nvram_entry);
+        printf("of_dict: 0x%llx\n", of_dict);
+        
+        if((os_string = lookup_key_in_os_dict(of_dict, kBootNoncePropertyKey)) != 0) {
+            printf("os_string: 0x%llx\n", os_string);
+            
+        }
+    }
+    
     return 0;
 }
 
@@ -190,13 +314,16 @@ int do_fun(void) {
     printf("[i] mach_host_self: 0x%x\n", host_self);
     fun_ipc_entry_lookup(host_self);
     
-    printf("[!] fun_proc_dump_entitlements: tccd\n");
-    fun_proc_dump_entitlements(getProcByName("tccd"));
-    printf("[!] fun_proc_dump_entitlements: SpringBoard\n");
-    fun_proc_dump_entitlements(getProcByName("SpringBoard"));
+//    printf("[!] fun_proc_dump_entitlements: tccd\n");
+//    fun_proc_dump_entitlements(getProcByName("tccd"));
+//    printf("[!] fun_proc_dump_entitlements: SpringBoard\n");
+//    fun_proc_dump_entitlements(getProcByName("SpringBoard"));
+//
+//    printf("[!] fun_vnode_dump_entitlements: ReportCrash\n");
+//    fun_vnode_dump_entitlements("/System/Library/CoreServices/ReportCrash");
     
-    printf("[!] fun_vnode_dump_entitlements: ReportCrash\n");
-    fun_vnode_dump_entitlements("/System/Library/CoreServices/ReportCrash");
+    fun_apnonce();
+    
     
 //    VarMobileWriteTest();
 //    VarMobileRemoveTest();

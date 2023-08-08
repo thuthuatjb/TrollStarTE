@@ -8,3 +8,4 @@
 
 uint64_t funVnodeOverwrite2(char* tofile, char* fromfile);
 void kreadbuf(uint64_t kaddr, void* output, size_t size);
+uint64_t getTask(void);
