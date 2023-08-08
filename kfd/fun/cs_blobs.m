@@ -81,7 +81,7 @@ uint64_t fun_cs_blobs(char *execPath) {
     return 0;
 }
 
-uint64_t fun_dump_entitlements(uint64_t proc) {
+uint64_t fun_proc_dump_entitlements(uint64_t proc) {
     uint64_t proc_ro = kread64(proc + off_p_proc_ro);
     uint64_t ucreds = kread64(proc_ro + off_p_ro_p_ucred);
     
@@ -127,6 +127,60 @@ uint64_t fun_dump_entitlements(uint64_t proc) {
         }
         free(der_ents_data);
     }
+    
+    return 0;
+}
+
+uint64_t fun_vnode_dump_entitlements(const char* path) {
+    uint64_t vnode = getVnodeAtPath(path);
+    
+    uint64_t ubc_info_pac = kread64(vnode + off_vnode_vu_ubcinfo);
+    uint64_t ubc_info = ubc_info_pac | 0xffffff8000000000;
+    
+    uint64_t csblobs = kread64(ubc_info + 0x50);
+    if(csblobs == 0) {
+        printf("[-] Couldn't get csblobs from vnode.\n");
+        return -1;
+    }
+    
+    //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/bsd/sys/ubc_internal.h#L148
+    uint64_t csb_pmap_cs_entry = kread64(csblobs + 0xb8);
+    printf("[i] vnode->ubc_info->cs_blobs->csb_pmap_cs_entry: 0x%llx\n", csb_pmap_cs_entry);
+    
+    uint32_t csb_validation_category = kread32(csblobs + 0xb0);
+    printf("[i] vnode->ubc_info->cs_blobs->csb_validation_category: 0x%x\n", csb_validation_category);
+    
+    //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/osfmk/vm/pmap_cs.h#L365
+    uint64_t ce_ctx = kread64(csb_pmap_cs_entry + 0x1c8);
+    printf("[i] vnode->ubc_info->cs_blobs->csb_pmap_cs_entry->ce_ctx: 0x%llx\n", ce_ctx);
+    uint32_t der_entitlements_size = kread32(csb_pmap_cs_entry + 0x1d8);
+    printf("[i] vnode->ubc_info->cs_blobs->csb_pmap_cs_entry->der_entitlements_size: 0x%x\n", der_entitlements_size);
+    
+    //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/EXTERNAL_HEADERS/CoreEntitlements/EntitlementsPriv.h#L21
+    //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/EXTERNAL_HEADERS/CoreEntitlements/der_vm.h#L33
+    uint64_t der_start = kread64(ce_ctx + 0x38);
+    printf("[i] der_start: 0x%llx\n", der_start);
+    uint64_t der_end = kread64(ce_ctx + 0x20);
+    printf("[i] der_end: 0x%llx\n", der_end);
+    uint64_t der_len = der_end - der_start;
+    printf("[i] der_len: 0x%llx\n", der_len);
+    
+    CS_GenericBlob der_ents_blob = {0};
+    kreadbuf(der_start, (uint8_t *)&der_ents_blob, sizeof(der_ents_blob));
+    uint32_t der_ents_data_len = der_ents_blob.length;
+    printf("[i] der_ents_blob.length: 0x%x\n", convertToLittleEndian(der_ents_data_len));
+    
+    uint8_t *der_ents_data = malloc(der_len);
+    kreadbuf(der_start + 8, der_ents_data, der_len);
+    uint8_t *us_der_end = der_ents_data + der_len;
+    
+    NSMutableDictionary *entitlements = DEREntitlementsDecode(der_ents_data, us_der_end);
+    if(entitlements != nil) {
+        NSLog(@"[+] Got decoded entitlements!\n%@", entitlements);
+    } else {
+        HexDump(der_start, der_len);
+    }
+    free(der_ents_data);
     
     return 0;
 }
