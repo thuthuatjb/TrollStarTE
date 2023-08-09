@@ -502,7 +502,7 @@ uint64_t funVnodeOverwriteFileUnlimitSize(char* to, char* from) {
     }
     
     printf("[i] ftruncate ret: %d\n", ftruncate(to_file_index, 0));
-    printf("[i] write: %zd\n", write(to_file_index, from_mapped, from_file_size));
+    printf("[i] write ret: %zd\n", write(to_file_index, from_mapped, from_file_size));
     
     munmap(from_mapped, from_file_size);
     

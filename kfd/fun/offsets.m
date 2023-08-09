@@ -43,6 +43,7 @@ uint32_t off_cr_svgid = 0;
 uint32_t off_cr_gmuid = 0;
 uint32_t off_cr_flags = 0;
 uint32_t off_task_t_flags = 0;
+uint32_t off_task_itk_space = 0;
 uint32_t off_fd_ofiles = 0;
 uint32_t off_fd_cdir = 0;
 uint32_t off_fp_glob = 0;
@@ -73,6 +74,21 @@ uint32_t off_mount_mnt_flag = 0;
 uint32_t off_specinfo_si_flags = 0;
 uint32_t off_namecache_nc_vp = 0;
 uint32_t off_namecache_nc_child_tqe_prev = 0;
+uint32_t off_ipc_space_is_table = 0;
+uint32_t off_ubc_info_cs_blobs = 0;
+uint32_t off_ubc_info_cs_add_gen = 0;
+uint32_t off_cs_blob_csb_pmap_cs_entry = 0;
+uint32_t off_cs_blob_csb_cdhash = 0;
+uint32_t off_cs_blob_csb_flags = 0;
+uint32_t off_cs_blob_csb_teamid = 0;
+uint32_t off_cs_blob_csb_validation_category = 0;
+uint32_t off_pmap_cs_code_directory_ce_ctx = 0;
+uint32_t off_pmap_cs_code_directory_der_entitlements_size = 0;
+uint32_t off_pmap_cs_code_directory_trust = 0;
+uint32_t off_ipc_entry_ie_object = 0;
+uint32_t off_ipc_object_io_bits = 0;
+uint32_t off_ipc_object_io_references = 0;
+uint32_t off_ipc_port_ip_kobject = 0;
 
 #define SYSTEM_VERSION_EQUAL_TO(v)                  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedSame)
 
@@ -124,6 +140,7 @@ void _offsets_init(void) {
         off_cr_flags = 0x5c;
         
         //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/osfmk/kern/task.h#L280
+        off_task_itk_space = 0x300;
         off_task_t_flags = 0x3D0;
         
         //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/bsd/sys/filedesc.h#L138
@@ -169,6 +186,35 @@ void _offsets_init(void) {
         //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/bsd/sys/namei.h#L243
         off_namecache_nc_vp = 0x48;
         off_namecache_nc_child_tqe_prev = 0x10;
+        
+        //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/osfmk/ipc/ipc_space.h#L123
+        off_ipc_space_is_table = 0x20;
+        
+        //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/bsd/sys/ubc_internal.h#L156
+        off_ubc_info_cs_blobs = 0x50;
+        off_ubc_info_cs_add_gen = 0x2c;
+        
+        //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/bsd/sys/ubc_internal.h#L103
+        off_cs_blob_csb_pmap_cs_entry = 0xb8;
+        off_cs_blob_csb_cdhash = 0x58;
+        off_cs_blob_csb_flags = 0x20;
+        off_cs_blob_csb_teamid = 0x88;
+        off_cs_blob_csb_validation_category = 0xb0; //https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056#file-ios_16_launch_constraints-txt-L39
+        
+        //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/osfmk/vm/pmap_cs.h#L299
+        off_pmap_cs_code_directory_ce_ctx = 0x1c8;
+        off_pmap_cs_code_directory_der_entitlements_size = 0x1d8;
+        off_pmap_cs_code_directory_trust = 0x1dc;
+        
+        //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/osfmk/ipc/ipc_entry.h#L111
+        off_ipc_entry_ie_object = 0;
+        
+        //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/osfmk/ipc/ipc_object.h#L120
+        off_ipc_object_io_bits = 0;
+        off_ipc_object_io_references = 0x4;
+        
+        //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/osfmk/ipc/ipc_port.h#L167
+        off_ipc_port_ip_kobject = 0x48; //https://github.com/0x7ff/dimentio/blob/7ffffffb4ebfcdbc46ab5e8f1becc0599a05711d/libdimentio.c#L973
         
     } else {
         printf("[-] No matching offsets.\n");

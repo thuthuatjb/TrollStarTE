@@ -63,20 +63,20 @@ NSMutableDictionary *DEREntitlementsDecode(uint8_t *start, uint8_t *end)
 uint64_t fun_cs_blobs(char *execPath) {
     
     uint64_t ubc_info = kread64(getVnodeAtPath(execPath) + off_vnode_vu_ubcinfo) | 0xffffff8000000000;
-    uint32_t cs_add_gen = kread32(ubc_info + 0x2c);
+    uint32_t cs_add_gen = kread32(ubc_info + off_ubc_info_cs_add_gen);
 //    cs_add_gen += 1;
-    printf("cs_add_gen, 0x2c: 0x%x\n", cs_add_gen);
-    kwrite32(ubc_info + 0x2c, cs_add_gen);
+    printf("cs_add_gen: 0x%x\n", cs_add_gen);
+    kwrite32(ubc_info + off_ubc_info_cs_add_gen, cs_add_gen);
     
-    uint64_t csblobs = kread64(ubc_info + 0x50);
+    uint64_t csblobs = kread64(ubc_info + off_ubc_info_cs_blobs);
     printf("csblobs: 0x%llx\n", csblobs);
-    uint32_t csb_flags = kread32(csblobs + 0x20);
+    uint32_t csb_flags = kread32(csblobs + off_cs_blob_csb_flags);
     printf("csb_flags: 0x%x\n", csb_flags);
-    uint64_t csb_teamid = kread64(csblobs + 0x88);
+    uint64_t csb_teamid = kread64(csblobs + off_cs_blob_csb_teamid);
     printf("csb_teamid: 0x%llx\n", csb_teamid);
     
     printf("csb_cdhash\n");
-    HexDump(csblobs + 0x58, 20);    //csblobs + 0x58 = csb_cdhash
+    HexDump(csblobs + off_cs_blob_csb_cdhash, 20);
     
     return 0;
 }
@@ -96,6 +96,8 @@ uint64_t fun_proc_dump_entitlements(uint64_t proc) {
     printf("[i] osents: 0x%llx\n", osents);
     uint64_t osentitlements = kread64(osents + 0x10);
     printf("[i] osentitlements: 0x%llx\n", osentitlements);
+    uint64_t dict = kread64(osentitlements + 0x70);
+    printf("[i] dict: 0x%llx\n", dict);
     uint64_t query_ctx = osentitlements + 0x20;
     printf("[i] query_ctx: 0x%llx\n", query_ctx);
     uint64_t der_start = kread64(query_ctx + 0x40);
@@ -137,24 +139,24 @@ uint64_t fun_vnode_dump_entitlements(const char* path) {
     uint64_t ubc_info_pac = kread64(vnode + off_vnode_vu_ubcinfo);
     uint64_t ubc_info = ubc_info_pac | 0xffffff8000000000;
     
-    uint64_t csblobs = kread64(ubc_info + 0x50);
+    uint64_t csblobs = kread64(ubc_info + off_ubc_info_cs_blobs);
     if(csblobs == 0) {
-        printf("[-] Couldn't get csblobs from vnode.\n");
+        printf("[-] Couldn't get vnode->ubc_info->cs_blobs.\n");
         return -1;
     }
     
-    //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/bsd/sys/ubc_internal.h#L148
-    uint64_t csb_pmap_cs_entry = kread64(csblobs + 0xb8);
+    uint64_t csb_pmap_cs_entry = kread64(csblobs + off_cs_blob_csb_pmap_cs_entry);
     printf("[i] vnode->ubc_info->cs_blobs->csb_pmap_cs_entry: 0x%llx\n", csb_pmap_cs_entry);
     
-    uint32_t csb_validation_category = kread32(csblobs + 0xb0);
+    uint32_t csb_validation_category = kread32(csblobs + off_cs_blob_csb_validation_category);
     printf("[i] vnode->ubc_info->cs_blobs->csb_validation_category: 0x%x\n", csb_validation_category);
     
-    //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/osfmk/vm/pmap_cs.h#L365
-    uint64_t ce_ctx = kread64(csb_pmap_cs_entry + 0x1c8);
+    uint64_t ce_ctx = kread64(csb_pmap_cs_entry + off_pmap_cs_code_directory_ce_ctx);
     printf("[i] vnode->ubc_info->cs_blobs->csb_pmap_cs_entry->ce_ctx: 0x%llx\n", ce_ctx);
-    uint32_t der_entitlements_size = kread32(csb_pmap_cs_entry + 0x1d8);
+    uint32_t der_entitlements_size = kread32(csb_pmap_cs_entry + off_pmap_cs_code_directory_der_entitlements_size);
     printf("[i] vnode->ubc_info->cs_blobs->csb_pmap_cs_entry->der_entitlements_size: 0x%x\n", der_entitlements_size);
+    uint32_t trust_level = kread32(csb_pmap_cs_entry + off_pmap_cs_code_directory_trust);
+    printf("[i] vnode->ubc_info->cs_blobs->csb_pmap_cs_entry->trust: 0x%x\n", trust_level);
     
     //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/EXTERNAL_HEADERS/CoreEntitlements/EntitlementsPriv.h#L21
     //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/EXTERNAL_HEADERS/CoreEntitlements/der_vm.h#L33

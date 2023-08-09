@@ -86,7 +86,6 @@ int funTask(char* process) {
     uint64_t pr_task = kread64(proc_ro + off_p_ro_pr_task);
     printf("[i] %s proc->proc_ro->pr_task: 0x%llx\n", process, pr_task);
     
-    //proc_is64bit_data+0x18: LDR             W8, [X8,#0x3D0]
     uint32_t t_flags = kread32(pr_task + off_task_t_flags);
     printf("[i] %s task->t_flags: 0x%x\n", process, t_flags);
     
@@ -115,8 +114,7 @@ uint64_t fun_ipc_entry_lookup(mach_port_name_t port_name) {
     uint64_t pr_task = kread64(proc_ro + off_p_ro_pr_task);
     printf("[i] self proc->proc_ro->pr_task: 0x%llx\n", pr_task);
     
-    //0x300 = task_itk_space_off
-    uint64_t itk_space_pac = kread64(pr_task + 0x300);
+    uint64_t itk_space_pac = kread64(pr_task + off_task_itk_space);
     uint64_t itk_space = itk_space_pac | 0xffffff8000000000;
     printf("[i] self task->itk_space: 0x%llx\n", itk_space);
     
@@ -124,26 +122,22 @@ uint64_t fun_ipc_entry_lookup(mach_port_name_t port_name) {
     uint32_t table_size = kread32(itk_space + 0x14);
     printf("[i] table_size: 0x%x, port_index: 0x%x\n", table_size, port_index);
     if (port_index >= table_size) {
-        printf("[-] invalid port name 0x%x\n", port_name);
+        printf("[-] invalid port name? 0x%x\n", port_name);
     }
     
-    //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/osfmk/ipc/ipc_space.h#L128C14-L128C31
-    //0x20 = IPC_SPACE_IS_TABLE_OFF
-    uint64_t is_table = kread64_smr(itk_space + 0x20);
+    uint64_t is_table = kread64_smr(itk_space + off_ipc_space_is_table);
     printf("[i] self task->itk_space->is_table: 0x%llx\n", is_table);
     
     uint64_t entry = is_table + port_index * 0x18/*SIZE(ipc_entry)*/;
     printf("[i] entry: 0x%llx\n", entry);
     
-    //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/osfmk/ipc/ipc_entry.h#L113
-    uint64_t object_pac = kread64(entry + 0x0/*OFFSET(ipc_entry, ie_object)*/);
+    uint64_t object_pac = kread64(entry + off_ipc_entry_ie_object);
     uint64_t object = object_pac | 0xffffff8000000000;
     
-    //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/osfmk/ipc/ipc_object.h#L120
-    uint32_t ip_bits = kread32(object + 0x0/*OFFSET(ipc_port, ip_bits)*/);
-    uint32_t ip_refs = kread32(object + 0x4/*OFFSET(ipc_port, ip_references)*/);
-    //https://github.com/0x7ff/dimentio/blob/main/libdimentio.c#L973C1-L973C7
-    uint64_t kobject_pac = kread64(object + 0x48/*OFFSET(ipc_port, ip_kobject)*/);
+    uint32_t ip_bits = kread32(object + off_ipc_object_io_bits);
+    uint32_t ip_refs = kread32(object + off_ipc_object_io_references);
+    
+    uint64_t kobject_pac = kread64(object + off_ipc_port_ip_kobject);
     uint64_t kobject = kobject_pac | 0xffffff8000000000;
     printf("[i] ipc_port: ip_bits 0x%x, ip_refs 0x%x\n", ip_bits, ip_refs);
     printf("[i] ip_kobject: 0x%llx\n", kobject);
@@ -177,10 +171,11 @@ static uint64_t
 get_of_dict(io_registry_entry_t nvram_entry) {
     uint64_t nvram_object = fun_ipc_entry_lookup(nvram_entry);
     
+    //IODTNVRAM::IODTNVRAM(OSMetaClass const*)+24
     return kread64(nvram_object + 0xc0);    //io_dt_nvram_of_dict_off = 0xC0;
 }
 
-static uint64_t print_key_value_in_os_dict(uint64_t os_dict) {
+uint64_t print_key_value_in_os_dict(uint64_t os_dict) {
     uint64_t os_dict_entry_ptr, string_ptr, val_ptr = 0;
     uint32_t os_dict_cnt, cur_key_len, cur_val_len;
     size_t max_key_len = 1024;
@@ -189,7 +184,8 @@ static uint64_t print_key_value_in_os_dict(uint64_t os_dict) {
     } os_dict_entry;
     char *cur_key;
 
-    if(((cur_key = malloc(max_key_len)) != NULL) /*&& ((cur_val = malloc(max_value_len)) != NULL)*/) {
+    if(((cur_key = malloc(max_key_len)) != NULL)) {
+        //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/libkern/libkern/c%2B%2B/OSDictionary.h#L138
         os_dict_entry_ptr = kread64(os_dict + 0x20/*OS_DICTIONARY_DICT_ENTRY_OFF*/);
         if(os_dict_entry_ptr != 0) {
             os_dict_entry_ptr = os_dict_entry_ptr | 0xffffff8000000000;
@@ -202,6 +198,7 @@ static uint64_t print_key_value_in_os_dict(uint64_t os_dict) {
                     //printf("key: 0x%llx, val: 0x%llx\n", os_dict_entry.key, os_dict_entry.val);
                     
                     //KEY
+                    //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/libkern/libkern/c%2B%2B/OSString.h#L108
                     cur_key_len = kread32(os_dict_entry.key + 0xc/*OS_STRING_LEN_OFF*/);
                     if(cur_key_len == 0) {
                         break;
@@ -298,14 +295,12 @@ int do_fun(void) {
     
     printf("[!] fun_proc_dump_entitlements: tccd\n");
     fun_proc_dump_entitlements(getProcByName("tccd"));
-    printf("[!] fun_proc_dump_entitlements: SpringBoard\n");
-    fun_proc_dump_entitlements(getProcByName("SpringBoard"));
 
     printf("[!] fun_vnode_dump_entitlements: ReportCrash\n");
     fun_vnode_dump_entitlements("/System/Library/CoreServices/ReportCrash");
     
+    printf("[!] fun_nvram_dump\n");
     fun_nvram_dump();
-    
     
 //    VarMobileWriteTest();
 //    VarMobileRemoveTest();

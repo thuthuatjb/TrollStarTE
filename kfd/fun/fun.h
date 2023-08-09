@@ -11,6 +11,5 @@
 #include <stdio.h>
 
 int do_fun(void);
-uint64_t fun_apnonce(void);
 
 #endif /* fun_h */
