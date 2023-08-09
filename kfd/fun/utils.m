@@ -280,6 +280,12 @@ void HexDump(uint64_t addr, size_t size) {
     size_t i, j;
     ascii[16] = '\0';
     for (i = 0; i < size; ++i) {
+        if ((i % 16) == 0)
+        {
+            printf("[0x%016llx+0x%03zx] ", addr, i);
+//            printf("[0x%016llx] ", i + addr);
+        }
+        
         printf("%02X ", ((unsigned char*)data)[i]);
         if (((unsigned char*)data)[i] >= ' ' && ((unsigned char*)data)[i] <= '~') {
             ascii[i % 16] = ((unsigned char*)data)[i];
