@@ -1,4 +1,170 @@
-# kfd (Post-Exploitation)
+# kfund (Post-Exploitation)
+kfund, short for my [fun](kfd/fun) with kfd exploit.
+
+## Supported Device 
+iPhone 14 Pro/Pro Max on iOS 16.1.2 (Currently only working with smith exploit)
+
+## What you can do with this?
+### utils.m
+```
+int ResSet16(NSInteger height, NSInteger width);
+```
+- Change resolution via modify com.apple.iokit.IOMobileGraphicsFamily.plist<br>
+It's safe to modify since file symlink from /tmp location.
+```
+int setSuperviseMode(BOOL enable);
+```
+- Set supervise mode (for delay OTA)
+```
+int removeKeyboardCache(void);
+```
+- Remove keyboard cache (to apply font)
+```
+int removeSMSCache(void);
+```
+- Remove SMS cache (to apply font)
+```
+int regionChanger(NSString *country_value, NSString *region_value);
+```
+- Modify region model via modify com.apple.MobileGestalt.plist<br>
+Can be used for mute camera sound.
+```
+bool sandbox_escape_can_i_access_file(char* path, int mode);
+```
+- Check if modifying file is available via partial sandbox escape.<br>
+`mode` argument can be `R_OK` or `W_OK` like access().<br>
+Even if only R_OK is available, you can modify file via `funVnodeOverwriteFileUnlimitSize`<br>
+If access available, return true
+```
+void HexDump(uint64_t addr, size_t size);
+```
+- Hex Dump from kernel address.
+
+
+### vnode.c
+```
+uint64_t getVnodeAtPath(char* filename);
+```
+- return vnode of path, if sandbox blocked to read, it fails.
+```
+uint64_t getVnodeAtPathByChdir(char *path);
+```
+- return vnode of path, but only directories work. NOT files.
+```
+uint64_t findRootVnode(void);
+```
+- return root vnode as is.
+
+
+```
+uint64_t funVnodeHide(char* filename);
+```
+- Hide file or directory.<br>
+Return vnode value for restore.
+```
+uint64_t funVnodeHide(char* filename);
+```
+- Reveal file or directory.<br>
+Required vnode value to restore.
+```
+uint64_t funVnodeChown(char* filename, uid_t uid, gid_t gid);
+```
+- Perform chown to file or directory.
+```
+uint64_t funVnodeChmod(char* filename, mode_t mode);
+```
+- Perform chmod to file or directory.
+```
+uint64_t funVnodeRedirectFolder(char* to, char* from);
+```
+- Redirect directory to another directory.<br>
+  Only work when mount points of directories are same.<br>
+  Can be escaped out of sandbox. (partial sandbox escape)<br>
+  If succeeds, return value to_vnode->v_data (for unredirect)
+```
+uint64_t funVnodeOverwriteFile(char* to, char* from);
+```
+- Perform overwrite file data to file.<br>
+  Only work when file size is 'lower or same' than original file size.<br>
+  Overwriting executable file also works, but executing will not work anymore. just freeze or crash.
+```
+uint64_t funVnodeIterateByPath(char* dirname);
+```
+- Iterating sub directory or file at dirname by iterating vnode.
+```
+uint64_t funVnodeIterateByVnode(uint64_t vnode);
+```
+- Iterating sub directory or file at vnode by iterating vnode.
+```
+uint64_t funVnodeRedirectFolderFromVnode(char* to, uint64_t from_vnode);
+```
+- Redirect directory to another directory using vnode.<br>
+  Only work when mount points of directories are same.<br>
+  Can be escaped out of sandbox. (partial sandbox escape)<br>
+  If succeeds, return value to_vnode->v_data (for unredirect)
+```
+uint64_t funVnodeUnRedirectFolder(char* to, uint64_t orig_to_v_data);
+```
+- UnRedirect directory to another directory.<br>
+It needs orig_to_v_data, ususally you can get return value of funVnodeRedirectFolder / funVnodeRedirectFolderByVnode
+```
+uint64_t findChildVnodeByVnode(uint64_t vnode, char* childname);
+```
+- Return vnode of subdirectory or sub file in vnode.<br>
+  childname can be what you want to find subdirectory or file name.<br>
+  vnode should be vnode of root directory.
+```
+uint64_t funVnodeOverwriteFileUnlimitSize(char* to, char* from);
+```
+- Perform overwrite file data to file.<br>
+  You can overwrite file data without file size limit! but only works on /var files.<br>
+  Overwriting executable file also works, but executing will also work since using write() instead of mmap().<br>
+  https://openradar.appspot.com/FB8914231
+
+### cs_blobs.c
+- Dump entitlements via proc.
+```
+uint64_t fun_proc_dump_entitlements(uint64_t proc);
+```
+- Dump entitlements, trust level, validation categories (csb_validation_category) info via vnode.
+```
+uint64_t fun_vnode_dump_entitlements(const char* path);
+```
+
+### proc.c
+```
+uint64_t getProc(pid_t pid);
+```
+- Get proc from pid
+```
+uint64_t getProcByName(char* nm);
+```
+- Get proc by process name
+```
+int getPidByName(char* nm)
+```
+- Get pid by process name
+### fun.m
+```
+int funUcred(uint64_t proc);
+```
+- Dump credential info from proc.
+```
+int funTask(char* process);
+```
+- Get task flag from process name.
+```
+uint64_t fun_nvram_dump(void);
+```
+- Dump nvram stuffs.
+```
+int do_fun(void);
+```
+- Some tests if working properly.
+
+  
+
+# kfd
 
 kfd, short for kernel file descriptor, is a project to read and write kernel memory on Apple
 devices. It leverages various vulnerabilities that can be exploited to obtain dangling PTEs, which
