@@ -62,7 +62,7 @@ struct ContentView: View {
                             do_fun()
                         }.disabled(kfd != 0).frame(minWidth: 0, maxWidth: .infinity)
                         Button("kclose") {
-                            do_kclose(kfd)
+                            do_kclose()
                             puaf_pages = 0
                             kfd = 0
                         }.disabled(kfd == 0).frame(minWidth: 0, maxWidth: .infinity)

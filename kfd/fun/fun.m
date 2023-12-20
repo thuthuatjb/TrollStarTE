@@ -278,17 +278,6 @@ int do_fun(void) {
     funCSFlags("launchd");
     funTask("kfd");
     
-    //Patch
-    funVnodeChown("/System/Library/PrivateFrameworks/TCC.framework/Support/tccd", 501, 501);
-    //Restore
-    funVnodeChown("/System/Library/PrivateFrameworks/TCC.framework/Support/tccd", 0, 0);
-    
-    
-    //Patch
-    funVnodeChmod("/System/Library/PrivateFrameworks/TCC.framework/Support/tccd", 0107777);
-    //Restore
-    funVnodeChmod("/System/Library/PrivateFrameworks/TCC.framework/Support/tccd", 0100755);
-    
     mach_port_t host_self = mach_host_self();
     printf("[i] mach_host_self: 0x%x\n", host_self);
     fun_ipc_entry_lookup(host_self);
@@ -301,6 +290,18 @@ int do_fun(void) {
     
     printf("[!] fun_nvram_dump\n");
     fun_nvram_dump();
+    
+    
+//    //Patch
+//    funVnodeChown("/System/Library/PrivateFrameworks/TCC.framework/Support/tccd", 501, 501);
+//    //Restore
+//    funVnodeChown("/System/Library/PrivateFrameworks/TCC.framework/Support/tccd", 0, 0);
+//    
+//    
+//    //Patch
+//    funVnodeChmod("/System/Library/PrivateFrameworks/TCC.framework/Support/tccd", 0107777);
+//    //Restore
+//    funVnodeChmod("/System/Library/PrivateFrameworks/TCC.framework/Support/tccd", 0100755);
     
 //    VarMobileWriteTest();
 //    VarMobileRemoveTest();

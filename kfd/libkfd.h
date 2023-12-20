@@ -13,7 +13,6 @@
 #define CONFIG_TIMER 1
 
 #include "libkfd/common.h"
-#include "fun.h"
 
 /*
  * The public API of libkfd.
@@ -55,9 +54,8 @@ struct info {
         i32 pid;
         u64 tid;
         u64 vid;
-        bool ios;
-        char osversion[8];
         u64 maxfilesperproc;
+        char kern_version[512];
     } env;
     struct {
         u64 current_map;
@@ -74,7 +72,6 @@ struct info {
 };
 
 struct perf {
-    u64 kernelcache_index;
     u64 kernel_slide;
     u64 gVirtBase;
     u64 gPhysBase;
@@ -169,16 +166,6 @@ void kfd_free(struct kfd* kfd)
     bzero_free(kfd, sizeof(struct kfd));
 }
 
-void kread(u64 kfd, u64 kaddr, void* uaddr, u64 size)
-{
-    krkw_kread((struct kfd*)(kfd), kaddr, uaddr, size);
-}
-
-void kwrite(u64 kfd, void* uaddr, u64 kaddr, u64 size)
-{
-    krkw_kwrite((struct kfd*)(kfd), uaddr, kaddr, size);
-}
-
 u64 kopen(u64 puaf_pages, u64 puaf_method, u64 kread_method, u64 kwrite_method)
 {
     timer_start();
@@ -196,11 +183,20 @@ u64 kopen(u64 puaf_pages, u64 puaf_method, u64 kread_method, u64 kwrite_method)
     krkw_run(kfd);
     info_run(kfd);
     perf_run(kfd);
-    
     puaf_cleanup(kfd);
 
     timer_end();
     return (u64)(kfd);
+}
+
+void kread(u64 kfd, u64 kaddr, void* uaddr, u64 size)
+{
+    krkw_kread((struct kfd*)(kfd), kaddr, uaddr, size);
+}
+
+void kwrite(u64 kfd, void* uaddr, u64 kaddr, u64 size)
+{
+    krkw_kwrite((struct kfd*)(kfd), uaddr, kaddr, size);
 }
 
 void kclose(u64 kfd)
