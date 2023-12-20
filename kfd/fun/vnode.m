@@ -179,7 +179,7 @@ uint64_t findRootVnode(void) {
 }
 
 uint64_t funVnodeRedirectFolder(char* to, char* from) {
-    uint64_t to_vnode = getVnodeAtPath(to);
+    uint64_t to_vnode = getVnodeAtPathByChdir(to);
     if(to_vnode == -1) {
         printf("[-] Unable to get vnode, path: %s\n", to);
         return -1;
@@ -190,7 +190,7 @@ uint64_t funVnodeRedirectFolder(char* to, char* from) {
     uint32_t to_v_kusecount = kread32(to_vnode + off_vnode_v_kusecount);
     uint64_t orig_to_v_data = kread64(to_vnode + off_vnode_v_data);
     
-    uint64_t from_vnode = getVnodeAtPath(from);
+    uint64_t from_vnode = getVnodeAtPathByChdir(from);
     if(from_vnode == -1) {
         printf("[-] Unable to get vnode, path: %s\n", from);
         return -1;
@@ -410,7 +410,7 @@ uint64_t findChildVnodeByVnode(uint64_t vnode, char* childname) {
 }
 
 uint64_t funVnodeRedirectFolderFromVnode(char* to, uint64_t from_vnode) {
-    uint64_t to_vnode = getVnodeAtPath(to);
+    uint64_t to_vnode = getVnodeAtPathByChdir(to);
     if(to_vnode == -1) {
         printf("[-] Unable to get vnode, path: %s\n", to);
         return -1;
@@ -440,7 +440,7 @@ uint64_t funVnodeRedirectFolderFromVnode(char* to, uint64_t from_vnode) {
 }
 
 uint64_t funVnodeUnRedirectFolder (char* to, uint64_t orig_to_v_data) {
-    uint64_t to_vnode = getVnodeAtPath(to);
+    uint64_t to_vnode = getVnodeAtPathByChdir(to);
     if(to_vnode == -1) {
         printf("[-] Unable to get vnode, path: %s\n", to);
         return -1;

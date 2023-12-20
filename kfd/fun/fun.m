@@ -101,6 +101,22 @@ int funTask(char* process) {
     uint32_t t_flags_ro = kread32(proc_ro + off_p_ro_t_flags_ro);
     printf("[i] %s proc->proc_ro->t_flags_ro: 0x%x\n", process, t_flags_ro);
     
+    
+    
+//    HexDump(pr_task, 0x600);
+//    
+//    HexDump(kread64(pr_task+0x3d8), 0x100);
+//    HexDump(kread64(kread64(pr_task+0x5e8+8)), 0x100);
+//    HexDump(kread64(kread64(pr_task+0x5e8+16)), 0x100);
+    
+//    HexDump(pr_task, 0x100);
+//    HexDump(kread64(pr_task+0x5DC+0xC+0x8), 0x100);
+//    HexDump(kread64(pr_task+0x5DC+0xC+0x8+0x8), 0x100);
+//    HexDump(kread64(pr_task+0x5DC+0xC+0x8+0x8+0x8), 0x100);
+    //pidsuspended = 0x3EC
+    //all_image_info_size = 0x3e0 (4bytes)
+    //all_image_info_addr = 0x3d8 (8bytes)
+    
     return 0;
 }
 
@@ -278,18 +294,18 @@ int do_fun(void) {
     funCSFlags("launchd");
     funTask("kfd");
     
-    mach_port_t host_self = mach_host_self();
-    printf("[i] mach_host_self: 0x%x\n", host_self);
-    fun_ipc_entry_lookup(host_self);
+//    mach_port_t host_self = mach_host_self();
+//    printf("[i] mach_host_self: 0x%x\n", host_self);
+//    fun_ipc_entry_lookup(host_self);
     
-    printf("[!] fun_proc_dump_entitlements: tccd\n");
-    fun_proc_dump_entitlements(getProcByName("tccd"));
-
-    printf("[!] fun_vnode_dump_entitlements: ReportCrash\n");
-    fun_vnode_dump_entitlements("/System/Library/CoreServices/ReportCrash");
-    
-    printf("[!] fun_nvram_dump\n");
-    fun_nvram_dump();
+//    printf("[!] fun_proc_dump_entitlements: tccd\n");
+//    fun_proc_dump_entitlements(getProcByName("tccd"));
+//
+//    printf("[!] fun_vnode_dump_entitlements: ReportCrash\n");
+//    fun_vnode_dump_entitlements("/System/Library/CoreServices/ReportCrash");
+//    
+//    printf("[!] fun_nvram_dump\n");
+//    fun_nvram_dump();
     
     
 //    //Patch
