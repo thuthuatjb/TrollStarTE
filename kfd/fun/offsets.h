@@ -88,4 +88,9 @@ extern uint32_t off_ipc_object_io_bits;
 extern uint32_t off_ipc_object_io_references;
 extern uint32_t off_ipc_port_ip_kobject;
 
+extern uint64_t off_gphysbase;
+extern uint64_t off_gphysize;
+extern uint64_t off_gvirtbase;
+extern uint64_t off_ptov_table;
+
 void _offsets_init(void);

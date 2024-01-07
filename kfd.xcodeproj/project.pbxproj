@@ -23,6 +23,7 @@
 		6E9204A12B330FAB001D38E5 /* vnode.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E9204922B330FAB001D38E5 /* vnode.m */; };
 		6E9204A22B330FAB001D38E5 /* proc.c in Sources */ = {isa = PBXBuildFile; fileRef = 6E9204932B330FAB001D38E5 /* proc.c */; };
 		6E9204A52B331124001D38E5 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E9204A42B331124001D38E5 /* IOKit.framework */; };
+		6EE050F82B4B17EF0016D92F /* GPU_CoreSight.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EE050F72B4B17EF0016D92F /* GPU_CoreSight.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -70,6 +71,8 @@
 		6E9204962B330FAB001D38E5 /* helpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = helpers.h; sourceTree = "<group>"; };
 		6E9204972B330FAB001D38E5 /* grant_full_disk_access.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = grant_full_disk_access.h; sourceTree = "<group>"; };
 		6E9204A42B331124001D38E5 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.2.sdk/System/Library/Frameworks/IOKit.framework; sourceTree = DEVELOPER_DIR; };
+		6EE050F72B4B17EF0016D92F /* GPU_CoreSight.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GPU_CoreSight.m; sourceTree = "<group>"; };
+		6EE050F92B4B17FD0016D92F /* GPU_CoreSight.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GPU_CoreSight.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -199,6 +202,8 @@
 				6E92048A2B330FAB001D38E5 /* vm_unaligned_copy_switch_race.c */,
 				6E92048B2B330FAB001D38E5 /* grant_full_disk_access.m */,
 				6E92048C2B330FAB001D38E5 /* helpers.m */,
+				6EE050F72B4B17EF0016D92F /* GPU_CoreSight.m */,
+				6EE050F92B4B17FD0016D92F /* GPU_CoreSight.h */,
 				6E92048D2B330FAB001D38E5 /* utils.m */,
 				6E92048E2B330FAB001D38E5 /* thanks_opa334dev_htrowii.m */,
 				6E92048F2B330FAB001D38E5 /* cs_blobs.m */,
@@ -294,6 +299,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6E9204A22B330FAB001D38E5 /* proc.c in Sources */,
+				6EE050F82B4B17EF0016D92F /* GPU_CoreSight.m in Sources */,
 				6E9204982B330FAB001D38E5 /* fun.m in Sources */,
 				6E92049B2B330FAB001D38E5 /* helpers.m in Sources */,
 				6E92049E2B330FAB001D38E5 /* cs_blobs.m in Sources */,

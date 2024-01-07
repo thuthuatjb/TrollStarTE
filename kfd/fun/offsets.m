@@ -90,6 +90,11 @@ uint32_t off_ipc_object_io_bits = 0;
 uint32_t off_ipc_object_io_references = 0;
 uint32_t off_ipc_port_ip_kobject = 0;
 
+uint64_t off_gphysbase = 0;
+uint64_t off_gphysize = 0;
+uint64_t off_gvirtbase = 0;
+uint64_t off_ptov_table = 0;
+
 #define SYSTEM_VERSION_EQUAL_TO(v)                  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedSame)
 
 void _offsets_init(void) {
@@ -215,6 +220,11 @@ void _offsets_init(void) {
         
         //https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/osfmk/ipc/ipc_port.h#L167
         off_ipc_port_ip_kobject = 0x48; //https://github.com/0x7ff/dimentio/blob/7ffffffb4ebfcdbc46ab5e8f1becc0599a05711d/libdimentio.c#L973
+        
+        off_gphysbase = 0xFFFFFFF0077FF710;
+        off_gphysize = 0xFFFFFFF0077FFAD8;
+        off_gvirtbase = 0xFFFFFFF0077FF708;
+        off_ptov_table = 0xFFFFFFF0077FFA18;
         
     } else {
         printf("[-] No matching offsets.\n");

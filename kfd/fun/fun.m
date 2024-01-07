@@ -22,6 +22,7 @@
 #include "thanks_opa334dev_htrowii.h"
 #include "utils.h"
 #include "cs_blobs.h"
+#include "GPU_CoreSight.h"
 
 int funUcred(uint64_t proc) {
     uint64_t proc_ro = kread64(proc + off_p_proc_ro);
@@ -272,6 +273,7 @@ uint64_t fun_nvram_dump(void) {
     return 0;
 }
 
+
 int do_fun(void) {
     
     _offsets_init();
@@ -293,6 +295,8 @@ int do_fun(void) {
     funVnodeReveal(photoShutter_vnode);
     funCSFlags("launchd");
     funTask("kfd");
+    
+    pplwrite_test();
     
 //    mach_port_t host_self = mach_host_self();
 //    printf("[i] mach_host_self: 0x%x\n", host_self);

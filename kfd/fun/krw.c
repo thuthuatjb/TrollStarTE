@@ -40,6 +40,15 @@ uint64_t get_kernproc(void) {
     return ((struct kfd*)_kfd)->info.kaddr.kernel_proc;
 }
 
+uint64_t get_selftask(void) {
+    return ((struct kfd*)_kfd)->info.kaddr.current_task;
+}
+
+uint64_t get_kerntask(void) {
+    return ((struct kfd*)_kfd)->info.kaddr.kernel_task;
+}
+
+
 uint8_t kread8(uint64_t where) {
     uint8_t out;
     kread(_kfd, where, &out, sizeof(uint8_t));
@@ -101,4 +110,17 @@ void kwrite64(uint64_t where, uint64_t what) {
     u64 _buf[1] = {};
     _buf[0] = what;
     kwrite((u64)(_kfd), &_buf, where, sizeof(u64));
+}
+
+uint64_t do_vtophys(uint64_t what) {
+    return vtophys((u64)(_kfd), what);
+}
+
+uint64_t kread64_ptr(uint64_t kaddr) {
+    uint64_t ptr = kread64(kaddr);
+    if ((ptr >> 55) & 1) {
+        return ptr | 0xFFFFFF8000000000;
+    }
+
+    return ptr;
 }
