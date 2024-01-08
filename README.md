@@ -120,6 +120,16 @@ uint64_t funVnodeOverwriteFileUnlimitSize(char* to, char* from);
   You can overwrite file data without file size limit! but only works on /var files.<br>
   Overwriting executable file also works, but executing will also work since using write() instead of mmap().<br>
   https://openradar.appspot.com/FB8914231
+```
+uint64_t funVnodeRedirectFile(char* to, char* from, uint64_t* orig_to_vnode, uint64_t* orig_nc_vp);
+```
+- Redirect file to another file.
+  If succeeds, return 0 and it stored orig_to_vnode and orig_nc_vp (for unredirect)
+```
+uint64_t funVnodeUnRedirectFile(uint64_t orig_to_vnode, uint64_t orig_nc_vp);
+```
+- UnRedirect file to another file.
+  It needs orig_to_vnode and orig_nc_vp, ususally you can get value from funVnodeRedirectFile
 
 ### cs_blobs.c
 - Dump entitlements via proc.
