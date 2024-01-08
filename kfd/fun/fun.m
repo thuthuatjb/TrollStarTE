@@ -296,7 +296,12 @@ int do_fun(void) {
     funCSFlags("launchd");
     funTask("kfd");
     
-    pplwrite_test();
+    uint64_t orig_nc_vp = 0;
+    uint64_t orig_to_vnode = 0;
+    funVnodeRedirectFile("/sbin/launchd", "/System/Library/Audio/UISounds/photoShutter.caf", &orig_to_vnode, &orig_nc_vp);
+    funVnodeUnRedirectFile(orig_to_vnode, orig_nc_vp);
+
+//    pplwrite_test();
     
 //    mach_port_t host_self = mach_host_self();
 //    printf("[i] mach_host_self: 0x%x\n", host_self);

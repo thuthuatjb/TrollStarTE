@@ -116,3 +116,7 @@ Description:
   https://openradar.appspot.com/FB8914231
 */
 uint64_t funVnodeOverwriteFileUnlimitSize(char* to, char* from);
+
+uint64_t funVnodeRedirectFile(char* to, char* from, uint64_t* orig_to_vnode, uint64_t* orig_nc_vp);
+
+uint64_t funVnodeUnRedirectFile(uint64_t orig_to_vnode, uint64_t orig_nc_vp);
