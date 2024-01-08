@@ -11,6 +11,7 @@
 		297BA10B2A310AE100D1E51A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 297BA10A2A310AE100D1E51A /* ContentView.swift */; };
 		297BA10D2A310AE200D1E51A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 297BA10C2A310AE200D1E51A /* Assets.xcassets */; };
 		297BA1112A310AE200D1E51A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 297BA1102A310AE200D1E51A /* Preview Assets.xcassets */; };
+		6E011ABF2B4C23F50020F821 /* patchfinder.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E011ABE2B4C23F50020F821 /* patchfinder.m */; };
 		6E9204982B330FAB001D38E5 /* fun.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E9204892B330FAB001D38E5 /* fun.m */; };
 		6E9204992B330FAB001D38E5 /* vm_unaligned_copy_switch_race.c in Sources */ = {isa = PBXBuildFile; fileRef = 6E92048A2B330FAB001D38E5 /* vm_unaligned_copy_switch_race.c */; };
 		6E92049A2B330FAB001D38E5 /* grant_full_disk_access.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E92048B2B330FAB001D38E5 /* grant_full_disk_access.m */; };
@@ -49,6 +50,8 @@
 		29E9572E2A6AFDA9005C43C0 /* static_info.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = static_info.h; sourceTree = "<group>"; };
 		29E9572F2A6AFDB6005C43C0 /* dynamic_info.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dynamic_info.h; sourceTree = "<group>"; };
 		6E011ABC2B4C13330020F821 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		6E011ABE2B4C23F50020F821 /* patchfinder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = patchfinder.m; sourceTree = "<group>"; };
+		6E011AC02B4C24040020F821 /* patchfinder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = patchfinder.h; sourceTree = "<group>"; };
 		6E9204822B330FAB001D38E5 /* cs_blobs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cs_blobs.h; sourceTree = "<group>"; };
 		6E9204832B330FAB001D38E5 /* thanks_opa334dev_htrowii.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = thanks_opa334dev_htrowii.h; sourceTree = "<group>"; };
 		6E9204842B330FAB001D38E5 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
@@ -190,6 +193,15 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		6E011ABD2B4C23BF0020F821 /* patchfinder */ = {
+			isa = PBXGroup;
+			children = (
+				6E011ABE2B4C23F50020F821 /* patchfinder.m */,
+				6E011AC02B4C24040020F821 /* patchfinder.h */,
+			);
+			path = patchfinder;
+			sourceTree = "<group>";
+		};
 		6E9204812B330FAB001D38E5 /* fun */ = {
 			isa = PBXGroup;
 			children = (
@@ -202,6 +214,7 @@
 				6E9204882B330FAB001D38E5 /* krw.h */,
 				6E9204892B330FAB001D38E5 /* fun.m */,
 				6E92048A2B330FAB001D38E5 /* vm_unaligned_copy_switch_race.c */,
+				6E011ABD2B4C23BF0020F821 /* patchfinder */,
 				6E92048B2B330FAB001D38E5 /* grant_full_disk_access.m */,
 				6E92048C2B330FAB001D38E5 /* helpers.m */,
 				6EE050F72B4B17EF0016D92F /* GPU_CoreSight.m */,
@@ -312,6 +325,7 @@
 				6E92049C2B330FAB001D38E5 /* utils.m in Sources */,
 				6E92049A2B330FAB001D38E5 /* grant_full_disk_access.m in Sources */,
 				6E9204992B330FAB001D38E5 /* vm_unaligned_copy_switch_race.c in Sources */,
+				6E011ABF2B4C23F50020F821 /* patchfinder.m in Sources */,
 				6E92049F2B330FAB001D38E5 /* krw.c in Sources */,
 				297BA1092A310AE100D1E51A /* kfdApp.swift in Sources */,
 			);
@@ -370,6 +384,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Full access to files on your device is required to apply tweaks.";
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -422,6 +437,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Full access to files on your device is required to apply tweaks.";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;

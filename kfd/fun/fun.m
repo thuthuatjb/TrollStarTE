@@ -277,13 +277,8 @@ int do_unsandbox(void) {
     grant_full_disk_access(^(NSError* error) {
         if(error != nil) {
             NSLog(@"[-] grant_full_disk_access returned error: %@", error);
-            exit(1);
         }
     });
-    
-//    NSLog(@"%@", [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/private/preboot" error:nil]);
-    
-    exit(1);
     
     return 0;
 }
