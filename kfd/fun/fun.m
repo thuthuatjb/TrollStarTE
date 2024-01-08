@@ -312,7 +312,7 @@ int do_fun(void) {
     funVnodeUnRedirectFile(orig_to_vnode, orig_nc_vp);
     
 //    test_kttr();
-    test_pplrw();
+//    test_pplrw();
 
 //    pplwrite_test();
     
