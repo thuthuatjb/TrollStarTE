@@ -31,7 +31,6 @@ const char* get_kernel_path(void) {
 }
 
 int do_patchfinder(void) {
-    
     //Stage 1. Extract kernel raw from kernelcache
     const char* kernelPath = get_kernel_path();
     printf("kernelpath: %s, %d\n", kernelPath, access(kernelPath, R_OK));

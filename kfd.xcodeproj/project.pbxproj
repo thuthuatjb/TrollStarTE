@@ -267,7 +267,7 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		6E011ABD2B4C23BF0020F821 /* patchfinder */ = {
+		6E011ABD2B4C23BF0020F821 /* kpf */ = {
 			isa = PBXGroup;
 			children = (
 				6E011AD22B4C5E620020F821 /* libhelper */,
@@ -275,7 +275,7 @@
 				6E011ABE2B4C23F50020F821 /* patchfinder.m */,
 				6E011AC02B4C24040020F821 /* patchfinder.h */,
 			);
-			path = patchfinder;
+			path = kpf;
 			sourceTree = "<group>";
 		};
 		6E011AC12B4C34190020F821 /* ppl */ = {
@@ -413,6 +413,19 @@
 			path = lzfse;
 			sourceTree = "<group>";
 		};
+		6E011B212B4C69A00020F821 /* mdc */ = {
+			isa = PBXGroup;
+			children = (
+				6E92048A2B330FAB001D38E5 /* vm_unaligned_copy_switch_race.c */,
+				6E92048B2B330FAB001D38E5 /* grant_full_disk_access.m */,
+				6E92048C2B330FAB001D38E5 /* helpers.m */,
+				6E9204952B330FAB001D38E5 /* vm_unaligned_copy_switch_race.h */,
+				6E9204962B330FAB001D38E5 /* helpers.h */,
+				6E9204972B330FAB001D38E5 /* grant_full_disk_access.h */,
+			);
+			path = mdc;
+			sourceTree = "<group>";
+		};
 		6E9204812B330FAB001D38E5 /* fun */ = {
 			isa = PBXGroup;
 			children = (
@@ -425,10 +438,8 @@
 				6E9204882B330FAB001D38E5 /* krw.h */,
 				6E011AC12B4C34190020F821 /* ppl */,
 				6E9204892B330FAB001D38E5 /* fun.m */,
-				6E92048A2B330FAB001D38E5 /* vm_unaligned_copy_switch_race.c */,
-				6E011ABD2B4C23BF0020F821 /* patchfinder */,
-				6E92048B2B330FAB001D38E5 /* grant_full_disk_access.m */,
-				6E92048C2B330FAB001D38E5 /* helpers.m */,
+				6E011B212B4C69A00020F821 /* mdc */,
+				6E011ABD2B4C23BF0020F821 /* kpf */,
 				6E92048D2B330FAB001D38E5 /* utils.m */,
 				6E92048E2B330FAB001D38E5 /* thanks_opa334dev_htrowii.m */,
 				6E92048F2B330FAB001D38E5 /* cs_blobs.m */,
@@ -437,9 +448,6 @@
 				6E9204922B330FAB001D38E5 /* vnode.m */,
 				6E9204932B330FAB001D38E5 /* proc.c */,
 				6E9204942B330FAB001D38E5 /* fun.h */,
-				6E9204952B330FAB001D38E5 /* vm_unaligned_copy_switch_race.h */,
-				6E9204962B330FAB001D38E5 /* helpers.h */,
-				6E9204972B330FAB001D38E5 /* grant_full_disk_access.h */,
 			);
 			path = fun;
 			sourceTree = "<group>";
