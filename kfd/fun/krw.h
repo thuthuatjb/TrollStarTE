@@ -19,6 +19,7 @@ void do_kwrite(void* uaddr, uint64_t kaddr, uint64_t size);
 uint64_t get_kslide(void);
 uint64_t get_kernproc(void);
 uint64_t get_selftask(void);
+uint64_t get_selfpmap(void);
 uint64_t get_kerntask(void);
 uint8_t kread8(uint64_t where);
 uint32_t kread16(uint64_t where);
@@ -30,6 +31,7 @@ void kwrite16(uint64_t where, uint16_t what);
 void kwrite32(uint64_t where, uint32_t what);
 void kwrite64(uint64_t where, uint64_t what);
 uint64_t do_vtophys(uint64_t what);
+uint64_t do_phystokv(uint64_t what);
 uint64_t kread64_ptr(uint64_t kaddr);
 
 #endif /* krw_h */

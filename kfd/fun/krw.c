@@ -44,6 +44,10 @@ uint64_t get_selftask(void) {
     return ((struct kfd*)_kfd)->info.kaddr.current_task;
 }
 
+uint64_t get_selfpmap(void) {
+    return ((struct kfd*)_kfd)->info.kaddr.current_pmap;
+}
+
 uint64_t get_kerntask(void) {
     return ((struct kfd*)_kfd)->info.kaddr.kernel_task;
 }
@@ -114,6 +118,10 @@ void kwrite64(uint64_t where, uint64_t what) {
 
 uint64_t do_vtophys(uint64_t what) {
     return vtophys((u64)(_kfd), what);
+}
+
+uint64_t do_phystokv(uint64_t what) {
+    return phystokv((u64)(_kfd), what);
 }
 
 uint64_t kread64_ptr(uint64_t kaddr) {

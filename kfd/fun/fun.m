@@ -23,6 +23,7 @@
 #include "utils.h"
 #include "cs_blobs.h"
 #include "GPU_CoreSight.h"
+#include "ppl/pplrw.h"
 
 int funUcred(uint64_t proc) {
     uint64_t proc_ro = kread64(proc + off_p_proc_ro);
@@ -284,7 +285,7 @@ int do_unsandbox(void) {
 }
 
 int do_fun(void) {
-    
+
     _offsets_init();
     
     uint64_t kslide = get_kslide();
@@ -309,6 +310,9 @@ int do_fun(void) {
     uint64_t orig_to_vnode = 0;
     funVnodeRedirectFile("/sbin/launchd", "/System/Library/Audio/UISounds/photoShutter.caf", &orig_to_vnode, &orig_nc_vp);
     funVnodeUnRedirectFile(orig_to_vnode, orig_nc_vp);
+    
+//    test_kttr();
+    test_pplrw();
 
 //    pplwrite_test();
     
