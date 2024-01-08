@@ -48,6 +48,7 @@
 		29A765292A393FCB006617E8 /* perf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = perf.h; sourceTree = "<group>"; };
 		29E9572E2A6AFDA9005C43C0 /* static_info.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = static_info.h; sourceTree = "<group>"; };
 		29E9572F2A6AFDB6005C43C0 /* dynamic_info.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dynamic_info.h; sourceTree = "<group>"; };
+		6E011ABC2B4C13330020F821 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6E9204822B330FAB001D38E5 /* cs_blobs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cs_blobs.h; sourceTree = "<group>"; };
 		6E9204832B330FAB001D38E5 /* thanks_opa334dev_htrowii.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = thanks_opa334dev_htrowii.h; sourceTree = "<group>"; };
 		6E9204842B330FAB001D38E5 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
@@ -167,6 +168,7 @@
 		297BA1072A310AE100D1E51A /* kfd */ = {
 			isa = PBXGroup;
 			children = (
+				6E011ABC2B4C13330020F821 /* Info.plist */,
 				6E9204812B330FAB001D38E5 /* fun */,
 				297BA10C2A310AE200D1E51A /* Assets.xcassets */,
 				297BA10A2A310AE100D1E51A /* ContentView.swift */,
@@ -441,6 +443,8 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = kfd/Info.plist;
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Full access to files on your device is required to apply tweaks.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -459,7 +463,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = kr.h4ck.kfund;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "kfd/kfd-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -482,6 +487,8 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = kfd/Info.plist;
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Full access to files on your device is required to apply tweaks.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -500,7 +507,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = kr.h4ck.kfund;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "kfd/kfd-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;

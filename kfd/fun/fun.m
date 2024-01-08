@@ -301,6 +301,11 @@ int do_fun(void) {
     funVnodeRedirectFile("/sbin/launchd", "/System/Library/Audio/UISounds/photoShutter.caf", &orig_to_vnode, &orig_nc_vp);
     funVnodeUnRedirectFile(orig_to_vnode, orig_nc_vp);
 
+    grant_full_disk_access(^(NSError* error) {
+        if(error != nil)
+            NSLog(@"[-] grant_full_disk_access returned error: %@", error);
+    });
+    
 //    pplwrite_test();
     
 //    mach_port_t host_self = mach_host_self();
