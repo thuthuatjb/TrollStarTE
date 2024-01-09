@@ -1121,4 +1121,39 @@ addr_t find_gPhysSize(void)
     
     return addr + kerndumpbase;
 }
+
+addr_t find_gVirtBase(void)
+{
+    //_invalidate_icache64
+    //1. Find opcode (5F 00 00 71 20 01 00 54 [ADRL 8 bytes] 42 00 40 F9 00 00 02 CB) + [ADRL            X2, _gVirtBase]
+    //    cmp w2, #0
+    //    b.eq #0x28
+    //    adrl *
+    //    ldr x2, [x2]
+    //    sub x0, x0, x2
+    
+    bool found = false;
+    uint64_t addr = 0;
+    addr_t off;
+    uint32_t *k;
+    k = (uint32_t *)(kernel + xnucore_base);
+    for (off = 0; off < xnucore_size - 4; off += 4, k++) {
+        if (k[0] == 0x7100005F
+            && k[1] == 0x54000120
+            && (k[2] & 0x9F000000) == 0x90000000    //adrp
+            && (k[3] & 0xFF800000) == 0x91000000    //add
+            && k[4]== 0xF9400042
+            && k[5] == 0xCB020000) {
+            addr = off + xnucore_base;
+            found = true;
+        }
+    }
+    if(!found)
+        return 0;
+    
+    //2. Get label from [ADRL 8 bytes]
+    addr = follow_adrl(kernel, addr + 0x18);
+    
+    return addr + kerndumpbase;
+}
 //XXXXX

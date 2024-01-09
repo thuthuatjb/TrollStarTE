@@ -52,6 +52,8 @@ int do_patchfinder(void) {
     printf("gPhysBase: 0x%llx\n", gPhysBase);
     uint64_t gPhysSize = find_gPhysSize();
     printf("gPhysSize: 0x%llx\n", gPhysSize);
+    uint64_t gVirtBase = find_gVirtBase();
+    printf("gVirtBase: 0x%llx\n", gVirtBase);
     
     term_kernel();
     
