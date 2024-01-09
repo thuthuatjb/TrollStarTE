@@ -581,7 +581,7 @@ follow_adrl(const uint8_t *buf, addr_t call)
 }
 
 static addr_t
-follow_adrpStr(const uint8_t *buf, addr_t call)
+follow_adrpLdr(const uint8_t *buf, addr_t call)
 {
     //Stage1. ADRP
     uint32_t op = *(uint32_t *)(buf + call);
@@ -1121,7 +1121,7 @@ addr_t find_gPhysSize(void)
         return find_gPhysBase() + 8;
     
     //2. Get label from [ADRL 8 bytes]
-    addr = follow_adrpStr(kernel, addr + 0x18);
+    addr = follow_adrpLdr(kernel, addr + 0x18);
     
     return addr + kerndumpbase;
 }
@@ -1282,5 +1282,44 @@ addr_t find_vn_kqfilter(void)
     }
     
     return addr + kerndumpbase;
+}
+
+
+addr_t find_proc_object_size(void) {
+    //footprint
+    //_proc_task: ADRP            X8, #qword_FFFFFFF00A3091E8@PAGE
+    //qword_FFFFFFF00A3091E8 DCQ 0x530
+    
+    //E0 03 15 AA 
+    //E1 04 81 52
+    //02 01 80 52
+    //03 11 80 52
+    uint32_t bytes[] = {
+        0xAA1503E0,
+        0x528104E1,
+        0x52800102,
+        0x52801103
+    };
+    
+    uint64_t addr = (uint64_t)boyermoore_horspool_memmem((unsigned char *)((uint64_t)kernel + xnucore_base), xnucore_size, (const unsigned char *)bytes, sizeof(bytes));
+    
+    if (!addr) {
+        return 0;
+    }
+    addr -= (uint64_t)kernel;
+    
+    //2. Step into High address, and find adrp opcode.
+    addr = step64(kernel, addr, 0x20, INSN_ADRP);
+    if (!addr) {
+        return 0;
+    }
+    
+    //3. Get label from adrl opcode.
+    addr = follow_adrpLdr(kernel, addr);
+    
+    //4. Get val from addr
+    uint64_t val = *(uint64_t *)(kernel + addr);
+    
+    return val;
 }
 //XXXXX

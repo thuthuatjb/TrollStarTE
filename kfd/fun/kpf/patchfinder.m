@@ -69,6 +69,8 @@ int do_patchfinder(void) {
     printf("ptov_table: 0x%llx\n", ptov_table);
     uint64_t vn_kqfilter = find_vn_kqfilter();
     printf("vn_kqfilter: 0x%llx\n", vn_kqfilter);
+    uint64_t proc_object_size = find_proc_object_size();
+    printf("proc_object_size: 0x%llx\n", proc_object_size);
     
     term_kernel();
     

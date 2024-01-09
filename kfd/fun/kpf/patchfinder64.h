@@ -37,5 +37,6 @@ uint64_t find_perfmon_dev_open(void);
 uint64_t find_perfmon_devices(void);
 uint64_t find_ptov_table(void);
 uint64_t find_vn_kqfilter(void);
+uint64_t find_proc_object_size(void);
 
 #endif
