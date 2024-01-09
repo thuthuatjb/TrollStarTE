@@ -33,5 +33,6 @@ uint64_t find_cdevsw(void);
 uint64_t find_gPhysBase(void);
 uint64_t find_gPhysSize(void);
 uint64_t find_gVirtBase(void);
+uint64_t find_perfmon_dev_open(void);
 
 #endif

@@ -54,6 +54,8 @@ int do_patchfinder(void) {
     printf("gPhysSize: 0x%llx\n", gPhysSize);
     uint64_t gVirtBase = find_gVirtBase();
     printf("gVirtBase: 0x%llx\n", gVirtBase);
+    uint64_t perfmon_dev_open = find_perfmon_dev_open();
+    printf("perfmon_dev_open: 0x%llx\n", perfmon_dev_open);
     
     term_kernel();
     

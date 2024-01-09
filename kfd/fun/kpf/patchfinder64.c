@@ -1156,4 +1156,39 @@ addr_t find_gVirtBase(void)
     
     return addr + kerndumpbase;
 }
+
+addr_t find_perfmon_dev_open(void)
+{
+    bool found = false;
+    uint64_t addr = 0;
+    addr_t off;
+    uint32_t *k;
+    k = (uint32_t *)(kernel + xnucore_base);
+    for (off = 0; off < xnucore_size - 4; off += 4, k++) {
+        if ((k[0] & 0xff000000) == 0x34000000    //cbz w*
+            && k[1] == 0x52800300    //mov W0, #0x18
+            && (k[2] & 0xff000000) == 0x14000000    //b*
+            && k[3] == 0x52800340   //mov w0, #0x1A
+            && (k[4] & 0xff000000) == 0x14000000    /* b* */) {
+            addr = off + xnucore_base;
+            found = true;
+        }
+    }
+    if(!found)
+        return 0;
+    
+    //2. Find begin of address(bof64)
+    addr = bof64(kernel, xnucore_base, addr);
+    if (!addr) {
+        return 0;
+    }
+    
+    //3. check PACIBSP (7F 23 03 D5)
+    uint32_t op = *(uint32_t *)(kernel + addr - 4);
+    if(op == 0xD503237F) {
+        addr -= 4;
+    }
+    
+    return addr + kerndumpbase;
+}
 //XXXXX
