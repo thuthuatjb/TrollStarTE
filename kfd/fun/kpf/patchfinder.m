@@ -50,6 +50,8 @@ int do_patchfinder(void) {
     printf("cdevsw: 0x%llx\n", cdevsw);
     uint64_t gPhysBase = find_gPhysBase();
     printf("gPhysBase: 0x%llx\n", gPhysBase);
+    uint64_t gPhysSize = find_gPhysSize();
+    printf("gPhysSize: 0x%llx\n", gPhysSize);
     
     term_kernel();
     

@@ -31,5 +31,6 @@ uint64_t find_strref(const char *string, int n, enum string_bases string_base, b
 
 uint64_t find_cdevsw(void);
 uint64_t find_gPhysBase(void);
+uint64_t find_gPhysSize(void);
 
 #endif

@@ -580,6 +580,33 @@ follow_adrl(const uint8_t *buf, addr_t call)
     return ret;
 }
 
+static addr_t
+follow_adrpStr(const uint8_t *buf, addr_t call)
+{
+    //Stage1. ADRP
+    uint32_t op = *(uint32_t *)(buf + call);
+    
+    uint64_t imm_hi_lo = (uint64_t)((op >> 3)  & 0x1FFFFC);
+    imm_hi_lo |= (uint64_t)((op >> 29) & 0x3);
+    if ((op & 0x800000) != 0) {
+        // Sign extend
+        imm_hi_lo |= 0xFFFFFFFFFFE00000;
+    }
+    
+    // Build real imm
+    uint64_t imm = imm_hi_lo << 12;
+//    printf("imm: 0x%llx\n", call, imm);
+    
+    uint64_t ret = (call & ~0xFFF) + imm;
+    
+    //Stage2. STR
+    uint32_t op2 = *(uint32_t *)(buf + call + 4);
+    uint64_t imm12 = ((op2 >> 10) & 0xFFF) << 3;
+    ret += imm12;
+    
+    return ret;
+}
+
 /* kernel iOS10 **************************************************************/
 
 #include <fcntl.h>
@@ -1033,6 +1060,12 @@ addr_t find_gPhysBase(void)
 {
     //_invalidate_icache64
     //1. Find opcode (5F 00 00 71 20 01 00 54 [ADRL 8 bytes] 42 00 40 F9 00 00 02 CB)
+    //    cmp w2, #0
+    //    b.eq #0x28
+    //    adrl *
+    //    ldr x2, [x2]
+    //    sub x0, x0, x2
+    
     bool found = false;
     uint64_t addr = 0;
     addr_t off;
@@ -1045,7 +1078,6 @@ addr_t find_gPhysBase(void)
             && (k[3] & 0xFF800000) == 0x91000000    //add
             && k[4]== 0xF9400042
             && k[5] == 0xCB020000) {
-//            return off + xnucore_base + kerndumpbase;
             addr = off + xnucore_base;
             found = true;
         }
@@ -1055,6 +1087,37 @@ addr_t find_gPhysBase(void)
     
     //2. Get label from [ADRL 8 bytes]
     addr = follow_adrl(kernel, addr + 8);
+    
+    return addr + kerndumpbase;
+}
+
+addr_t find_gPhysSize(void)
+{
+    //_invalidate_icache64
+    //1. Find opcode ([STR 4 bytes] 08 01 09 8B 08 C5 72 92 08 01 09 CB)
+    //    str *
+    //    add x8, x8, x9
+    //    and x8, x8, #0xffffffffffffc000
+    //    sub x8, x8, x9
+    bool found = false;
+    uint64_t addr = 0;
+    addr_t off;
+    uint32_t *k;
+    k = (uint32_t *)(kernel + xnucore_base);
+    for (off = 0; off < xnucore_size - 4; off += 4, k++) {
+        if ((k[0] & 0xFFC00000) == 0xF9000000   //str
+            && k[1] == 0x8b090108
+            && k[2] == 0x9272c508
+            && k[3] == 0xcb090108) {
+            addr = off + xnucore_base;
+            found = true;
+        }
+    }
+    if(!found)
+        return 0;
+    
+    //2. Get label from [ADRL 8 bytes]
+    addr = follow_adrpStr(kernel, addr + 0x18);
     
     return addr + kerndumpbase;
 }
