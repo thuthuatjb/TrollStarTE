@@ -56,6 +56,8 @@ int do_patchfinder(void) {
     printf("gVirtBase: 0x%llx\n", gVirtBase);
     uint64_t perfmon_dev_open = find_perfmon_dev_open();
     printf("perfmon_dev_open: 0x%llx\n", perfmon_dev_open);
+    uint64_t perfmon_devices = find_perfmon_devices();
+    printf("perfmon_devices: 0x%llx\n", perfmon_devices);
     
     term_kernel();
     
