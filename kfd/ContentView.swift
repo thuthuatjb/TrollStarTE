@@ -14,8 +14,8 @@ struct ContentView: View {
     @State private var puaf_pages_index = 7
     @State private var puaf_pages = 0
 
-    private var puaf_method_options = ["physpuppet", "smith"]
-    @State private var puaf_method = 1
+    private var puaf_method_options = ["physpuppet", "smith", "landa"]
+    @State private var puaf_method = 2
 
     private var kread_method_options = ["kqueue_workloop_ctl", "sem_open"]
     @State private var kread_method = 1
@@ -58,10 +58,10 @@ struct ContentView: View {
                     HStack {
                         Button("kopen") {
                             puaf_pages = puaf_pages_options[puaf_pages_index]
-                            do_patchfinder()
+//                            do_patchfinder()
                             
-//                            kfd = do_kopen(UInt64(puaf_pages), UInt64(puaf_method), UInt64(kread_method), UInt64(kwrite_method))
-//                            do_fun()
+                            kfd = do_kopen(UInt64(puaf_pages), UInt64(puaf_method), UInt64(kread_method), UInt64(kwrite_method))
+                            do_fun()
                         }.disabled(kfd != 0).frame(minWidth: 0, maxWidth: .infinity)
                         Button("kclose") {
                             do_kclose()

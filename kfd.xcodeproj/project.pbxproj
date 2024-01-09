@@ -176,6 +176,7 @@
 		6ED3B8232B4DC33E008251E5 /* libfragmentzip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libfragmentzip.h; sourceTree = "<group>"; };
 		6ED3B8242B4DC3B8008251E5 /* libMobileGestalt.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libMobileGestalt.tbd; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.2.sdk/usr/lib/libMobileGestalt.tbd; sourceTree = DEVELOPER_DIR; };
 		6ED3B8262B4DC3DF008251E5 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.2.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
+		6ED3B8282B4DD6A4008251E5 /* landa.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = landa.h; sourceTree = "<group>"; };
 		6EE050F72B4B17EF0016D92F /* GPU_CoreSight.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GPU_CoreSight.m; sourceTree = "<group>"; };
 		6EE050F92B4B17FD0016D92F /* GPU_CoreSight.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GPU_CoreSight.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -235,6 +236,7 @@
 			children = (
 				2948BA722A31636600B2ED3C /* physpuppet.h */,
 				29A358F32A43B53300C297A1 /* smith.h */,
+				6ED3B8282B4DD6A4008251E5 /* landa.h */,
 			);
 			path = puaf;
 			sourceTree = "<group>";
