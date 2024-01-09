@@ -151,12 +151,15 @@ int grabkernel(const char *downloadPath, int isResearchKernel){
 
     sBuild = sizeof(build);
     assure(!getBuildNum(build, &sBuild));
+//    strcpy(build, "20G81"); //XXX CUSOTM
     printf("[GK] Got build number: %s\n",build);
     sMachine = sizeof(machine);
     assure(!getMachineName(machine, &sMachine));
+//    strcpy(machine, "iPhone11,4");  //XXX CUSOTM
     printf("[GK] Got machine number: %s\n",machine);
     sModel = sizeof(hwmodel);
     assure(!getHWModel(hwmodel, &sModel));
+//    strcpy(hwmodel, "D331AP");  //XXX CUSOTM
     printf("[GK] Got model: %s\n",hwmodel);
 
     assure(sizeof(firmwareUrl)>sBuild+sMachine+strlen(IPSW_URL_TEMPLATE)+1);

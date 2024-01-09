@@ -1019,38 +1019,42 @@ find_symbol(const char *symbol)
 //XXXXX
 addr_t find_cdevsw(void)
 {
-    //1. Find opcode (1F 09 00 31 20 02 00 54 1F 05 00 31 A1 0A 00 54)
-    //    cmn w8, #2
-    //    b.eq #0x48
-    //    cmn w8, #1
-    //    b.ne #0x160
+//    MOV             X1, #0
+//    com.apple.kernel:__text:FFFFFFF0081FB580                 MOV             X2, #0
+//    com.apple.kernel:__text:FFFFFFF0081FB584                 MOV             W3, #0
+//    com.apple.kernel:__text:FFFFFFF0081FB588                 MOV             W4, #1
+//    com.apple.kernel:__text:FFFFFFF0081FB58C                 MOV             X5, #0
+//    01 00 80 D2
+//    02 00 80 D2
+//    03 00 80 52
+//    24 00 80 52
+//    05 00 80 D2
+    //1. opcode
+    bool found = false;
+    uint64_t addr = 0;
+    addr_t off;
+    uint32_t *k;
+    k = (uint32_t *)(kernel + xnucore_base);
+    for (off = 0; off < xnucore_size - 4; off += 4, k++) {
+        if ((k[0] & 0xff000000) == 0xb4000000   //cbz
+            && k[1] == 0xd2800001   //mov x1, #0
+            && k[2] == 0xd2800002   //mov x2, #0
+            && k[3] == 0x52800003   //mov w3, #0
+            && k[4] == 0x52800024   //mov w4, #1
+            && k[5] == 0xd2800005  /* mov x5, #0 */) {
+            addr = off + xnucore_base;
+            found = true;
+        }
+    }
+    if(!found)
+        return 0;
     
-    uint32_t bytes[] = {
-        0x3100091f,
-        0x54000220,
-        0x3100051f,
-        0x54000aa1
-    };
-    
-    uint64_t addr = (uint64_t)boyermoore_horspool_memmem((unsigned char *)((uint64_t)kernel + xnucore_base), xnucore_size, (const unsigned char *)bytes, sizeof(bytes));
-    
+    //2. Step into High address, and find adrp opcode.
+    addr = step64(kernel, addr, 0x80, INSN_ADRP);
     if (!addr) {
         return 0;
     }
-    addr -= (uint64_t)kernel;
-    
-    //2. Find begin of address(bof64)
-    addr = bof64(kernel, xnucore_base, addr);
-    if (!addr) {
-        return 0;
-    }
-    
-    //3. Step into High address, and find adrp opcode.
-    addr = step64(kernel, addr, 0x30, INSN_ADRP);
-    if (!addr) {
-        return 0;
-    }
-    //4. Get label from adrl opcode.
+    //3. Get label from adrl opcode.
     addr = follow_adrl(kernel, addr);
     
     return addr + kerndumpbase;
