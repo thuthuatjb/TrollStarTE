@@ -29,4 +29,14 @@ IORegistryEntryCreateCFProperty(io_registry_entry_t entry, CFStringRef key, CFAl
 
 int do_patchfinder(void);
 
+extern uint64_t off_cdevsw;
+extern uint64_t off_gPhysBase;
+extern uint64_t off_gPhysSize;
+extern uint64_t off_gVirtBase;
+extern uint64_t off_perfmon_dev_open;
+extern uint64_t off_perfmon_devices;
+extern uint64_t off_ptov_table;
+extern uint64_t off_vn_kqfilter;
+extern uint64_t off_proc_object_size;
+
 #endif /* patchfinder_h */

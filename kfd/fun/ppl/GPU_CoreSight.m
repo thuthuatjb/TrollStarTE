@@ -251,7 +251,7 @@ uint64_t phys_tokv(uint64_t pa)
     do_kread(off_gphysbase + get_kslide(), &gPhysBase, sizeof(gPhysBase));
     do_kread(off_gphysize + get_kslide(), &gPhysSize, sizeof(gPhysSize));
     do_kread(off_gvirtbase + get_kslide(), &gVirtBase, sizeof(gVirtBase));
-    do_kread(off_ptov_table + get_kslide(), ptov_table, sizeof(ptov_table));
+    do_kread(off_ptov__table + get_kslide(), ptov_table, sizeof(ptov_table));
     
     for (uint64_t i = 0; (i < PTOV_TABLE_SIZE) && (ptov_table[i].len != 0); i++) {
         if ((pa >= ptov_table[i].pa) && (pa < (ptov_table[i].pa + ptov_table[i].len))) {

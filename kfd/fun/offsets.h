@@ -97,6 +97,6 @@ extern uint32_t off_ipc_port_ip_kobject;
 extern uint64_t off_gphysbase;
 extern uint64_t off_gphysize;
 extern uint64_t off_gvirtbase;
-extern uint64_t off_ptov_table;
+extern uint64_t off_ptov__table;
 
 void _offsets_init(void);

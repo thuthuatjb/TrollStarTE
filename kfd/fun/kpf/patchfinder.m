@@ -13,6 +13,17 @@
 #import "patchfinder64.h"
 #import "libgrabkernel/libgrabkernel.h"
 
+bool did_patchfinder = false;
+uint64_t off_cdevsw = 0;
+uint64_t off_gPhysBase = 0;
+uint64_t off_gPhysSize = 0;
+uint64_t off_gVirtBase = 0;
+uint64_t off_perfmon_dev_open = 0;
+uint64_t off_perfmon_devices = 0;
+uint64_t off_ptov_table = 0;
+uint64_t off_vn_kqfilter = 0;
+uint64_t off_proc_object_size = 0;
+
 const char* getBootManifestHash(void) {
     struct statfs fs;
     if (statfs("/usr/standalone/firmware", &fs) == 0) {
@@ -37,6 +48,9 @@ void removeIfExist(const char* path) {
 }
 
 int do_patchfinder(void) {
+    if(did_patchfinder)
+        return 0;
+    
     //Stage 1. Download kernelcache
     const char *kernelPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/kernelcache"].UTF8String;
     removeIfExist(kernelPath);
@@ -53,26 +67,28 @@ int do_patchfinder(void) {
         return -1;
     }
     
-    uint64_t cdevsw = find_cdevsw();
-    printf("cdevsw: 0x%llx\n", cdevsw);
-    uint64_t gPhysBase = find_gPhysBase();
-    printf("gPhysBase: 0x%llx\n", gPhysBase);
-    uint64_t gPhysSize = find_gPhysSize();
-    printf("gPhysSize: 0x%llx\n", gPhysSize);
-    uint64_t gVirtBase = find_gVirtBase();
-    printf("gVirtBase: 0x%llx\n", gVirtBase);
-    uint64_t perfmon_dev_open = find_perfmon_dev_open();
-    printf("perfmon_dev_open: 0x%llx\n", perfmon_dev_open);
-    uint64_t perfmon_devices = find_perfmon_devices();
-    printf("perfmon_devices: 0x%llx\n", perfmon_devices);
-    uint64_t ptov_table = find_ptov_table();
-    printf("ptov_table: 0x%llx\n", ptov_table);
-    uint64_t vn_kqfilter = find_vn_kqfilter();
-    printf("vn_kqfilter: 0x%llx\n", vn_kqfilter);
-    uint64_t proc_object_size = find_proc_object_size();
-    printf("proc_object_size: 0x%llx\n", proc_object_size);
+    off_cdevsw = find_cdevsw();
+    printf("cdevsw: 0x%llx\n", off_cdevsw);
+    off_gPhysBase = find_gPhysBase();
+    printf("gPhysBase: 0x%llx\n", off_gPhysBase);
+    off_gPhysSize = find_gPhysSize();
+    printf("gPhysSize: 0x%llx\n", off_gPhysSize);
+    off_gVirtBase = find_gVirtBase();
+    printf("gVirtBase: 0x%llx\n", off_gVirtBase);
+    off_perfmon_dev_open = find_perfmon_dev_open();
+    printf("perfmon_dev_open: 0x%llx\n", off_perfmon_dev_open);
+    off_perfmon_devices = find_perfmon_devices();
+    printf("perfmon_devices: 0x%llx\n", off_perfmon_devices);
+    off_ptov_table = find_ptov_table();
+    printf("ptov_table: 0x%llx\n", off_ptov_table);
+    off_vn_kqfilter = find_vn_kqfilter();
+    printf("vn_kqfilter: 0x%llx\n", off_vn_kqfilter);
+    off_proc_object_size = find_proc_object_size();
+    printf("proc_object_size: 0x%llx\n", off_proc_object_size);
     
     term_kernel();
+    
+    did_patchfinder = true;
     
     return 0;
 }

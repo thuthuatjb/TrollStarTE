@@ -99,7 +99,7 @@ uint32_t off_ipc_port_ip_kobject = 0;
 uint64_t off_gphysbase = 0;
 uint64_t off_gphysize = 0;
 uint64_t off_gvirtbase = 0;
-uint64_t off_ptov_table = 0;
+uint64_t off_ptov__table = 0;
 
 #define SYSTEM_VERSION_EQUAL_TO(v)                  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedSame)
 
@@ -236,7 +236,7 @@ void _offsets_init(void) {
         off_gphysbase = 0xFFFFFFF0077FF710;
         off_gphysize = 0xFFFFFFF0077FFAD8;
         off_gvirtbase = 0xFFFFFFF0077FF708;
-        off_ptov_table = 0xFFFFFFF0077FFA18;
+        off_ptov__table = 0xFFFFFFF0077FFA18;
         
     } else {
         printf("[-] No matching offsets.\n");
