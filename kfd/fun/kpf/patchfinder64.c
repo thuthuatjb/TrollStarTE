@@ -1118,7 +1118,7 @@ addr_t find_gPhysSize(void)
         }
     }
     if(!found)
-        return 0;
+        return find_gPhysBase() + 8;
     
     //2. Get label from [ADRL 8 bytes]
     addr = follow_adrpStr(kernel, addr + 0x18);
