@@ -51,6 +51,12 @@
 		6E9204A22B330FAB001D38E5 /* proc.c in Sources */ = {isa = PBXBuildFile; fileRef = 6E9204932B330FAB001D38E5 /* proc.c */; };
 		6E9204A52B331124001D38E5 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E9204A42B331124001D38E5 /* IOKit.framework */; };
 		6ED3B80A2B4D8A24008251E5 /* patchfinder64.c in Sources */ = {isa = PBXBuildFile; fileRef = 6ED3B8092B4D8A24008251E5 /* patchfinder64.c */; };
+		6ED3B80D2B4DC14A008251E5 /* libgrabkernel.m in Sources */ = {isa = PBXBuildFile; fileRef = 6ED3B80C2B4DC14A008251E5 /* libgrabkernel.m */; };
+		6ED3B8202B4DC2D4008251E5 /* libcurl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6ED3B81D2B4DC2D4008251E5 /* libcurl.a */; };
+		6ED3B8212B4DC2D4008251E5 /* libgrabkernel.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6ED3B81E2B4DC2D4008251E5 /* libgrabkernel.a */; };
+		6ED3B8222B4DC2D4008251E5 /* libfragmentzip.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6ED3B81F2B4DC2D4008251E5 /* libfragmentzip.a */; };
+		6ED3B8252B4DC3C2008251E5 /* libMobileGestalt.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6ED3B8242B4DC3B8008251E5 /* libMobileGestalt.tbd */; };
+		6ED3B8272B4DC3E5008251E5 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6ED3B8262B4DC3DF008251E5 /* libz.tbd */; };
 		6EE050F82B4B17EF0016D92F /* GPU_CoreSight.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EE050F72B4B17EF0016D92F /* GPU_CoreSight.m */; };
 /* End PBXBuildFile section */
 
@@ -152,6 +158,24 @@
 		6E9204A42B331124001D38E5 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.2.sdk/System/Library/Frameworks/IOKit.framework; sourceTree = DEVELOPER_DIR; };
 		6ED3B8082B4D8A24008251E5 /* patchfinder64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = patchfinder64.h; sourceTree = "<group>"; };
 		6ED3B8092B4D8A24008251E5 /* patchfinder64.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = patchfinder64.c; sourceTree = "<group>"; };
+		6ED3B80C2B4DC14A008251E5 /* libgrabkernel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = libgrabkernel.m; sourceTree = "<group>"; };
+		6ED3B80E2B4DC177008251E5 /* all_libgrabkernel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = all_libgrabkernel.h; sourceTree = "<group>"; };
+		6ED3B80F2B4DC1C7008251E5 /* libgrabkernel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libgrabkernel.h; sourceTree = "<group>"; };
+		6ED3B8142B4DC2D4008251E5 /* curlrules.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = curlrules.h; sourceTree = "<group>"; };
+		6ED3B8152B4DC2D4008251E5 /* stdcheaders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdcheaders.h; sourceTree = "<group>"; };
+		6ED3B8162B4DC2D4008251E5 /* mprintf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mprintf.h; sourceTree = "<group>"; };
+		6ED3B8172B4DC2D4008251E5 /* easy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = easy.h; sourceTree = "<group>"; };
+		6ED3B8182B4DC2D4008251E5 /* curl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = curl.h; sourceTree = "<group>"; };
+		6ED3B8192B4DC2D4008251E5 /* curlver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = curlver.h; sourceTree = "<group>"; };
+		6ED3B81A2B4DC2D4008251E5 /* typecheck-gcc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "typecheck-gcc.h"; sourceTree = "<group>"; };
+		6ED3B81B2B4DC2D4008251E5 /* multi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = multi.h; sourceTree = "<group>"; };
+		6ED3B81C2B4DC2D4008251E5 /* curlbuild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = curlbuild.h; sourceTree = "<group>"; };
+		6ED3B81D2B4DC2D4008251E5 /* libcurl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libcurl.a; sourceTree = "<group>"; };
+		6ED3B81E2B4DC2D4008251E5 /* libgrabkernel.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libgrabkernel.a; sourceTree = "<group>"; };
+		6ED3B81F2B4DC2D4008251E5 /* libfragmentzip.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libfragmentzip.a; sourceTree = "<group>"; };
+		6ED3B8232B4DC33E008251E5 /* libfragmentzip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libfragmentzip.h; sourceTree = "<group>"; };
+		6ED3B8242B4DC3B8008251E5 /* libMobileGestalt.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libMobileGestalt.tbd; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.2.sdk/usr/lib/libMobileGestalt.tbd; sourceTree = DEVELOPER_DIR; };
+		6ED3B8262B4DC3DF008251E5 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.2.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
 		6EE050F72B4B17EF0016D92F /* GPU_CoreSight.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GPU_CoreSight.m; sourceTree = "<group>"; };
 		6EE050F92B4B17FD0016D92F /* GPU_CoreSight.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GPU_CoreSight.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -162,6 +186,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				6E9204A52B331124001D38E5 /* IOKit.framework in Frameworks */,
+				6ED3B8272B4DC3E5008251E5 /* libz.tbd in Frameworks */,
+				6ED3B8222B4DC2D4008251E5 /* libfragmentzip.a in Frameworks */,
+				6ED3B8212B4DC2D4008251E5 /* libgrabkernel.a in Frameworks */,
+				6ED3B8252B4DC3C2008251E5 /* libMobileGestalt.tbd in Frameworks */,
+				6ED3B8202B4DC2D4008251E5 /* libcurl.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -273,6 +302,7 @@
 		6E011ABD2B4C23BF0020F821 /* kpf */ = {
 			isa = PBXGroup;
 			children = (
+				6ED3B80B2B4DC12E008251E5 /* libgrabkernel */,
 				6E011AD22B4C5E620020F821 /* libhelper */,
 				6E011AD12B4C5E4E0020F821 /* img4helper */,
 				6E011ABE2B4C23F50020F821 /* patchfinder.m */,
@@ -460,9 +490,58 @@
 		6E9204A32B331123001D38E5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6ED3B8262B4DC3DF008251E5 /* libz.tbd */,
+				6ED3B8242B4DC3B8008251E5 /* libMobileGestalt.tbd */,
 				6E9204A42B331124001D38E5 /* IOKit.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		6ED3B80B2B4DC12E008251E5 /* libgrabkernel */ = {
+			isa = PBXGroup;
+			children = (
+				6ED3B8112B4DC2D4008251E5 /* deps */,
+				6ED3B80C2B4DC14A008251E5 /* libgrabkernel.m */,
+				6ED3B80E2B4DC177008251E5 /* all_libgrabkernel.h */,
+				6ED3B80F2B4DC1C7008251E5 /* libgrabkernel.h */,
+				6ED3B8232B4DC33E008251E5 /* libfragmentzip.h */,
+			);
+			path = libgrabkernel;
+			sourceTree = "<group>";
+		};
+		6ED3B8112B4DC2D4008251E5 /* deps */ = {
+			isa = PBXGroup;
+			children = (
+				6ED3B8122B4DC2D4008251E5 /* curl-static */,
+				6ED3B81E2B4DC2D4008251E5 /* libgrabkernel.a */,
+				6ED3B81F2B4DC2D4008251E5 /* libfragmentzip.a */,
+			);
+			path = deps;
+			sourceTree = "<group>";
+		};
+		6ED3B8122B4DC2D4008251E5 /* curl-static */ = {
+			isa = PBXGroup;
+			children = (
+				6ED3B8132B4DC2D4008251E5 /* curl */,
+				6ED3B81D2B4DC2D4008251E5 /* libcurl.a */,
+			);
+			path = "curl-static";
+			sourceTree = "<group>";
+		};
+		6ED3B8132B4DC2D4008251E5 /* curl */ = {
+			isa = PBXGroup;
+			children = (
+				6ED3B8142B4DC2D4008251E5 /* curlrules.h */,
+				6ED3B8152B4DC2D4008251E5 /* stdcheaders.h */,
+				6ED3B8162B4DC2D4008251E5 /* mprintf.h */,
+				6ED3B8172B4DC2D4008251E5 /* easy.h */,
+				6ED3B8182B4DC2D4008251E5 /* curl.h */,
+				6ED3B8192B4DC2D4008251E5 /* curlver.h */,
+				6ED3B81A2B4DC2D4008251E5 /* typecheck-gcc.h */,
+				6ED3B81B2B4DC2D4008251E5 /* multi.h */,
+				6ED3B81C2B4DC2D4008251E5 /* curlbuild.h */,
+			);
+			path = curl;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -542,6 +621,7 @@
 				6E011B152B4C619E0020F821 /* symbol.c in Sources */,
 				6E011B092B4C619E0020F821 /* lzvn_decode_base.c in Sources */,
 				6EE050F82B4B17EF0016D92F /* GPU_CoreSight.m in Sources */,
+				6ED3B80D2B4DC14A008251E5 /* libgrabkernel.m in Sources */,
 				6E011B182B4C619E0020F821 /* sep.c in Sources */,
 				6E011ACF2B4C5D7C0020F821 /* asn1.c in Sources */,
 				6E011B0A2B4C619E0020F821 /* lzfse_encode.c in Sources */,
@@ -724,6 +804,11 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/kfd/fun/kpf/libgrabkernel/deps/curl-static",
+					"$(PROJECT_DIR)/kfd/fun/kpf/libgrabkernel/deps",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = kr.h4ck.kfund;
@@ -768,6 +853,11 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/kfd/fun/kpf/libgrabkernel/deps/curl-static",
+					"$(PROJECT_DIR)/kfd/fun/kpf/libgrabkernel/deps",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = kr.h4ck.kfund;

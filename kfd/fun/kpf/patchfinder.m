@@ -11,6 +11,7 @@
 #import "patchfinder.h"
 #import "img4helper/img4.h"
 #import "patchfinder64.h"
+#import "libgrabkernel/libgrabkernel.h"
 
 const char* getBootManifestHash(void) {
     struct statfs fs;
@@ -31,21 +32,27 @@ const char* get_kernel_path(void) {
     return kernelPath.UTF8String;
 }
 
+void removeIfExist(const char* path) {
+    if(access(path, F_OK) == 0) remove(path);
+}
+
 int do_patchfinder(void) {
-    //Stage 1. Extract kernel raw from kernelcache
-    const char* kernelPath = get_kernel_path();
-    printf("kernelpath: %s, %d\n", kernelPath, access(kernelPath, R_OK));
-    if(access(kernelPath, R_OK) == -1) {
-        return -1;
-    }
-    NSString *kernelcacheRawPath = [NSString stringWithFormat:@"%@/%@", NSHomeDirectory(), @"/Documents/kernel.raw"];
-    if(access(kernelcacheRawPath.UTF8String, F_OK) == 0) remove(kernelcacheRawPath.UTF8String);
+    //Stage 1. Download kernelcache
+    const char *kernelPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/kernelcache"].UTF8String;
+    removeIfExist(kernelPath);
+    grabkernel(kernelPath, 0);
+    
+    //Stage 2. Extract kernel raw from kernelcache
+    if(access(kernelPath, R_OK) == -1) return -1;
+    NSString *kernelcacheRawPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/kernelcache_raw"];
+    removeIfExist(kernelcacheRawPath.UTF8String);
     img4_extract_im4p(kernelPath, kernelcacheRawPath.UTF8String, NULL, 0);
     
-    //Stage 2. Run Patchfinder
+    //Stage 3. Run Patchfinder
     if(init_kernel(NULL, 0, kernelcacheRawPath.UTF8String) != 0) {
         return -1;
     }
+    
     uint64_t cdevsw = find_cdevsw();
     printf("cdevsw: 0x%llx\n", cdevsw);
     uint64_t gPhysBase = find_gPhysBase();
