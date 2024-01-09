@@ -30,5 +30,6 @@ uint64_t find_reference(uint64_t to, int n, enum text_bases base);
 uint64_t find_strref(const char *string, int n, enum string_bases string_base, bool full_match, bool ppl_base);
 
 uint64_t find_cdevsw(void);
+uint64_t find_gPhysBase(void);
 
 #endif
