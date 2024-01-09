@@ -58,6 +58,10 @@ int do_patchfinder(void) {
     printf("perfmon_dev_open: 0x%llx\n", perfmon_dev_open);
     uint64_t perfmon_devices = find_perfmon_devices();
     printf("perfmon_devices: 0x%llx\n", perfmon_devices);
+    uint64_t ptov_table = find_ptov_table();
+    printf("ptov_table: 0x%llx\n", ptov_table);
+    uint64_t vn_kqfilter = find_vn_kqfilter();
+    printf("vn_kqfilter: 0x%llx\n", vn_kqfilter);
     
     term_kernel();
     

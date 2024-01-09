@@ -1219,4 +1219,64 @@ addr_t find_perfmon_devices(void)
     
     return addr + kerndumpbase;
 }
+
+addr_t find_ptov_table(void)
+{
+    //1. Find opcode (49 00 80 52 04 00 00 14 09 00 80 D2 02 00 00 14)
+    uint32_t bytes[] = {
+        0x52800049,
+        0x14000004,
+        0xd2800009,
+        0x14000002
+    };
+    
+    uint64_t addr = (uint64_t)boyermoore_horspool_memmem((unsigned char *)((uint64_t)kernel + xnucore_base), xnucore_size, (const unsigned char *)bytes, sizeof(bytes));
+    
+    if (!addr) {
+        return 0;
+    }
+    addr -= (uint64_t)kernel;
+    
+    //2. Step into High address, and find adrp opcode.
+    addr = step64(kernel, addr, 0x20, INSN_ADRP);
+    if (!addr) {
+        return 0;
+    }
+    //3. Get label from adrl opcode.
+    addr = follow_adrl(kernel, addr);
+    
+    return addr + kerndumpbase;
+}
+
+addr_t find_vn_kqfilter(void)
+{
+    //1. Find opcode (01 00 80 D2 E0 03 15 AA E2 03 13 AA E3 03 14 AA)
+    uint32_t bytes[] = {
+        0xD2800001,
+        0xAA1503E0,
+        0xAA1303E2,
+        0xAA1403E3
+    };
+    
+    uint64_t addr = (uint64_t)boyermoore_horspool_memmem((unsigned char *)((uint64_t)kernel + xnucore_base), xnucore_size, (const unsigned char *)bytes, sizeof(bytes));
+    
+    if (!addr) {
+        return 0;
+    }
+    addr -= (uint64_t)kernel;
+    
+    //2. Find begin of address(bof64)
+    addr = bof64(kernel, xnucore_base, addr);
+    if (!addr) {
+        return 0;
+    }
+    
+    //3. check PACIBSP (7F 23 03 D5)
+    uint32_t op = *(uint32_t *)(kernel + addr - 4);
+    if(op == 0xD503237F) {
+        addr -= 4;
+    }
+    
+    return addr + kerndumpbase;
+}
 //XXXXX
