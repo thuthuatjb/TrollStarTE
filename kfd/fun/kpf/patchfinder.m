@@ -10,6 +10,7 @@
 #import <sys/mount.h>
 #import "patchfinder.h"
 #import "img4helper/img4.h"
+#import "patchfinder64.h"
 
 const char* getBootManifestHash(void) {
     struct statfs fs;
@@ -40,6 +41,15 @@ int do_patchfinder(void) {
     NSString *kernelcacheRawPath = [NSString stringWithFormat:@"%@/%@", NSHomeDirectory(), @"/Documents/kernel.raw"];
     if(access(kernelcacheRawPath.UTF8String, F_OK) == 0) remove(kernelcacheRawPath.UTF8String);
     img4_extract_im4p(kernelPath, kernelcacheRawPath.UTF8String, NULL, 0);
+    
+    //Stage 2. Run Patchfinder
+    if(init_kernel(NULL, 0, kernelcacheRawPath.UTF8String) != 0) {
+        return -1;
+    }
+    uint64_t cdevsw = find_cdevsw();
+    printf("cdevsw: 0x%llx\n", cdevsw);
+    
+    term_kernel();
     
     return 0;
 }
