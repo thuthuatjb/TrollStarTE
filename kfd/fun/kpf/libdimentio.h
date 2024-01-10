@@ -55,4 +55,7 @@ set_kbase(uint64_t _kbase);
 
 void
 pfinder_term(pfinder_t *pfinder);
+
+kaddr_t
+pfinder_kernproc(pfinder_t pfinder);
 #endif

@@ -103,6 +103,8 @@ int do_dynamic_patchfinder(void) {
     pfinder_t pfinder;
     if(pfinder_init(&pfinder) == KERN_SUCCESS) {
         printf("pfinder_init: success\n");
+        uint64_t kernproc = pfinder_kernproc(pfinder);
+        printf("kernproc: 0x%llx\n", kernproc);
     }
     pfinder_term(&pfinder);
     

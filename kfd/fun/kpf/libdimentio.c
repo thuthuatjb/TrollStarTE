@@ -783,7 +783,7 @@ pfinder_xref_str(pfinder_t pfinder, const char *str, uint32_t rd) {
     return 0;
 }
 
-static kaddr_t
+kaddr_t
 pfinder_kernproc(pfinder_t pfinder) {
     kaddr_t ref = pfinder_xref_str(pfinder, "Should never have an EVFILT_READ except for reg or fifo. @%s:%d", 0);
     uint32_t insns[2];
