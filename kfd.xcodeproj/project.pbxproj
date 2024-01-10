@@ -50,7 +50,7 @@
 		6E9204A12B330FAB001D38E5 /* vnode.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E9204922B330FAB001D38E5 /* vnode.m */; };
 		6E9204A22B330FAB001D38E5 /* proc.c in Sources */ = {isa = PBXBuildFile; fileRef = 6E9204932B330FAB001D38E5 /* proc.c */; };
 		6E9204A52B331124001D38E5 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E9204A42B331124001D38E5 /* IOKit.framework */; };
-		6ED3B80A2B4D8A24008251E5 /* patchfinder64.c in Sources */ = {isa = PBXBuildFile; fileRef = 6ED3B8092B4D8A24008251E5 /* patchfinder64.c */; };
+		6ED3B80A2B4D8A24008251E5 /* patchfinder64.m in Sources */ = {isa = PBXBuildFile; fileRef = 6ED3B8092B4D8A24008251E5 /* patchfinder64.m */; };
 		6ED3B80D2B4DC14A008251E5 /* libgrabkernel.m in Sources */ = {isa = PBXBuildFile; fileRef = 6ED3B80C2B4DC14A008251E5 /* libgrabkernel.m */; };
 		6ED3B8202B4DC2D4008251E5 /* libcurl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6ED3B81D2B4DC2D4008251E5 /* libcurl.a */; };
 		6ED3B8212B4DC2D4008251E5 /* libgrabkernel.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6ED3B81E2B4DC2D4008251E5 /* libgrabkernel.a */; };
@@ -157,7 +157,7 @@
 		6E9204972B330FAB001D38E5 /* grant_full_disk_access.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = grant_full_disk_access.h; sourceTree = "<group>"; };
 		6E9204A42B331124001D38E5 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.2.sdk/System/Library/Frameworks/IOKit.framework; sourceTree = DEVELOPER_DIR; };
 		6ED3B8082B4D8A24008251E5 /* patchfinder64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = patchfinder64.h; sourceTree = "<group>"; };
-		6ED3B8092B4D8A24008251E5 /* patchfinder64.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = patchfinder64.c; sourceTree = "<group>"; };
+		6ED3B8092B4D8A24008251E5 /* patchfinder64.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = patchfinder64.m; sourceTree = "<group>"; };
 		6ED3B80C2B4DC14A008251E5 /* libgrabkernel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = libgrabkernel.m; sourceTree = "<group>"; };
 		6ED3B80E2B4DC177008251E5 /* all_libgrabkernel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = all_libgrabkernel.h; sourceTree = "<group>"; };
 		6ED3B80F2B4DC1C7008251E5 /* libgrabkernel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libgrabkernel.h; sourceTree = "<group>"; };
@@ -310,7 +310,7 @@
 				6E011ABE2B4C23F50020F821 /* patchfinder.m */,
 				6E011AC02B4C24040020F821 /* patchfinder.h */,
 				6ED3B8082B4D8A24008251E5 /* patchfinder64.h */,
-				6ED3B8092B4D8A24008251E5 /* patchfinder64.c */,
+				6ED3B8092B4D8A24008251E5 /* patchfinder64.m */,
 			);
 			path = kpf;
 			sourceTree = "<group>";
@@ -659,7 +659,7 @@
 				6E011B132B4C619E0020F821 /* load-commands.c in Sources */,
 				6E011ACE2B4C5D7C0020F821 /* img4.c in Sources */,
 				6E011ADD2B4C5EA60020F821 /* hstring.c in Sources */,
-				6ED3B80A2B4D8A24008251E5 /* patchfinder64.c in Sources */,
+				6ED3B80A2B4D8A24008251E5 /* patchfinder64.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

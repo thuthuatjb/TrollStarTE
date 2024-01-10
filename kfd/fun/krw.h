@@ -14,6 +14,8 @@
 
 uint64_t do_kopen(uint64_t puaf_pages, uint64_t puaf_method, uint64_t kread_method, uint64_t kwrite_method);
 void do_kclose(void);
+void early_kread(uint64_t kfd, uint64_t kaddr, void* uaddr, uint64_t size);
+void early_kreadbuf(uint64_t kfd, uint64_t kaddr, void* output, size_t size);
 void do_kread(uint64_t kaddr, void* uaddr, uint64_t size);
 void do_kwrite(void* uaddr, uint64_t kaddr, uint64_t size);
 uint64_t get_kslide(void);

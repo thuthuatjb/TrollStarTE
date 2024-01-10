@@ -311,7 +311,6 @@ int do_fun(void) {
     funVnodeRedirectFile("/sbin/launchd", "/System/Library/Audio/UISounds/photoShutter.caf", &orig_to_vnode, &orig_nc_vp);
     funVnodeUnRedirectFile(orig_to_vnode, orig_nc_vp);
     
-    HexDump(get_kerntask(), 0x500);
     
 //    test_kttr();
 //    test_pplrw();

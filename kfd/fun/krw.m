@@ -24,6 +24,43 @@ void do_kclose(void)
     kclose((struct kfd*)(_kfd));
 }
 
+void early_kread(uint64_t kfd, u64 kaddr, void* uaddr, u64 size)
+{
+    kread((struct kfd*)(kfd), kaddr, uaddr, size);
+}
+
+uint64_t early_kread64(uint64_t kfd, uint64_t where) {
+    uint64_t out;
+    kread((struct kfd*)(kfd), where, &out, sizeof(uint64_t));
+    return out;
+}
+
+uint32_t early_kread32(uint64_t kfd, uint64_t where) {
+    return early_kread64(kfd, where) & 0xffffffff;
+}
+
+void early_kreadbuf(uint64_t kfd, uint64_t kaddr, void* output, size_t size)
+{
+    uint64_t endAddr = kaddr + size;
+    uint32_t outputOffset = 0;
+    unsigned char* outputBytes = (unsigned char*)output;
+    
+    for(uint64_t curAddr = kaddr; curAddr < endAddr; curAddr += 4)
+    {
+        uint32_t k = early_kread32(kfd, curAddr);
+
+        unsigned char* kb = (unsigned char*)&k;
+        for(int i = 0; i < 4; i++)
+        {
+            if(outputOffset == size) break;
+            outputBytes[outputOffset] = kb[i];
+            outputOffset++;
+        }
+        if(outputOffset == size) break;
+    }
+}
+
+
 void do_kread(u64 kaddr, void* uaddr, u64 size)
 {
     kread(_kfd, kaddr, uaddr, size);
