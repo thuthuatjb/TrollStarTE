@@ -17,6 +17,21 @@
 #    include <CommonCrypto/CommonCrypto.h>
 #    include <CoreFoundation/CoreFoundation.h>
 #    define KADDR_FMT "0x%" PRIX64
+
+#include <mach-o/loader.h>
+
+typedef struct {
+    struct section_64 s64;
+    char *data;
+} sec_64_t;
+
+typedef struct {
+    sec_64_t sec_text, sec_cstring;
+    const char *kernel;
+    size_t kernel_sz;
+    char *data;
+} pfinder_t;
+
 typedef uint64_t kaddr_t;
 typedef kern_return_t (*kread_func_t)(kaddr_t, void *, size_t), (*kwrite_func_t)(kaddr_t, const void *, size_t);
 
@@ -31,4 +46,13 @@ dimentio(uint64_t *, bool, uint8_t[CC_SHA384_DIGEST_LENGTH], size_t *);
 
 kern_return_t
 dimentio_preinit(uint64_t *, bool, uint8_t[CC_SHA384_DIGEST_LENGTH], size_t *);
+
+kern_return_t
+pfinder_init(pfinder_t *pfinder);
+
+int
+set_kbase(uint64_t _kbase);
+
+void
+pfinder_term(pfinder_t *pfinder);
 #endif

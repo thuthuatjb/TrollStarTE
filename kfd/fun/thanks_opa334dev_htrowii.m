@@ -35,27 +35,6 @@ uint64_t kread_ptr(uint64_t kaddr) {
     return ptr;
 }
 
-void kreadbuf(uint64_t kaddr, void* output, size_t size)
-{
-    uint64_t endAddr = kaddr + size;
-    uint32_t outputOffset = 0;
-    unsigned char* outputBytes = (unsigned char*)output;
-    
-    for(uint64_t curAddr = kaddr; curAddr < endAddr; curAddr += 4)
-    {
-        uint32_t k = kread32(curAddr);
-
-        unsigned char* kb = (unsigned char*)&k;
-        for(int i = 0; i < 4; i++)
-        {
-            if(outputOffset == size) break;
-            outputBytes[outputOffset] = kb[i];
-            outputOffset++;
-        }
-        if(outputOffset == size) break;
-    }
-}
-
 uint64_t vm_map_get_header(uint64_t vm_map_ptr)
 {
     return vm_map_ptr + 0x10;

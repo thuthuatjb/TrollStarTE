@@ -16,12 +16,12 @@
 #include <compression.h>
 #include <dlfcn.h>
 #include <mach-o/fat.h>
-#include <mach-o/loader.h>
 #include <mach/mach.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/sysctl.h>
 #include <sys/utsname.h>
+#include "../krw.h"
 
 #define LZSS_F (18)
 #define LZSS_N (4096)
@@ -102,18 +102,6 @@ typedef mach_port_t io_object_t;
 typedef kern_return_t (*kernrw_0_kbase_func_t)(kaddr_t *);
 typedef io_object_t io_service_t, io_connect_t, io_registry_entry_t;
 typedef int (*krw_0_kbase_func_t)(kaddr_t *), (*krw_0_kread_func_t)(kaddr_t, void *, size_t), (*krw_0_kwrite_func_t)(const void *, kaddr_t, size_t), (*kernrw_0_req_kernrw_func_t)(void);
-
-typedef struct {
-    struct section_64 s64;
-    char *data;
-} sec_64_t;
-
-typedef struct {
-    sec_64_t sec_text, sec_cstring;
-    const char *kernel;
-    size_t kernel_sz;
-    char *data;
-} pfinder_t;
 
 kern_return_t
 IOServiceClose(io_connect_t);
@@ -303,6 +291,12 @@ kdecompress(const void *src, size_t src_len, size_t *dst_len) {
 }
 
 static kern_return_t
+kread_buf_kfd(kaddr_t addr, void *buf, size_t sz) {
+    kreadbuf(addr, buf, sz);
+    return KERN_SUCCESS;
+}
+
+static kern_return_t
 kread_buf_krw_0(kaddr_t addr, void *buf, size_t sz) {
     return krw_0_kread(addr, buf, sz) == 0 ? KERN_SUCCESS : KERN_FAILURE;
 }
@@ -476,7 +470,7 @@ pfinder_reset(pfinder_t *pfinder) {
     sec_reset(&pfinder->sec_cstring);
 }
 
-static void
+void
 pfinder_term(pfinder_t *pfinder) {
     free(pfinder->data);
     sec_term(&pfinder->sec_text);
@@ -487,9 +481,7 @@ pfinder_term(pfinder_t *pfinder) {
 static kern_return_t
 pfinder_init_macho(pfinder_t *pfinder, size_t off) {
     const char *p = pfinder->kernel + off, *e;
-#if TARGET_OS_OSX
     struct fileset_entry_command fec;
-#endif
     struct segment_command_64 sg64;
     struct mach_header_64 mh64;
     struct load_command lc;
@@ -497,11 +489,7 @@ pfinder_init_macho(pfinder_t *pfinder, size_t off) {
 
     memcpy(&mh64, p, sizeof(mh64));
     if(mh64.magic == MH_MAGIC_64 && mh64.cputype == CPU_TYPE_ARM64 &&
-#if TARGET_OS_OSX
        (mh64.filetype == MH_EXECUTE || (off == 0 && mh64.filetype == MH_FILESET))
-#else
-       mh64.filetype == MH_EXECUTE
-#endif
        && mh64.sizeofcmds < (pfinder->kernel_sz - sizeof(mh64)) - off) {
         for(p += sizeof(mh64), e = p + mh64.sizeofcmds; mh64.ncmds-- != 0 && (size_t)(e - p) >= sizeof(lc); p += lc.cmdsize) {
             memcpy(&lc, p, sizeof(lc));
@@ -537,7 +525,6 @@ pfinder_init_macho(pfinder_t *pfinder, size_t off) {
                     }
                 }
             }
-#if TARGET_OS_OSX
             else if(mh64.filetype == MH_FILESET && lc.cmd == LC_FILESET_ENTRY) {
                 if(lc.cmdsize < sizeof(fec)) {
                     break;
@@ -550,7 +537,6 @@ pfinder_init_macho(pfinder_t *pfinder, size_t off) {
                     return KERN_SUCCESS;
                 }
             }
-#endif
             if(pfinder->sec_text.s64.size != 0 && pfinder->sec_cstring.s64.size != 0) {
                 pfinder->sec_text.s64.addr += kbase - vm_kernel_link_addr;
                 pfinder->sec_cstring.s64.addr += kbase - vm_kernel_link_addr;
@@ -561,7 +547,6 @@ pfinder_init_macho(pfinder_t *pfinder, size_t off) {
     return KERN_FAILURE;
 }
 
-#if TARGET_OS_OSX
 static int
 kstrcmp(kaddr_t p, const char *s0) {
     size_t len = strlen(s0);
@@ -577,13 +562,10 @@ kstrcmp(kaddr_t p, const char *s0) {
     }
     return ret;
 }
-#endif
 
 static kern_return_t
 pfinder_init_kernel(pfinder_t *pfinder, size_t off) {
-#if TARGET_OS_OSX
     struct fileset_entry_command fec;
-#endif
     struct segment_command_64 sg64;
     kaddr_t p = kbase + off, e;
     struct mach_header_64 mh64;
@@ -591,11 +573,7 @@ pfinder_init_kernel(pfinder_t *pfinder, size_t off) {
     struct section_64 s64;
 
     if(kread_buf(p, &mh64, sizeof(mh64)) == KERN_SUCCESS && mh64.magic == MH_MAGIC_64 && mh64.cputype == CPU_TYPE_ARM64 &&
-#if TARGET_OS_OSX
        (mh64.filetype == MH_EXECUTE || (off == 0 && mh64.filetype == MH_FILESET))
-#else
-       mh64.filetype == MH_EXECUTE
-#endif
        ) {
         for(p += sizeof(mh64), e = p + mh64.sizeofcmds; mh64.ncmds-- != 0 && e - p >= sizeof(lc); p += lc.cmdsize) {
             if(kread_buf(p, &lc, sizeof(lc)) != KERN_SUCCESS || lc.cmdsize < sizeof(lc) || e - p < lc.cmdsize) {
@@ -627,7 +605,6 @@ pfinder_init_kernel(pfinder_t *pfinder, size_t off) {
                     }
                 }
             }
-#if TARGET_OS_OSX
             else if(mh64.filetype == MH_FILESET && lc.cmd == LC_FILESET_ENTRY) {
                 if(lc.cmdsize < sizeof(fec) || kread_buf(p, &fec, sizeof(fec)) != KERN_SUCCESS) {
                     break;
@@ -639,7 +616,6 @@ pfinder_init_kernel(pfinder_t *pfinder, size_t off) {
                     return KERN_SUCCESS;
                 }
             }
-#endif
             if(pfinder->sec_text.s64.size != 0 && pfinder->sec_cstring.s64.size != 0) {
                 return KERN_SUCCESS;
             }
@@ -694,14 +670,11 @@ pfinder_init_file(pfinder_t *pfinder, const char *filename) {
 static char *
 get_boot_path(void) {
     size_t path_len = sizeof(BOOT_PATH);
-#if TARGET_OS_OSX
     CFDataRef boot_objects_path_cf;
     size_t boot_objects_path_len;
-#else
     const uint8_t *hash;
     CFDataRef hash_cf;
     size_t hash_len;
-#endif
     io_registry_entry_t chosen;
     struct stat stat_buf;
     char *path = NULL;
@@ -709,7 +682,6 @@ get_boot_path(void) {
     if(stat(PREBOOT_PATH, &stat_buf) != -1 && S_ISDIR(stat_buf.st_mode)) {
         if((chosen = IORegistryEntryFromPath(kIOMasterPortDefault, kIODeviceTreePlane ":/chosen")) != IO_OBJECT_NULL) {
             path_len += strlen(PREBOOT_PATH);
-#if TARGET_OS_OSX
             if((boot_objects_path_cf = IORegistryEntryCreateCFProperty(chosen, CFSTR("boot-objects-path"), kCFAllocatorDefault, kNilOptions)) != NULL) {
                 if(CFGetTypeID(boot_objects_path_cf) == CFDataGetTypeID() && (boot_objects_path_len = (size_t)CFDataGetLength(boot_objects_path_cf) - 1) != 0) {
                     path_len += boot_objects_path_len;
@@ -720,7 +692,6 @@ get_boot_path(void) {
                 }
                 CFRelease(boot_objects_path_cf);
             }
-#else
             if((hash_cf = IORegistryEntryCreateCFProperty(chosen, CFSTR("boot-manifest-hash"), kCFAllocatorDefault, kNilOptions)) != NULL) {
                 if(CFGetTypeID(hash_cf) == CFDataGetTypeID() && (hash_len = (size_t)CFDataGetLength(hash_cf) << 1U) != 0) {
                     path_len += hash_len;
@@ -733,7 +704,6 @@ get_boot_path(void) {
                 }
                 CFRelease(hash_cf);
             }
-#endif
             IOObjectRelease(chosen);
         }
     } else if(stat(BOOT_PATH, &stat_buf) != -1 && S_ISREG(stat_buf.st_mode)) {
@@ -745,21 +715,23 @@ get_boot_path(void) {
     return path;
 }
 
-static kern_return_t
+int set_kbase(uint64_t _kbase) {
+    kbase = _kbase;
+    
+    return 0;
+}
+
+kern_return_t
 pfinder_init(pfinder_t *pfinder) {
-    char *boot_path = get_boot_path();
     kern_return_t ret = KERN_FAILURE;
+    
+    kread_buf = kread_buf_kfd;
 
     pfinder_reset(pfinder);
-    if(boot_path != NULL) {
-        printf("boot_path: %s\n", boot_path);
-        if((ret = pfinder_init_file(pfinder, boot_path)) != KERN_SUCCESS && (ret = pfinder_init_kernel(pfinder, 0)) != KERN_SUCCESS) {
-            pfinder_term(pfinder);
-        }
-        free(boot_path);
-    } else if((ret = pfinder_init_kernel(pfinder, 0)) != KERN_SUCCESS) {
+    if((ret = pfinder_init_kernel(pfinder, 0)) != KERN_SUCCESS) {
         pfinder_term(pfinder);
     }
+    
     return ret;
 }
 

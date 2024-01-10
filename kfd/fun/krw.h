@@ -35,5 +35,6 @@ void kwrite64(uint64_t where, uint64_t what);
 uint64_t do_vtophys(uint64_t what);
 uint64_t do_phystokv(uint64_t what);
 uint64_t kread64_ptr(uint64_t kaddr);
+void kreadbuf(uint64_t kaddr, void* output, size_t size);
 
 #endif /* krw_h */

@@ -24,6 +24,7 @@
 #include "cs_blobs.h"
 #include "GPU_CoreSight.h"
 #include "ppl/pplrw.h"
+#include "kpf/patchfinder.h"
 
 int funUcred(uint64_t proc) {
     uint64_t proc_ro = kread64(proc + off_p_proc_ro);
@@ -310,6 +311,8 @@ int do_fun(void) {
     uint64_t orig_to_vnode = 0;
     funVnodeRedirectFile("/sbin/launchd", "/System/Library/Audio/UISounds/photoShutter.caf", &orig_to_vnode, &orig_nc_vp);
     funVnodeUnRedirectFile(orig_to_vnode, orig_nc_vp);
+    
+    do_dynamic_patchfinder();
     
     
 //    test_kttr();

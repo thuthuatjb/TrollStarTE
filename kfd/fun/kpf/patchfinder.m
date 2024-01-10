@@ -12,6 +12,8 @@
 #import "img4helper/img4.h"
 #import "patchfinder64.h"
 #import "libgrabkernel/libgrabkernel.h"
+#import "libdimentio.h"
+#import "krw.h"
 
 bool did_patchfinder = false;
 uint64_t off_cdevsw = 0;
@@ -89,6 +91,22 @@ int do_patchfinder(void) {
     term_kernel();
     
     did_patchfinder = true;
+    
+    return 0;
+}
+
+int do_dynamic_patchfinder(void) {
+//    if(did_patchfinder)
+//        return 0;
+    
+    set_kbase(0xFFFFFFF007004000 + get_kslide());
+    pfinder_t pfinder;
+    if(pfinder_init(&pfinder) == KERN_SUCCESS) {
+        printf("pfinder_init: success\n");
+    }
+    pfinder_term(&pfinder);
+    
+//    did_patchfinder = true;
     
     return 0;
 }

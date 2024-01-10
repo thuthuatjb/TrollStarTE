@@ -29,6 +29,8 @@ IORegistryEntryCreateCFProperty(io_registry_entry_t entry, CFStringRef key, CFAl
 
 int do_patchfinder(void);
 
+int do_dynamic_patchfinder(void);
+
 extern uint64_t off_cdevsw;
 extern uint64_t off_gPhysBase;
 extern uint64_t off_gPhysSize;
