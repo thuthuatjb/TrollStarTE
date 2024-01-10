@@ -624,8 +624,26 @@ follow_adrpLdr(const uint8_t *buf, addr_t call)
 static FHANDLE
 OPEN(const char *filename, int oflag)
 {
-    // XXX use sub_reopen() to handle FAT
-    return img4_reopen(file_open(filename, oflag), NULL, 0);
+    ssize_t rv;
+    char buf[28];
+    FHANDLE fd = file_open(filename, oflag);
+    if (!fd) {
+        return NULL;
+    }
+    rv = fd->read(fd, buf, 4);
+    fd->lseek(fd, 0, SEEK_SET);
+    if (rv == 4 && !MACHO(buf)) {
+        fd = img4_reopen(fd, NULL, 0);
+        if (!fd) {
+            return NULL;
+        }
+        rv = fd->read(fd, buf, sizeof(buf));
+        if (rv == sizeof(buf) && *(uint32_t *)buf == 0xBEBAFECA && __builtin_bswap32(*(uint32_t *)(buf + 4)) > 0) {
+            return sub_reopen(fd, __builtin_bswap32(*(uint32_t *)(buf + 16)), __builtin_bswap32(*(uint32_t *)(buf + 20)));
+        }
+        fd->lseek(fd, 0, SEEK_SET);
+    }
+    return fd;
 }
 #define CLOSE(fd) (fd)->close(fd)
 #define READ(fd, buf, sz) (fd)->read(fd, buf, sz)
@@ -650,6 +668,8 @@ PREAD(FHANDLE fd, void *buf, size_t count, off_t offset)
 
 static uint8_t *kernel = NULL;
 static size_t kernel_size = 0;
+
+static uint32_t arch_off = 0;
 
 int
 init_kernel(size_t (*kread)(uint64_t, void *, size_t), addr_t kernel_base, const char *filename)
@@ -677,6 +697,20 @@ init_kernel(size_t (*kread)(uint64_t, void *, size_t), addr_t kernel_base, const
         if (fd == INVALID_HANDLE) {
             return -1;
         }
+        
+        
+        uint32_t magic;
+        read(fd, &magic, 4);
+        lseek(fd, 0, SEEK_SET);
+        if (magic == 0xbebafeca) {
+            struct fat_header fat;
+            lseek(fd, sizeof(fat), SEEK_SET);
+            struct fat_arch_64 arch;
+            read(fd, &arch, sizeof(arch));
+            arch_off = ntohl(arch.offset);
+            lseek(fd, arch_off, SEEK_SET); // kerneldec gives a FAT binary for some reason
+        }
+        
         rv = READ(fd, buf, sizeof(buf));
         if (rv != sizeof(buf) || !MACHO(buf)) {
             CLOSE(fd);
@@ -691,7 +725,7 @@ init_kernel(size_t (*kread)(uint64_t, void *, size_t), addr_t kernel_base, const
 //    printf("hdr->ncmds: %u\n", hdr->ncmds);
     for (i = 0; i < hdr->ncmds; i++) {
         const struct load_command *cmd = (struct load_command *)q;
-        
+//        printf("i: %d, cmd->cmd: 0x%x\n", i, cmd->cmd);
         if (cmd->cmd == LC_SEGMENT_64) {
             const struct segment_command_64 *seg = (struct segment_command_64 *)q;
             if(seg->filesize == 0) {
@@ -834,6 +868,8 @@ init_kernel(size_t (*kread)(uint64_t, void *, size_t), addr_t kernel_base, const
             }
             q = q + cmd->cmdsize;
         }
+        
+        kernel += arch_off;
 
         CLOSE(fd);
     }
@@ -843,6 +879,7 @@ init_kernel(size_t (*kread)(uint64_t, void *, size_t), addr_t kernel_base, const
 void
 term_kernel(void)
 {
+    kernel -= arch_off;
     if (kernel != NULL) {
         free(kernel);
         kernel = NULL;
@@ -970,6 +1007,9 @@ find_strref(const char *string, int n, enum string_bases string_base, bool full_
 addr_t
 find_symbol(const char *symbol)
 {
+    //XXX Temporary disabled
+    return 0;
+    
     if (!symbol) {
         return 0;
     }
@@ -1161,19 +1201,27 @@ addr_t find_gVirtBase(void)
     return addr + kerndumpbase;
 }
 
-addr_t find_perfmon_dev_open(void)
+addr_t find_perfmon_dev_open_2(void)
 {
+//__TEXT_EXEC:__text:FFFFFFF007324700 3F 01 08 6B                 CMP             W9, W8
+//__TEXT_EXEC:__text:FFFFFFF007324704 E1 01 00 54                 B.NE            loc_FFFFFFF007324740
+//__TEXT_EXEC:__text:FFFFFFF007324708 A8 5E 00 12                 AND             W8, W21, #0xFFFFFF
+//__TEXT_EXEC:__text:FFFFFFF00732470C 1F 05 00 71                 CMP             W8, #1
+//__TEXT_EXEC:__text:FFFFFFF007324710 68 02 00 54                 B.HI            loc_FFFFFFF00732475C
+    
     bool found = false;
     uint64_t addr = 0;
     addr_t off;
     uint32_t *k;
     k = (uint32_t *)(kernel + xnucore_base);
     for (off = 0; off < xnucore_size - 4; off += 4, k++) {
-        if ((k[0] & 0xff000000) == 0x34000000    //cbz w*
-            && k[1] == 0x52800300    //mov W0, #0x18
-            && (k[2] & 0xff000000) == 0x14000000    //b*
-            && k[3] == 0x52800340   //mov w0, #0x1A
-            && (k[4] & 0xff000000) == 0x14000000    /* b* */) {
+        if (k[0] == 0x53187ea8  //lsr w8, w21, #0x18
+            && (k[2] & 0xffc0001f) == 0xb9400009   // ldr w9, [Xn, n]
+            && k[3] == 0x6b08013f    //cmp w9, w8 v
+            && (k[4] & 0xff00001f) == 0x54000001    //b.ne *
+            && (k[5] & 0xfffffc00) == 0x12005c00    //and Wn, Wn, 0xfffff v
+            && k[6] == 0x7100051f   //cmp w8, #1 v
+            && (k[7] & 0xff00001f) == 0x54000008    /* b.hi * v */) {
             addr = off + xnucore_base;
             found = true;
         }
@@ -1196,22 +1244,60 @@ addr_t find_perfmon_dev_open(void)
     return addr + kerndumpbase;
 }
 
-addr_t find_perfmon_devices(void)
+addr_t find_perfmon_dev_open(void)
 {
-    //1. Find opcode (3F 01 08 6B 61 06 00 54 28 00 80 52 0A 14 80 52)
-    uint32_t bytes[] = {
-        0x6b08013f,
-        0x54000661,
-        0x52800028,
-        0x5280140a
-    };
+    bool found = false;
+    uint64_t addr = 0;
+    addr_t off;
+    uint32_t *k;
+    k = (uint32_t *)(kernel + xnucore_base);
+    for (off = 0; off < xnucore_size - 4; off += 4, k++) {
+        if ((k[0] & 0xff000000) == 0x34000000    //cbz w*
+            && k[1] == 0x52800300    //mov W0, #0x18
+            && (k[2] & 0xff000000) == 0x14000000    //b*
+            && k[3] == 0x52800340   //mov w0, #0x1A
+            && (k[4] & 0xff000000) == 0x14000000    /* b* */) {
+            addr = off + xnucore_base;
+            found = true;
+        }
+    }
+    if(!found)
+        return find_perfmon_dev_open_2();
     
-    uint64_t addr = (uint64_t)boyermoore_horspool_memmem((unsigned char *)((uint64_t)kernel + xnucore_base), xnucore_size, (const unsigned char *)bytes, sizeof(bytes));
-    
+    //2. Find begin of address(bof64)
+    addr = bof64(kernel, xnucore_base, addr);
     if (!addr) {
         return 0;
     }
-    addr -= (uint64_t)kernel;
+    
+    //3. check PACIBSP (7F 23 03 D5)
+    uint32_t op = *(uint32_t *)(kernel + addr - 4);
+    if(op == 0xD503237F) {
+        addr -= 4;
+    }
+    
+    return addr + kerndumpbase;
+}
+
+addr_t find_perfmon_devices(void)
+{
+    
+    bool found = false;
+    uint64_t addr = 0;
+    addr_t off;
+    uint32_t *k;
+    k = (uint32_t *)(kernel + xnucore_base);
+    for (off = 0; off < xnucore_size - 4; off += 4, k++) {
+        if (k[0] == 0x6b08013f    //cmp w9, w8
+            && (k[1] & 0xff00001f) == 0x54000001    //b.ne *
+            && k[2] == 0x52800028    //mov w8, #1
+            && k[3] == 0x5280140a   /* mov w10, #0xa0 */) {
+            addr = off + xnucore_base;
+            found = true;
+        }
+    }
+    if(!found)
+        return 0;
     
     //2. Step into High address, and find adrp opcode.
     addr = step64(kernel, addr, 0x18, INSN_ADRP);
@@ -1252,6 +1338,47 @@ addr_t find_ptov_table(void)
     return addr + kerndumpbase;
 }
 
+addr_t find_vn_kqfilter_2(void)
+{
+    //1F 05 00 71
+    //60 02 00 54
+    //1F 11 00 71
+    //E0 0C 00 54
+    //1F 1D 00 71
+    
+    bool found = false;
+    uint64_t addr = 0;
+    addr_t off;
+    uint32_t *k;
+    k = (uint32_t *)(kernel + xnucore_base);
+    for (off = 0; off < xnucore_size - 4; off += 4, k++) {
+        if (k[0] == 0x7100051f  //cmp w8, #1
+            && (k[1] & 0xff00001f) == 0x54000000    //b.eq *
+            && k[2] == 0x7100111f    //cmp w8, #4
+            && (k[3] & 0xff00001f) == 0x54000000  //b.eq *
+            && k[4] == 0x71001d1f    /* cmp w8, #7 */) {
+            addr = off + xnucore_base;
+            found = true;
+        }
+    }
+    if(!found)
+        return 0;
+    
+    //2. Find begin of address(bof64)
+    addr = bof64(kernel, xnucore_base, addr);
+    if (!addr) {
+        return 0;
+    }
+    
+    //3. check PACIBSP (7F 23 03 D5)
+    uint32_t op = *(uint32_t *)(kernel + addr - 4);
+    if(op == 0xD503237F) {
+        addr -= 4;
+    }
+    
+    return addr + kerndumpbase;
+}
+
 addr_t find_vn_kqfilter(void)
 {
     //1. Find opcode (01 00 80 D2 E0 03 15 AA E2 03 13 AA E3 03 14 AA)
@@ -1265,7 +1392,7 @@ addr_t find_vn_kqfilter(void)
     uint64_t addr = (uint64_t)boyermoore_horspool_memmem((unsigned char *)((uint64_t)kernel + xnucore_base), xnucore_size, (const unsigned char *)bytes, sizeof(bytes));
     
     if (!addr) {
-        return 0;
+        return find_vn_kqfilter_2();
     }
     addr -= (uint64_t)kernel;
     
@@ -1284,13 +1411,12 @@ addr_t find_vn_kqfilter(void)
     return addr + kerndumpbase;
 }
 
-
 addr_t find_proc_object_size(void) {
     //footprint
     //_proc_task: ADRP            X8, #qword_FFFFFFF00A3091E8@PAGE
     //qword_FFFFFFF00A3091E8 DCQ 0x530
     
-    //E0 03 15 AA 
+    //E0 03 15 AA
     //E1 04 81 52
     //02 01 80 52
     //03 11 80 52
