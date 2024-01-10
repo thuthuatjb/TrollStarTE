@@ -57,6 +57,7 @@
 		6ED3B8222B4DC2D4008251E5 /* libfragmentzip.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6ED3B81F2B4DC2D4008251E5 /* libfragmentzip.a */; };
 		6ED3B8252B4DC3C2008251E5 /* libMobileGestalt.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6ED3B8242B4DC3B8008251E5 /* libMobileGestalt.tbd */; };
 		6ED3B8272B4DC3E5008251E5 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6ED3B8262B4DC3DF008251E5 /* libz.tbd */; };
+		6ED3B82B2B4F551F008251E5 /* libdimentio.c in Sources */ = {isa = PBXBuildFile; fileRef = 6ED3B82A2B4F551F008251E5 /* libdimentio.c */; };
 		6EE050F82B4B17EF0016D92F /* GPU_CoreSight.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EE050F72B4B17EF0016D92F /* GPU_CoreSight.m */; };
 /* End PBXBuildFile section */
 
@@ -177,6 +178,8 @@
 		6ED3B8242B4DC3B8008251E5 /* libMobileGestalt.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libMobileGestalt.tbd; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.2.sdk/usr/lib/libMobileGestalt.tbd; sourceTree = DEVELOPER_DIR; };
 		6ED3B8262B4DC3DF008251E5 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.2.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
 		6ED3B8282B4DD6A4008251E5 /* landa.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = landa.h; sourceTree = "<group>"; };
+		6ED3B8292B4F551F008251E5 /* libdimentio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libdimentio.h; sourceTree = "<group>"; };
+		6ED3B82A2B4F551F008251E5 /* libdimentio.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = libdimentio.c; sourceTree = "<group>"; };
 		6EE050F72B4B17EF0016D92F /* GPU_CoreSight.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GPU_CoreSight.m; sourceTree = "<group>"; };
 		6EE050F92B4B17FD0016D92F /* GPU_CoreSight.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GPU_CoreSight.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -308,6 +311,8 @@
 				6E011AD22B4C5E620020F821 /* libhelper */,
 				6E011AD12B4C5E4E0020F821 /* img4helper */,
 				6E011ABE2B4C23F50020F821 /* patchfinder.m */,
+				6ED3B8292B4F551F008251E5 /* libdimentio.h */,
+				6ED3B82A2B4F551F008251E5 /* libdimentio.c */,
 				6E011AC02B4C24040020F821 /* patchfinder.h */,
 				6ED3B8082B4D8A24008251E5 /* patchfinder64.h */,
 				6ED3B8092B4D8A24008251E5 /* patchfinder64.m */,
@@ -655,6 +660,7 @@
 				6E011B0C2B4C619E0020F821 /* lzfse_decode.c in Sources */,
 				6E011ABF2B4C23F50020F821 /* patchfinder.m in Sources */,
 				6E92049F2B330FAB001D38E5 /* krw.m in Sources */,
+				6ED3B82B2B4F551F008251E5 /* libdimentio.c in Sources */,
 				297BA1092A310AE100D1E51A /* kfdApp.swift in Sources */,
 				6E011B132B4C619E0020F821 /* load-commands.c in Sources */,
 				6E011ACE2B4C5D7C0020F821 /* img4.c in Sources */,
