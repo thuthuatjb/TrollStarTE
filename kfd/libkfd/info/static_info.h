@@ -19,7 +19,8 @@
 #define ARM_PGBYTES    (1ull << ARM_PGSHIFT)
 #define ARM_PGMASK     (ARM_PGBYTES - 1ull)
 
-#define T1SZ_BOOT    17ull
+unsigned long long t1sz_boot = 0;
+#define T1SZ_BOOT    t1sz_boot
 
 #define AP_RWNA    (0x0ull << 6)
 #define AP_RWRW    (0x1ull << 6)

@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <sys/syscall.h>
 #include <stdbool.h>
+#include <mach-o/fat.h>
 #include "patchfinder64.h"
 
 bool auth_ptrs = false;

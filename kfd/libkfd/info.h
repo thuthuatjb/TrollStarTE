@@ -103,6 +103,8 @@ void info_init(struct kfd* kfd)
     kern_versions[kfd->info.env.vid].kernelcache__vn_kqfilter = off_vn_kqfilter;
     kern_versions[kfd->info.env.vid].proc__object_size = off_proc_object_size;
     
+    t1sz_boot = 25;
+    
     print_u64(kfd->info.env.vid);
 
 //    const u64 number_of_kern_versions = sizeof(kern_versions) / sizeof(kern_versions[0]);
