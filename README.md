@@ -2,8 +2,10 @@
 kfund, short for my [fun](kfd/fun) with kfd exploit.
 
 ## Supported Device 
-Experimental dynamic patchfinder is now working (patchfinder only works with landa/physpuppet exploit), so...<br>
-Supposed to be work: iOS/iPadOS 16.0-16.6.1 
+Experimental dynamic patchfinder is now working (patchfinder only works with landa/physpuppet exploit), <br>
+so...<br><br>
+Supposed to be work: <br>
+iOS/iPadOS 16.0-16.6.1 
 
 ## What you can do with this?
 ### utils.m
