@@ -812,6 +812,73 @@ pfinder_proc_struct_sz_ptr(pfinder_t pfinder) {
     return 0;
 }
 
+static kaddr_t
+follow_adrl(kaddr_t ref, uint32_t adrp_op, uint32_t add_op)
+{
+    //Stage1. ADRP
+    uint64_t imm_hi_lo = (uint64_t)((adrp_op >> 3)  & 0x1FFFFC);
+    imm_hi_lo |= (uint64_t)((adrp_op >> 29) & 0x3);
+    if ((adrp_op & 0x800000) != 0) {
+        // Sign extend
+        imm_hi_lo |= 0xFFFFFFFFFFE00000;
+    }
+    
+    // Build real imm
+    uint64_t imm = imm_hi_lo << 12;
+    
+    uint64_t ret = (ref & ~0xFFF) + imm;
+    
+    //Stage2. ADD
+    uint64_t imm12 = (add_op & 0x3FFC00) >> 10;
+        
+    uint32_t shift = (add_op >> 22) & 1;
+    if (shift == 1) {
+        imm12 = imm12 << 12;
+    }
+    
+    uint8_t regDst = (uint8_t)(add_op & 0x1F);
+    uint8_t regSrc = (uint8_t)((add_op >> 5) & 0x1F);
+    ret += imm12;
+    return ret;
+}
+
+kaddr_t
+pfinder_cdevsw(pfinder_t pfinder) {
+    bool found = false;
+    
+    //1. opcode
+    kaddr_t ref = pfinder.sec_text.s64.addr;
+    uint32_t insns[6];
+    
+    for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
+        if((insns[0] & 0xff000000) == 0xb4000000   //cbz
+           && insns[1] == 0xd2800001   //mov x1, #0
+           && insns[2] == 0xd2800002   //mov x2, #0
+           && insns[3] == 0x52800003   //mov w3, #0
+           && insns[4] == 0x52800024   //mov w4, #1
+           && insns[5] == 0xd2800005  /* mov x5, #0 */) {
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+        return 0;
+    
+//    printf("1 ref: 0x%llx, ref-kslide: 0x%llx\n", ref, ref-get_kslide());
+    
+    //2. Step into High address, and find adrp opcode.
+    for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
+        if(IS_ADRP(insns[0]) && IS_ADD_X(insns[1])) {
+            break;
+        }
+    }
+    
+//    printf("2 ref: 0x%llx, ref-kslide: 0x%llx\n", ref, ref-get_kslide());
+    
+    //3. Get label from adrl opcode.
+    return follow_adrl(ref, insns[0], insns[1]);
+}
+
 static kern_return_t
 init_kbase(void) {
     struct {

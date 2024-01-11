@@ -58,4 +58,7 @@ pfinder_term(pfinder_t *pfinder);
 
 kaddr_t
 pfinder_kernproc(pfinder_t pfinder);
+
+kaddr_t
+pfinder_cdevsw(pfinder_t pfinder);
 #endif

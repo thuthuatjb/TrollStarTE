@@ -105,6 +105,9 @@ int do_dynamic_patchfinder(void) {
         printf("pfinder_init: success\n");
         uint64_t kernproc = pfinder_kernproc(pfinder);
         printf("kernproc: 0x%llx\n", kernproc);
+        
+        uint64_t cdevsw = pfinder_cdevsw(pfinder);
+        printf("cdevsw: 0x%llx\n", cdevsw);
     }
     pfinder_term(&pfinder);
     
