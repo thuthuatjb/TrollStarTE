@@ -312,7 +312,11 @@ int do_fun(void) {
     funVnodeRedirectFile("/sbin/launchd", "/System/Library/Audio/UISounds/photoShutter.caf", &orig_to_vnode, &orig_nc_vp);
     funVnodeUnRedirectFile(orig_to_vnode, orig_nc_vp);
     
-    
+//    uint64_t vm_map = kread64(get_kerntask() + 0x28) | 0xffffff8000000000;
+//    uint64_t vm_map_pmap = kread64(vm_map + 0x40) | 0xffffff8000000000;
+//    uint64_t tte = kread64(vm_map_pmap);
+//    printf("tte: 0x%llx\n", tte);
+//    read+0x0, 0xfffffff011e18000
     
 //    test_kttr();
 //    test_pplrw();

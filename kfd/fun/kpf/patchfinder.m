@@ -49,7 +49,7 @@ void removeIfExist(const char* path) {
     if(access(path, F_OK) == 0) remove(path);
 }
 
-int do_patchfinder(void) {
+int do_static_patchfinder(void) {
     if(did_patchfinder)
         return 0;
     
@@ -103,38 +103,43 @@ int do_dynamic_patchfinder(uint64_t kfd, uint64_t kbase) {
     set_kfd(kfd);
     pfinder_t pfinder;
     if(pfinder_init(&pfinder) == KERN_SUCCESS) {
-        printf("pfinder_init: success\n");
-        uint64_t kernproc = pfinder_kernproc(pfinder);
-        printf("kernproc: 0x%llx\n", kernproc);
+        printf("pfinder_init: success!\n");
         
         uint64_t cdevsw = pfinder_cdevsw(pfinder);
-        printf("cdevsw: 0x%llx\n", (cdevsw != 0) ? cdevsw - kslide : 0);
-        uint64_t gPhysBase = pfinder_gPhysBase(pfinder);
-        printf("gPhysBase: 0x%llx\n", (gPhysBase != 0) ? gPhysBase - kslide : 0);
-        uint64_t gPhysSize = pfinder_gPhysSize(pfinder);
-        printf("gPhysSize: 0x%llx\n", (gPhysSize != 0) ? gPhysSize - kslide : 0);
-        uint64_t gVirtBase = pfinder_gVirtBase(pfinder);
-        printf("gVirtBase: 0x%llx\n", (gVirtBase != 0) ? gVirtBase - kslide : 0);
+        if(cdevsw) off_cdevsw = cdevsw - kslide;
+        printf("cdevsw: 0x%llx\n", off_cdevsw);
         
-        uint64_t perfmon_dev_open_2 = pfinder_perfmon_dev_open_2(pfinder);
-        printf("perfmon_dev_open_2: 0x%llx\n", (perfmon_dev_open_2 != 0) ? perfmon_dev_open_2 - kslide : 0);
+        uint64_t gPhysBase = pfinder_gPhysBase(pfinder);
+        if(gPhysBase) off_gPhysBase = gPhysBase - kslide;
+        printf("gPhysBase: 0x%llx\n", off_gPhysBase);
+        
+        uint64_t gPhysSize = pfinder_gPhysSize(pfinder);
+        if(gPhysSize) off_gPhysSize = gPhysSize - kslide;
+        printf("gPhysSize: 0x%llx\n", off_gPhysSize);
+        
+        uint64_t gVirtBase = pfinder_gVirtBase(pfinder);
+        if(gVirtBase) off_gVirtBase = gVirtBase - kslide;
+        printf("gVirtBase: 0x%llx\n", off_gVirtBase);
+        
         uint64_t perfmon_dev_open = pfinder_perfmon_dev_open(pfinder);
-        printf("perfmon_dev_open: 0x%llx\n", (perfmon_dev_open != 0) ? perfmon_dev_open - kslide : 0);
+        if(perfmon_dev_open) off_perfmon_dev_open = perfmon_dev_open - kslide;
+        printf("perfmon_dev_open: 0x%llx\n", off_perfmon_dev_open);
         
         uint64_t perfmon_devices = pfinder_perfmon_devices(pfinder);
-        printf("perfmon_devices: 0x%llx\n", (perfmon_devices != 0) ? perfmon_devices - kslide : 0);
+        if(perfmon_devices) off_perfmon_devices = perfmon_devices - kslide;
+        printf("perfmon_devices: 0x%llx\n", off_perfmon_devices);
         
         uint64_t ptov_table = pfinder_ptov_table(pfinder);
-        printf("ptov_table: 0x%llx\n", (ptov_table != 0) ? ptov_table - kslide : 0);
+        if(ptov_table) off_ptov_table = ptov_table - kslide;
+        printf("ptov_table: 0x%llx\n", off_ptov_table);
         
         uint64_t vn_kqfilter = pfinder_vn_kqfilter(pfinder);
-        printf("vn_kqfilter: 0x%llx\n", (vn_kqfilter != 0) ? vn_kqfilter - kslide : 0);
-        
-        uint64_t vn_kqfilter_2 = pfinder_vn_kqfilter_2(pfinder);
-        printf("vn_kqfilter_2: 0x%llx\n", (vn_kqfilter_2 != 0) ? vn_kqfilter_2 - kslide : 0);
+        if(vn_kqfilter) off_vn_kqfilter = vn_kqfilter - kslide;
+        printf("vn_kqfilter: 0x%llx\n", off_vn_kqfilter);
         
         uint64_t proc_object_size = pfinder_proc_object_size(pfinder);
-        printf("proc_object_size: 0x%llx\n", proc_object_size);
+        if(proc_object_size) off_proc_object_size = proc_object_size;
+        printf("proc_object_size: 0x%llx\n", off_proc_object_size);
         
     }
     pfinder_term(&pfinder);

@@ -92,16 +92,16 @@ void info_init(struct kfd* kfd)
     
     kfd->info.env.vid = 0;
     
-    //set offset from patchfinder
-    kern_versions[kfd->info.env.vid].kernelcache__cdevsw = off_cdevsw;
-    kern_versions[kfd->info.env.vid].kernelcache__gPhysBase = off_gPhysBase;
-    kern_versions[kfd->info.env.vid].kernelcache__gPhysSize = off_gPhysSize;
-    kern_versions[kfd->info.env.vid].kernelcache__gVirtBase = off_gVirtBase;
-    kern_versions[kfd->info.env.vid].kernelcache__perfmon_dev_open = off_perfmon_dev_open;
-    kern_versions[kfd->info.env.vid].kernelcache__perfmon_devices = off_perfmon_devices;
-    kern_versions[kfd->info.env.vid].kernelcache__ptov_table = off_ptov_table;
-    kern_versions[kfd->info.env.vid].kernelcache__vn_kqfilter = off_vn_kqfilter;
-    kern_versions[kfd->info.env.vid].proc__object_size = off_proc_object_size;
+    //set offset from static patchfinder
+//    kern_versions[kfd->info.env.vid].kernelcache__cdevsw = off_cdevsw;
+//    kern_versions[kfd->info.env.vid].kernelcache__gPhysBase = off_gPhysBase;
+//    kern_versions[kfd->info.env.vid].kernelcache__gPhysSize = off_gPhysSize;
+//    kern_versions[kfd->info.env.vid].kernelcache__gVirtBase = off_gVirtBase;
+//    kern_versions[kfd->info.env.vid].kernelcache__perfmon_dev_open = off_perfmon_dev_open;
+//    kern_versions[kfd->info.env.vid].kernelcache__perfmon_devices = off_perfmon_devices;
+//    kern_versions[kfd->info.env.vid].kernelcache__ptov_table = off_ptov_table;
+//    kern_versions[kfd->info.env.vid].kernelcache__vn_kqfilter = off_vn_kqfilter;
+//    kern_versions[kfd->info.env.vid].proc__object_size = off_proc_object_size;
     
     t1sz_boot = 25;
     

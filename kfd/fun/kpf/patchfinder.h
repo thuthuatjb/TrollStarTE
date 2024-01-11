@@ -27,7 +27,7 @@ CFTypeRef
 IORegistryEntryCreateCFProperty(io_registry_entry_t entry, CFStringRef key, CFAllocatorRef allocator, IOOptionBits options);
 
 
-int do_patchfinder(void);
+int do_static_patchfinder(void);
 
 int do_dynamic_patchfinder(uint64_t kfd, uint64_t kbase);
 
