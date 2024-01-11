@@ -14,7 +14,7 @@ uint64_t _kfd = 0;
 
 uint64_t do_kopen(uint64_t puaf_pages, uint64_t puaf_method, uint64_t kread_method, uint64_t kwrite_method)
 {
-    remove([NSString stringWithFormat:@"%@/Documents/kfund_offsets.plist", NSHomeDirectory()].UTF8String);  //TEMPORARY: remove offsets plist to check if patchfinder is working
+//    remove([NSString stringWithFormat:@"%@/Documents/kfund_offsets.plist", NSHomeDirectory()].UTF8String);  //TEMPORARY: remove offsets plist to check if patchfinder is working
 //    do_static_patchfinder();
     _kfd = kopen(puaf_pages, puaf_method, kread_method, kwrite_method);
     return _kfd;
