@@ -114,6 +114,11 @@ int do_dynamic_patchfinder(void) {
         printf("gPhysSize: 0x%llx\n", (gPhysSize != 0) ? gPhysSize - get_kslide() : 0);
         uint64_t gVirtBase = pfinder_gVirtBase(pfinder);
         printf("gVirtBase: 0x%llx\n", (gVirtBase != 0) ? gVirtBase - get_kslide() : 0);
+        
+        uint64_t perfmon_dev_open_2 = pfinder_perfmon_dev_open_2(pfinder);
+        printf("perfmon_dev_open_2: 0x%llx\n", (perfmon_dev_open_2 != 0) ? perfmon_dev_open_2 - get_kslide() : 0);
+        uint64_t perfmon_dev_open = pfinder_perfmon_dev_open(pfinder);
+        printf("perfmon_dev_open: 0x%llx\n", (perfmon_dev_open != 0) ? perfmon_dev_open - get_kslide() : 0);
     }
     pfinder_term(&pfinder);
     

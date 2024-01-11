@@ -813,6 +813,62 @@ pfinder_proc_struct_sz_ptr(pfinder_t pfinder) {
 }
 
 static kaddr_t
+pfinder_bof64(pfinder_t pfinder, kaddr_t start, kaddr_t where)
+{
+    for (; where >= start; where -= 4) {
+        uint32_t op = 0;
+        kread_buf(where, &op, sizeof(op));//*(uint32_t *)(buf + where);
+        if ((op & 0xFFC003FF) == 0x910003FD) {
+            unsigned delta = (op >> 10) & 0xFFF;
+            //printf("0x%llx: ADD X29, SP, #0x%x\n", where + kerndumpbase, delta);
+            if ((delta & 0xF) == 0) {
+                kaddr_t prev = where - ((delta >> 4) + 1) * 4;
+                uint32_t au = 0;
+                kread_buf(prev, &au, sizeof(au));//*(uint32_t *)(buf + prev);
+                //printf("0x%llx: (%llx & %llx) == %llx\n", prev + kerndumpbase, au, 0x3BC003E0, au & 0x3BC003E0);
+                if ((au & 0x3BC003E0) == 0x298003E0) {
+                    //printf("%x: STP x, y, [SP,#-imm]!\n", prev);
+                    return prev;
+                } else if ((au & 0x7F8003FF) == 0x510003FF) {
+                    //printf("%x: SUB SP, SP, #imm\n", prev);
+                    return prev;
+                }
+                for (kaddr_t diff = 4; diff < delta/4+4; diff+=4) {
+                    uint32_t ai = 0;
+                    kread_buf(where - diff, &ai, sizeof(ai));//*(uint32_t *)(buf + where - diff);
+                    // SUB SP, SP, #imm
+                    //printf("0x%llx: (%llx & %llx) == %llx\n", where - diff + kerndumpbase, ai, 0x3BC003E0, ai & 0x3BC003E0);
+                    if ((ai & 0x7F8003FF) == 0x510003FF) {
+                        return where - diff;
+                    }
+                    // Not stp and not str
+                    if (((ai & 0xFFC003E0) != 0xA90003E0) && (ai&0xFFC001F0) != 0xF90001E0) {
+                        break;
+                    }
+                }
+                // try something else
+                while (where > start) {
+                    where -= 4;
+//                    au = *(uint32_t *)(buf + where);
+                    au = 0;
+                    kread_buf(where, &au, sizeof(au));
+                    // SUB SP, SP, #imm
+                    if ((au & 0xFFC003FF) == 0xD10003FF && ((au >> 10) & 0xFFF) == delta + 0x10) {
+                        return where;
+                    }
+                    // STP x, y, [SP,#imm]
+                    if ((au & 0xFFC003E0) != 0xA90003E0) {
+                        where += 4;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+static kaddr_t
 follow_adrl(kaddr_t ref, uint32_t adrp_op, uint32_t add_op)
 {
     //Stage1. ADRP
@@ -971,6 +1027,80 @@ pfinder_gVirtBase(pfinder_t pfinder)
         return 0;
     
     return follow_adrl(ref, insns[6], insns[7]);
+}
+
+kaddr_t
+pfinder_perfmon_dev_open_2(pfinder_t pfinder)
+{
+//__TEXT_EXEC:__text:FFFFFFF007324700 3F 01 08 6B                 CMP             W9, W8
+//__TEXT_EXEC:__text:FFFFFFF007324704 E1 01 00 54                 B.NE            loc_FFFFFFF007324740
+//__TEXT_EXEC:__text:FFFFFFF007324708 A8 5E 00 12                 AND             W8, W21, #0xFFFFFF
+//__TEXT_EXEC:__text:FFFFFFF00732470C 1F 05 00 71                 CMP             W8, #1
+//__TEXT_EXEC:__text:FFFFFFF007324710 68 02 00 54                 B.HI            loc_FFFFFFF00732475C
+    
+    bool found = false;
+    
+    //1. opcode
+    kaddr_t ref = pfinder.sec_text.s64.addr;
+    uint32_t insns[8];
+    
+    for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
+        if (insns[0] == 0x53187ea8  //lsr w8, w21, #0x18
+            && (insns[2] & 0xffc0001f) == 0xb9400009   // ldr w9, [Xn, n]
+            && insns[3] == 0x6b08013f    //cmp w9, w8 v
+            && (insns[4] & 0xff00001f) == 0x54000001    //b.ne *
+            && (insns[5] & 0xfffffc00) == 0x12005c00    //and Wn, Wn, 0xfffff v
+            && insns[6] == 0x7100051f   //cmp w8, #1 v
+            && (insns[7] & 0xff00001f) == 0x54000008    /* b.hi * v */) {
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+        return 0;
+    
+    ref = pfinder_bof64(pfinder, pfinder.sec_text.s64.addr, ref);
+    
+    uint32_t op = 0;//*(uint32_t *)(kernel + addr - 4);
+    kread_buf(ref-4, &op, sizeof(op));
+    if(op == 0xD503237F) {
+        ref -= 4;
+    }
+    
+    return ref;
+}
+
+kaddr_t
+pfinder_perfmon_dev_open(pfinder_t pfinder)
+{
+    bool found = false;
+    
+    //1. opcode
+    kaddr_t ref = pfinder.sec_text.s64.addr;
+    uint32_t insns[5];
+    
+    for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
+        if ((insns[0] & 0xff000000) == 0x34000000    //cbz w*
+            && insns[1] == 0x52800300    //mov W0, #0x18
+            && (insns[2] & 0xff000000) == 0x14000000    //b*
+            && insns[3] == 0x52800340   //mov w0, #0x1A
+            && (insns[4] & 0xff000000) == 0x14000000    /* b* */) {
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+        return pfinder_perfmon_dev_open_2(pfinder);
+    
+    ref = pfinder_bof64(pfinder, pfinder.sec_text.s64.addr, ref);
+    
+    uint32_t op = 0;//*(uint32_t *)(kernel + addr - 4);
+    kread_buf(ref-4, &op, sizeof(op));
+    if(op == 0xD503237F) {
+        ref -= 4;
+    }
+    
+    return ref;
 }
 
 static kern_return_t
