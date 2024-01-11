@@ -31,6 +31,10 @@ int do_static_patchfinder(void);
 
 int do_dynamic_patchfinder(uint64_t kfd, uint64_t kbase);
 
+int import_kfd_offsets(void);
+
+int save_kfd_offsets(void);
+
 extern uint64_t off_cdevsw;
 extern uint64_t off_gPhysBase;
 extern uint64_t off_gPhysSize;

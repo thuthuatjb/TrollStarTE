@@ -50,9 +50,6 @@ void removeIfExist(const char* path) {
 }
 
 int do_static_patchfinder(void) {
-    if(did_patchfinder)
-        return 0;
-    
     //Stage 1. Download kernelcache
     const char *kernelPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/kernelcache"].UTF8String;
     removeIfExist(kernelPath);
@@ -71,80 +68,162 @@ int do_static_patchfinder(void) {
     
     off_cdevsw = find_cdevsw();
     printf("cdevsw: 0x%llx\n", off_cdevsw);
+    if(off_cdevsw == 0) return -1;
+    
     off_gPhysBase = find_gPhysBase();
     printf("gPhysBase: 0x%llx\n", off_gPhysBase);
+    if(off_gPhysBase == 0) return -1;
+    
     off_gPhysSize = find_gPhysSize();
     printf("gPhysSize: 0x%llx\n", off_gPhysSize);
+    if(off_gPhysSize == 0) return -1;
+    
     off_gVirtBase = find_gVirtBase();
     printf("gVirtBase: 0x%llx\n", off_gVirtBase);
+    if(off_gVirtBase == 0) return -1;
+    
     off_perfmon_dev_open = find_perfmon_dev_open();
     printf("perfmon_dev_open: 0x%llx\n", off_perfmon_dev_open);
+    if(off_perfmon_dev_open == 0) return -1;
+    
     off_perfmon_devices = find_perfmon_devices();
     printf("perfmon_devices: 0x%llx\n", off_perfmon_devices);
+    if(off_perfmon_devices == 0) return -1;
+    
     off_ptov_table = find_ptov_table();
     printf("ptov_table: 0x%llx\n", off_ptov_table);
+    if(off_ptov_table == 0) return -1;
+    
     off_vn_kqfilter = find_vn_kqfilter();
     printf("vn_kqfilter: 0x%llx\n", off_vn_kqfilter);
+    if(off_vn_kqfilter == 0) return -1;
+    
     off_proc_object_size = find_proc_object_size();
     printf("proc_object_size: 0x%llx\n", off_proc_object_size);
+    if(off_proc_object_size == 0) return -1;
     
     term_kernel();
-    
-    did_patchfinder = true;
     
     return 0;
 }
 
 int do_dynamic_patchfinder(uint64_t kfd, uint64_t kbase) {
-//    if(did_patchfinder)
-//        return 0;
     uint64_t kslide = kbase - 0xFFFFFFF007004000;
     set_kbase(kbase);
     set_kfd(kfd);
     pfinder_t pfinder;
-    if(pfinder_init(&pfinder) == KERN_SUCCESS) {
-        printf("pfinder_init: success!\n");
-        
-        uint64_t cdevsw = pfinder_cdevsw(pfinder);
-        if(cdevsw) off_cdevsw = cdevsw - kslide;
-        printf("cdevsw: 0x%llx\n", off_cdevsw);
-        
-        uint64_t gPhysBase = pfinder_gPhysBase(pfinder);
-        if(gPhysBase) off_gPhysBase = gPhysBase - kslide;
-        printf("gPhysBase: 0x%llx\n", off_gPhysBase);
-        
-        uint64_t gPhysSize = pfinder_gPhysSize(pfinder);
-        if(gPhysSize) off_gPhysSize = gPhysSize - kslide;
-        printf("gPhysSize: 0x%llx\n", off_gPhysSize);
-        
-        uint64_t gVirtBase = pfinder_gVirtBase(pfinder);
-        if(gVirtBase) off_gVirtBase = gVirtBase - kslide;
-        printf("gVirtBase: 0x%llx\n", off_gVirtBase);
-        
-        uint64_t perfmon_dev_open = pfinder_perfmon_dev_open(pfinder);
-        if(perfmon_dev_open) off_perfmon_dev_open = perfmon_dev_open - kslide;
-        printf("perfmon_dev_open: 0x%llx\n", off_perfmon_dev_open);
-        
-        uint64_t perfmon_devices = pfinder_perfmon_devices(pfinder);
-        if(perfmon_devices) off_perfmon_devices = perfmon_devices - kslide;
-        printf("perfmon_devices: 0x%llx\n", off_perfmon_devices);
-        
-        uint64_t ptov_table = pfinder_ptov_table(pfinder);
-        if(ptov_table) off_ptov_table = ptov_table - kslide;
-        printf("ptov_table: 0x%llx\n", off_ptov_table);
-        
-        uint64_t vn_kqfilter = pfinder_vn_kqfilter(pfinder);
-        if(vn_kqfilter) off_vn_kqfilter = vn_kqfilter - kslide;
-        printf("vn_kqfilter: 0x%llx\n", off_vn_kqfilter);
-        
-        uint64_t proc_object_size = pfinder_proc_object_size(pfinder);
-        if(proc_object_size) off_proc_object_size = proc_object_size;
-        printf("proc_object_size: 0x%llx\n", off_proc_object_size);
-        
+    if(pfinder_init(&pfinder) != KERN_SUCCESS) {
+        return -1;
     }
+    printf("pfinder_init: success!\n");
+    
+    uint64_t cdevsw = pfinder_cdevsw(pfinder);
+    if(cdevsw) off_cdevsw = cdevsw - kslide;
+    printf("cdevsw: 0x%llx\n", off_cdevsw);
+    if(off_cdevsw == 0) return -1;
+    
+    uint64_t gPhysBase = pfinder_gPhysBase(pfinder);
+    if(gPhysBase) off_gPhysBase = gPhysBase - kslide;
+    printf("gPhysBase: 0x%llx\n", off_gPhysBase);
+    if(off_gPhysBase == 0) return -1;
+    
+    uint64_t gPhysSize = pfinder_gPhysSize(pfinder);
+    if(gPhysSize) off_gPhysSize = gPhysSize - kslide;
+    printf("gPhysSize: 0x%llx\n", off_gPhysSize);
+    if(off_gPhysSize == 0) return -1;
+    
+    uint64_t gVirtBase = pfinder_gVirtBase(pfinder);
+    if(gVirtBase) off_gVirtBase = gVirtBase - kslide;
+    printf("gVirtBase: 0x%llx\n", off_gVirtBase);
+    if(off_gVirtBase == 0) return -1;
+    
+    uint64_t perfmon_dev_open = pfinder_perfmon_dev_open(pfinder);
+    if(perfmon_dev_open) off_perfmon_dev_open = perfmon_dev_open - kslide;
+    printf("perfmon_dev_open: 0x%llx\n", off_perfmon_dev_open);
+    if(off_perfmon_dev_open == 0) return -1;
+    
+    uint64_t perfmon_devices = pfinder_perfmon_devices(pfinder);
+    if(perfmon_devices) off_perfmon_devices = perfmon_devices - kslide;
+    printf("perfmon_devices: 0x%llx\n", off_perfmon_devices);
+    if(off_perfmon_devices == 0) return -1;
+    
+    uint64_t ptov_table = pfinder_ptov_table(pfinder);
+    if(ptov_table) off_ptov_table = ptov_table - kslide;
+    printf("ptov_table: 0x%llx\n", off_ptov_table);
+    if(off_ptov_table == 0) return -1;
+    
+    uint64_t vn_kqfilter = pfinder_vn_kqfilter(pfinder);
+    if(vn_kqfilter) off_vn_kqfilter = vn_kqfilter - kslide;
+    printf("vn_kqfilter: 0x%llx\n", off_vn_kqfilter);
+    if(off_vn_kqfilter == 0) return -1;
+    
+    uint64_t proc_object_size = pfinder_proc_object_size(pfinder);
+    if(proc_object_size) off_proc_object_size = proc_object_size;
+    printf("proc_object_size: 0x%llx\n", off_proc_object_size);
+    if(off_proc_object_size == 0) return -1;
+    
     pfinder_term(&pfinder);
     
-//    did_patchfinder = true;
+    save_kfd_offsets();
+    
+    return 0;
+}
+
+const char* get_kernversion(void) {
+    char kern_version[512] = {};
+    size_t size = sizeof(kern_version);
+    sysctlbyname("kern.version", &kern_version, &size, NULL, 0);
+    printf("current kern.version: %s\n", kern_version);
+    
+    return strdup(kern_version);;
+}
+
+int import_kfd_offsets(void) {
+    NSString* save_path = [NSString stringWithFormat:@"%@/Documents/kfund_offsets.plist", NSHomeDirectory()];
+    if(access(save_path.UTF8String, F_OK) == -1)
+        return -1;
+    
+    NSDictionary *offsets = [NSDictionary dictionaryWithContentsOfFile:save_path];
+    NSString *saved_kern_version = [offsets objectForKey:@"kern_version"];
+    if(strcmp(get_kernversion(), saved_kern_version.UTF8String) != 0)
+        return -1;
+    
+    off_cdevsw = [offsets[@"off_cdevsw"] unsignedLongLongValue];
+    off_gPhysBase = [offsets[@"off_gPhysBase"] unsignedLongLongValue];
+    off_gPhysSize = [offsets[@"off_gPhysSize"] unsignedLongLongValue];
+    off_gVirtBase = [offsets[@"off_gVirtBase"] unsignedLongLongValue];
+    off_perfmon_dev_open = [offsets[@"off_perfmon_dev_open"] unsignedLongLongValue];
+    off_perfmon_devices = [offsets[@"off_perfmon_devices"] unsignedLongLongValue];
+    off_ptov_table = [offsets[@"off_ptov_table"] unsignedLongLongValue];
+    off_vn_kqfilter = [offsets[@"off_vn_kqfilter"] unsignedLongLongValue];
+    off_proc_object_size = [offsets[@"off_proc_object_size"] unsignedLongLongValue];
+    
+    return 0;
+}
+
+int save_kfd_offsets(void) {
+    NSString* save_path = [NSString stringWithFormat:@"%@/Documents/kfund_offsets.plist", NSHomeDirectory()];
+    remove(save_path.UTF8String);
+    
+    NSDictionary *offsets = @{
+        @"kern_version": @(get_kernversion()),
+        @"off_cdevsw": @(off_cdevsw),
+        @"off_gPhysBase": @(off_gPhysBase),
+        @"off_gPhysSize": @(off_gPhysSize),
+        @"off_gVirtBase": @(off_gVirtBase),
+        @"off_perfmon_dev_open": @(off_perfmon_dev_open),
+        @"off_perfmon_devices": @(off_perfmon_devices),
+        @"off_ptov_table": @(off_ptov_table),
+        @"off_vn_kqfilter": @(off_vn_kqfilter),
+        @"off_proc_object_size": @(off_proc_object_size),
+    };
+    
+    BOOL success = [offsets writeToFile:save_path atomically:YES];
+    if (!success) {
+        printf("failed to saved offsets: %s\n", save_path.UTF8String);
+        return -1;
+    }
+    printf("saved offsets for kfd: %s\n", save_path.UTF8String);
     
     return 0;
 }
