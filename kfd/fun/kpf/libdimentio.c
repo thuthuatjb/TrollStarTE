@@ -839,6 +839,28 @@ follow_adrl(kaddr_t ref, uint32_t adrp_op, uint32_t add_op)
     return ret;
 }
 
+static kaddr_t
+follow_adrpLdr(kaddr_t ref, uint32_t adrp_op, uint32_t ldr_op)
+{
+    //Stage1. ADRP
+    uint64_t imm_hi_lo = (uint64_t)((adrp_op >> 3)  & 0x1FFFFC);
+    imm_hi_lo |= (uint64_t)((adrp_op >> 29) & 0x3);
+    if ((adrp_op & 0x800000) != 0) {
+        // Sign extend
+        imm_hi_lo |= 0xFFFFFFFFFFE00000;
+    }
+    
+    // Build real imm
+    uint64_t imm = imm_hi_lo << 12;
+    uint64_t ret = (ref & ~0xFFF) + imm;
+    
+    //Stage2. STR, LDR
+    uint64_t imm12 = ((ldr_op >> 10) & 0xFFF) << 3;
+    ret += imm12;
+    
+    return ret;
+}
+
 kaddr_t
 pfinder_cdevsw(pfinder_t pfinder) {
     bool found = false;
@@ -899,6 +921,30 @@ pfinder_gPhysBase(pfinder_t pfinder) {
         return 0;
     
     return follow_adrl(ref, insns[2], insns[3]);
+}
+
+kaddr_t
+pfinder_gPhysSize(pfinder_t pfinder)
+{
+    bool found = false;
+    
+    //1. opcode
+    kaddr_t ref = pfinder.sec_text.s64.addr;
+    uint32_t insns[8];
+    
+    for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
+        if ((insns[0] & 0xFFC00000) == 0xF9000000   //str
+            && insns[1] == 0x8b090108
+            && insns[2] == 0x9272c508
+            && insns[3] == 0xcb090108) {
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+        return pfinder_gPhysBase(pfinder) + 8;
+    
+    return follow_adrpLdr(ref, insns[6], insns[7]);
 }
 
 

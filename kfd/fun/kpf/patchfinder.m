@@ -106,10 +106,12 @@ int do_dynamic_patchfinder(void) {
         uint64_t kernproc = pfinder_kernproc(pfinder);
         printf("kernproc: 0x%llx\n", kernproc);
         
-        uint64_t cdevsw = pfinder_cdevsw(pfinder) - get_kslide();
-        printf("cdevsw: 0x%llx\n", cdevsw);
-        uint64_t gPhysBase = pfinder_gPhysBase(pfinder) - get_kslide();
-        printf("gPhysBase: 0x%llx\n", gPhysBase);
+        uint64_t cdevsw = pfinder_cdevsw(pfinder);
+        printf("cdevsw: 0x%llx\n", (cdevsw != 0) ? cdevsw - get_kslide() : 0);
+        uint64_t gPhysBase = pfinder_gPhysBase(pfinder);
+        printf("gPhysBase: 0x%llx\n", (gPhysBase != 0) ? gPhysBase - get_kslide() : 0);
+        uint64_t gPhysSize = pfinder_gPhysSize(pfinder);
+        printf("gPhysSize: 0x%llx\n", (gPhysSize != 0) ? gPhysSize - get_kslide() : 0);
     }
     pfinder_term(&pfinder);
     
