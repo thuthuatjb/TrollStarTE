@@ -119,6 +119,13 @@ int do_dynamic_patchfinder(void) {
         printf("perfmon_dev_open_2: 0x%llx\n", (perfmon_dev_open_2 != 0) ? perfmon_dev_open_2 - get_kslide() : 0);
         uint64_t perfmon_dev_open = pfinder_perfmon_dev_open(pfinder);
         printf("perfmon_dev_open: 0x%llx\n", (perfmon_dev_open != 0) ? perfmon_dev_open - get_kslide() : 0);
+        
+        uint64_t perfmon_devices = pfinder_perfmon_devices(pfinder);
+        printf("perfmon_devices: 0x%llx\n", (perfmon_devices != 0) ? perfmon_devices - get_kslide() : 0);
+        
+        uint64_t ptov_table = pfinder_ptov_table(pfinder);
+        printf("ptov_table: 0x%llx\n", (ptov_table != 0) ? ptov_table - get_kslide() : 0);
+        
     }
     pfinder_term(&pfinder);
     

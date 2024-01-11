@@ -1103,6 +1103,67 @@ pfinder_perfmon_dev_open(pfinder_t pfinder)
     return ref;
 }
 
+kaddr_t
+pfinder_perfmon_devices(pfinder_t pfinder)
+{
+    bool found = false;
+    
+    //1. opcode
+    kaddr_t ref = pfinder.sec_text.s64.addr;
+    uint32_t insns[5];
+    
+    for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
+        if (insns[0] == 0x6b08013f    //cmp w9, w8
+            && (insns[1] & 0xff00001f) == 0x54000001    //b.ne *
+            && insns[2] == 0x52800028    //mov w8, #1
+            && insns[3] == 0x5280140a   /* mov w10, #0xa0 */) {
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+        return 0;
+    
+    for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
+        if(IS_ADRP(insns[0]) && IS_ADD_X(insns[1])) {
+            break;
+        }
+    }
+    
+    return follow_adrl(ref, insns[0], insns[1]);
+}
+
+kaddr_t
+pfinder_ptov_table(pfinder_t pfinder)
+{
+    bool found = false;
+    
+    //1. opcode
+    kaddr_t ref = pfinder.sec_text.s64.addr;
+    uint32_t insns[5];
+    
+    for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
+        if (insns[0] == 0x52800049
+            && insns[1] == 0x14000004
+            && insns[2] == 0xd2800009
+            && insns[3] == 0x14000002) {
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+        return 0;
+    
+    for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
+        if(IS_ADRP(insns[0]) && IS_ADD_X(insns[1])) {
+            break;
+        }
+    }
+    
+    return follow_adrl(ref, insns[0], insns[1]);
+}
+
+
 static kern_return_t
 init_kbase(void) {
     struct {

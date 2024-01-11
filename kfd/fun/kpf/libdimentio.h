@@ -76,4 +76,10 @@ pfinder_perfmon_dev_open_2(pfinder_t pfinder);
 
 kaddr_t
 pfinder_perfmon_dev_open(pfinder_t pfinder);
+
+kaddr_t
+pfinder_perfmon_devices(pfinder_t pfinder);
+
+kaddr_t
+pfinder_ptov_table(pfinder_t pfinder);
 #endif
