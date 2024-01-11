@@ -106,6 +106,8 @@ int do_static_patchfinder_libdimentio(void) {
 
 
 int do_static_patchfinder(void) {
+    printf("[!] Starting static patchfinder (Thanks xerub)\n");
+    
     //Stage 1. Download kernelcache
     const char *kernelPath = [NSString stringWithFormat:@"%@%@", NSHomeDirectory(), @"/Documents/kernelcache"].UTF8String;
     removeIfExist(kernelPath);
@@ -169,6 +171,8 @@ int do_static_patchfinder(void) {
 }
 
 int do_dynamic_patchfinder(uint64_t kfd, uint64_t kbase) {
+    printf("[!] Starting dynamic patchfinder (Thanks 0x7ff)\n");
+    
     uint64_t kslide = kbase - 0xFFFFFFF007004000;
     set_kbase(kbase);
     set_kfd(kfd);
@@ -249,15 +253,26 @@ int import_kfd_offsets(void) {
     if(strcmp(get_kernversion(), saved_kern_version.UTF8String) != 0)
         return -1;
     
+    printf("[!] Found saved kfd offsets\n");
+    
     off_cdevsw = [offsets[@"off_cdevsw"] unsignedLongLongValue];
+    printf("cdevsw: 0x%llx\n", off_cdevsw);
     off_gPhysBase = [offsets[@"off_gPhysBase"] unsignedLongLongValue];
+    printf("gPhysBase: 0x%llx\n", off_gPhysBase);
     off_gPhysSize = [offsets[@"off_gPhysSize"] unsignedLongLongValue];
+    printf("gPhysSize: 0x%llx\n", off_gPhysSize);
     off_gVirtBase = [offsets[@"off_gVirtBase"] unsignedLongLongValue];
+    printf("gVirtBase: 0x%llx\n", off_gVirtBase);
     off_perfmon_dev_open = [offsets[@"off_perfmon_dev_open"] unsignedLongLongValue];
+    printf("perfmon_dev_open: 0x%llx\n", off_perfmon_dev_open);
     off_perfmon_devices = [offsets[@"off_perfmon_devices"] unsignedLongLongValue];
+    printf("perfmon_devices: 0x%llx\n", off_perfmon_devices);
     off_ptov_table = [offsets[@"off_ptov_table"] unsignedLongLongValue];
+    printf("ptov_table: 0x%llx\n", off_ptov_table);
     off_vn_kqfilter = [offsets[@"off_vn_kqfilter"] unsignedLongLongValue];
+    printf("vn_kqfilter: 0x%llx\n", off_vn_kqfilter);
     off_proc_object_size = [offsets[@"off_proc_object_size"] unsignedLongLongValue];
+    printf("proc_object_size: 0x%llx\n", off_proc_object_size);
     
     return 0;
 }
@@ -265,6 +280,8 @@ int import_kfd_offsets(void) {
 int save_kfd_offsets(void) {
     NSString* save_path = [NSString stringWithFormat:@"%@/Documents/kfund_offsets.plist", NSHomeDirectory()];
     remove(save_path.UTF8String);
+    
+    printf("[!] Saving kfd offsets\n");
     
     NSDictionary *offsets = @{
         @"kern_version": @(get_kernversion()),
