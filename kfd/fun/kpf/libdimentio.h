@@ -61,4 +61,7 @@ pfinder_kernproc(pfinder_t pfinder);
 
 kaddr_t
 pfinder_cdevsw(pfinder_t pfinder);
+
+kaddr_t
+pfinder_gPhysBase(pfinder_t pfinder);
 #endif

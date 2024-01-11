@@ -835,9 +835,6 @@ follow_adrl(kaddr_t ref, uint32_t adrp_op, uint32_t add_op)
     if (shift == 1) {
         imm12 = imm12 << 12;
     }
-    
-    uint8_t regDst = (uint8_t)(add_op & 0x1F);
-    uint8_t regSrc = (uint8_t)((add_op >> 5) & 0x1F);
     ret += imm12;
     return ret;
 }
@@ -878,6 +875,32 @@ pfinder_cdevsw(pfinder_t pfinder) {
     //3. Get label from adrl opcode.
     return follow_adrl(ref, insns[0], insns[1]);
 }
+
+kaddr_t
+pfinder_gPhysBase(pfinder_t pfinder) {
+    bool found = false;
+    
+    //1. opcode
+    kaddr_t ref = pfinder.sec_text.s64.addr;
+    uint32_t insns[6];
+    
+    for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
+        if(insns[0] == 0x7100005F
+           && insns[1] == 0x54000120
+           && (insns[2] & 0x9F000000) == 0x90000000    //adrp
+           && (insns[3] & 0xFF800000) == 0x91000000    //add
+           && insns[4]== 0xF9400042
+           && insns[5] == 0xCB020000) {
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+        return 0;
+    
+    return follow_adrl(ref, insns[2], insns[3]);
+}
+
 
 static kern_return_t
 init_kbase(void) {
