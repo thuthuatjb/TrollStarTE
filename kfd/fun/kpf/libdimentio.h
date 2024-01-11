@@ -82,4 +82,13 @@ pfinder_perfmon_devices(pfinder_t pfinder);
 
 kaddr_t
 pfinder_ptov_table(pfinder_t pfinder);
+
+kaddr_t
+pfinder_vn_kqfilter_2(pfinder_t pfinder);
+
+kaddr_t
+pfinder_vn_kqfilter(pfinder_t pfinder);
+
+kaddr_t
+pfinder_proc_object_size(pfinder_t pfinder);
 #endif

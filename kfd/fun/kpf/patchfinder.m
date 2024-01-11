@@ -126,6 +126,15 @@ int do_dynamic_patchfinder(void) {
         uint64_t ptov_table = pfinder_ptov_table(pfinder);
         printf("ptov_table: 0x%llx\n", (ptov_table != 0) ? ptov_table - get_kslide() : 0);
         
+        uint64_t vn_kqfilter = pfinder_vn_kqfilter(pfinder);
+        printf("vn_kqfilter: 0x%llx\n", (vn_kqfilter != 0) ? vn_kqfilter - get_kslide() : 0);
+        
+        uint64_t vn_kqfilter_2 = pfinder_vn_kqfilter_2(pfinder);
+        printf("vn_kqfilter_2: 0x%llx\n", (vn_kqfilter_2 != 0) ? vn_kqfilter_2 - get_kslide() : 0);
+        
+        uint64_t proc_object_size = pfinder_proc_object_size(pfinder);
+        printf("proc_object_size: 0x%llx\n", proc_object_size);
+        
     }
     pfinder_term(&pfinder);
     

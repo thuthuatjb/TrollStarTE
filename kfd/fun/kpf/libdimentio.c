@@ -1163,6 +1163,102 @@ pfinder_ptov_table(pfinder_t pfinder)
     return follow_adrl(ref, insns[0], insns[1]);
 }
 
+kaddr_t 
+pfinder_vn_kqfilter_2(pfinder_t pfinder)
+{
+    bool found = false;
+    
+    //1. opcode
+    kaddr_t ref = pfinder.sec_text.s64.addr;
+    uint32_t insns[5];
+    
+    for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
+        if (insns[0] == 0x7100051f  //cmp w8, #1
+            && (insns[1] & 0xff00001f) == 0x54000000    //b.eq *
+            && insns[2] == 0x7100111f    //cmp w8, #4
+            && (insns[3] & 0xff00001f) == 0x54000000  //b.eq *
+            && insns[4] == 0x71001d1f    /* cmp w8, #7 */) {
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+        return 0;
+    
+    ref = pfinder_bof64(pfinder, pfinder.sec_text.s64.addr, ref);
+    
+    uint32_t op = 0;//*(uint32_t *)(kernel + addr - 4);
+    kread_buf(ref-4, &op, sizeof(op));
+    if(op == 0xD503237F) {
+        ref -= 4;
+    }
+    
+    return ref;
+}
+
+kaddr_t
+pfinder_vn_kqfilter(pfinder_t pfinder)
+{
+    bool found = false;
+
+    kaddr_t ref = pfinder.sec_text.s64.addr;
+    uint32_t insns[5];
+    
+    for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
+        if (insns[0] == 0xD2800001
+            && insns[1] == 0xAA1503E0
+            && insns[2] == 0xAA1303E2
+            && insns[3] == 0xAA1403E3) {
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+        return 0;
+    
+    ref = pfinder_bof64(pfinder, pfinder.sec_text.s64.addr, ref);
+    
+    uint32_t op = 0;//*(uint32_t *)(kernel + addr - 4);
+    kread_buf(ref-4, &op, sizeof(op));
+    if(op == 0xD503237F) {
+        ref -= 4;
+    }
+    
+    return ref;
+}
+
+kaddr_t
+pfinder_proc_object_size(pfinder_t pfinder) {
+    bool found = false;
+    
+    kaddr_t ref = pfinder.sec_text.s64.addr;
+    uint32_t insns[5];
+    
+    for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
+        if (insns[0] == 0xAA1503E0
+            && insns[1] == 0x528104E1
+            && insns[2] == 0x52800102
+            && insns[3] == 0x52801103) {
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+        return 0;
+    
+    for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
+        if(IS_ADRP(insns[0]) && (IS_LDR_X(insns[1]) || IS_LDR_W_UNSIGNED_IMM(insns[1]) || IS_LDR_X_UNSIGNED_IMM(insns[1]))) {
+            break;
+        }
+    }
+    
+    ref = follow_adrpLdr(ref, insns[0], insns[1]);
+    
+    uint64_t val = 0;
+    kread_buf(ref, &val, sizeof(val));
+    
+    return val;
+}
 
 static kern_return_t
 init_kbase(void) {
