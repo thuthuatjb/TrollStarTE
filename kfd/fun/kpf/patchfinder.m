@@ -95,11 +95,12 @@ int do_patchfinder(void) {
     return 0;
 }
 
-int do_dynamic_patchfinder(void) {
+int do_dynamic_patchfinder(uint64_t kfd, uint64_t kbase) {
 //    if(did_patchfinder)
 //        return 0;
-    
-    set_kbase(0xFFFFFFF007004000 + get_kslide());
+    uint64_t kslide = kbase - 0xFFFFFFF007004000;
+    set_kbase(kbase);
+    set_kfd(kfd);
     pfinder_t pfinder;
     if(pfinder_init(&pfinder) == KERN_SUCCESS) {
         printf("pfinder_init: success\n");
@@ -107,30 +108,30 @@ int do_dynamic_patchfinder(void) {
         printf("kernproc: 0x%llx\n", kernproc);
         
         uint64_t cdevsw = pfinder_cdevsw(pfinder);
-        printf("cdevsw: 0x%llx\n", (cdevsw != 0) ? cdevsw - get_kslide() : 0);
+        printf("cdevsw: 0x%llx\n", (cdevsw != 0) ? cdevsw - kslide : 0);
         uint64_t gPhysBase = pfinder_gPhysBase(pfinder);
-        printf("gPhysBase: 0x%llx\n", (gPhysBase != 0) ? gPhysBase - get_kslide() : 0);
+        printf("gPhysBase: 0x%llx\n", (gPhysBase != 0) ? gPhysBase - kslide : 0);
         uint64_t gPhysSize = pfinder_gPhysSize(pfinder);
-        printf("gPhysSize: 0x%llx\n", (gPhysSize != 0) ? gPhysSize - get_kslide() : 0);
+        printf("gPhysSize: 0x%llx\n", (gPhysSize != 0) ? gPhysSize - kslide : 0);
         uint64_t gVirtBase = pfinder_gVirtBase(pfinder);
-        printf("gVirtBase: 0x%llx\n", (gVirtBase != 0) ? gVirtBase - get_kslide() : 0);
+        printf("gVirtBase: 0x%llx\n", (gVirtBase != 0) ? gVirtBase - kslide : 0);
         
         uint64_t perfmon_dev_open_2 = pfinder_perfmon_dev_open_2(pfinder);
-        printf("perfmon_dev_open_2: 0x%llx\n", (perfmon_dev_open_2 != 0) ? perfmon_dev_open_2 - get_kslide() : 0);
+        printf("perfmon_dev_open_2: 0x%llx\n", (perfmon_dev_open_2 != 0) ? perfmon_dev_open_2 - kslide : 0);
         uint64_t perfmon_dev_open = pfinder_perfmon_dev_open(pfinder);
-        printf("perfmon_dev_open: 0x%llx\n", (perfmon_dev_open != 0) ? perfmon_dev_open - get_kslide() : 0);
+        printf("perfmon_dev_open: 0x%llx\n", (perfmon_dev_open != 0) ? perfmon_dev_open - kslide : 0);
         
         uint64_t perfmon_devices = pfinder_perfmon_devices(pfinder);
-        printf("perfmon_devices: 0x%llx\n", (perfmon_devices != 0) ? perfmon_devices - get_kslide() : 0);
+        printf("perfmon_devices: 0x%llx\n", (perfmon_devices != 0) ? perfmon_devices - kslide : 0);
         
         uint64_t ptov_table = pfinder_ptov_table(pfinder);
-        printf("ptov_table: 0x%llx\n", (ptov_table != 0) ? ptov_table - get_kslide() : 0);
+        printf("ptov_table: 0x%llx\n", (ptov_table != 0) ? ptov_table - kslide : 0);
         
         uint64_t vn_kqfilter = pfinder_vn_kqfilter(pfinder);
-        printf("vn_kqfilter: 0x%llx\n", (vn_kqfilter != 0) ? vn_kqfilter - get_kslide() : 0);
+        printf("vn_kqfilter: 0x%llx\n", (vn_kqfilter != 0) ? vn_kqfilter - kslide : 0);
         
         uint64_t vn_kqfilter_2 = pfinder_vn_kqfilter_2(pfinder);
-        printf("vn_kqfilter_2: 0x%llx\n", (vn_kqfilter_2 != 0) ? vn_kqfilter_2 - get_kslide() : 0);
+        printf("vn_kqfilter_2: 0x%llx\n", (vn_kqfilter_2 != 0) ? vn_kqfilter_2 - kslide : 0);
         
         uint64_t proc_object_size = pfinder_proc_object_size(pfinder);
         printf("proc_object_size: 0x%llx\n", proc_object_size);

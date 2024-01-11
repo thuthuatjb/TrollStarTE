@@ -96,6 +96,8 @@
 #    define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
+uint64_t kfd = 0;
+
 typedef char io_string_t[512];
 typedef uint32_t IOOptionBits;
 typedef mach_port_t io_object_t;
@@ -292,7 +294,9 @@ kdecompress(const void *src, size_t src_len, size_t *dst_len) {
 
 static kern_return_t
 kread_buf_kfd(kaddr_t addr, void *buf, size_t sz) {
-    kreadbuf(addr, buf, sz);
+    if(kfd == 0)
+        return KERN_FAILURE;
+    early_kreadbuf(kfd, addr, buf, sz);
     return KERN_SUCCESS;
 }
 
@@ -717,6 +721,12 @@ get_boot_path(void) {
 
 int set_kbase(uint64_t _kbase) {
     kbase = _kbase;
+    
+    return 0;
+}
+
+int set_kfd(uint64_t _kfd) {
+    kfd = _kfd;
     
     return 0;
 }

