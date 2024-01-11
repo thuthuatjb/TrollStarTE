@@ -112,6 +112,8 @@ int do_dynamic_patchfinder(void) {
         printf("gPhysBase: 0x%llx\n", (gPhysBase != 0) ? gPhysBase - get_kslide() : 0);
         uint64_t gPhysSize = pfinder_gPhysSize(pfinder);
         printf("gPhysSize: 0x%llx\n", (gPhysSize != 0) ? gPhysSize - get_kslide() : 0);
+        uint64_t gVirtBase = pfinder_gVirtBase(pfinder);
+        printf("gVirtBase: 0x%llx\n", (gVirtBase != 0) ? gVirtBase - get_kslide() : 0);
     }
     pfinder_term(&pfinder);
     

@@ -67,4 +67,7 @@ pfinder_gPhysBase(pfinder_t pfinder);
 
 kaddr_t
 pfinder_gPhysSize(pfinder_t pfinder);
+
+kaddr_t
+pfinder_gVirtBase(pfinder_t pfinder);
 #endif

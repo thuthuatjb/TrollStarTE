@@ -947,6 +947,31 @@ pfinder_gPhysSize(pfinder_t pfinder)
     return follow_adrpLdr(ref, insns[6], insns[7]);
 }
 
+kaddr_t
+pfinder_gVirtBase(pfinder_t pfinder)
+{
+    bool found = false;
+    
+    //1. opcode
+    kaddr_t ref = pfinder.sec_text.s64.addr;
+    uint32_t insns[8];
+    
+    for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
+        if (insns[0] == 0x7100005F
+            && insns[1] == 0x54000120
+            && (insns[2] & 0x9F000000) == 0x90000000    //adrp
+            && (insns[3] & 0xFF800000) == 0x91000000    //add
+            && insns[4]== 0xF9400042
+            && insns[5] == 0xCB020000) {
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+        return 0;
+    
+    return follow_adrl(ref, insns[6], insns[7]);
+}
 
 static kern_return_t
 init_kbase(void) {
