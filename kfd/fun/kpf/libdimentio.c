@@ -96,6 +96,7 @@
 #    define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
+char* kernel_path = NULL;
 uint64_t kfd = 0;
 
 typedef char io_string_t[512];
@@ -731,14 +732,27 @@ int set_kfd(uint64_t _kfd) {
     return 0;
 }
 
+int set_kernel_path(char* _path) {
+    kernel_path = _path;
+    
+    return 0;
+}
+
 kern_return_t
 pfinder_init(pfinder_t *pfinder) {
     kern_return_t ret = KERN_FAILURE;
     
-    kread_buf = kread_buf_kfd;
-
     pfinder_reset(pfinder);
-    if((ret = pfinder_init_kernel(pfinder, 0)) != KERN_SUCCESS) {
+    
+    if(kernel_path != NULL && access(kernel_path, F_OK) == 0) {
+        printf("kernel_path: %s\n", kernel_path);
+        if((ret = pfinder_init_file(pfinder, kernel_path)) != KERN_SUCCESS) {
+            pfinder_term(pfinder);
+        }
+    }
+    
+    kread_buf = kread_buf_kfd;
+    if(kernel_path == NULL && (ret = pfinder_init_kernel(pfinder, 0)) != KERN_SUCCESS) {
         pfinder_term(pfinder);
     }
     
@@ -826,33 +840,43 @@ static kaddr_t
 pfinder_bof64(pfinder_t pfinder, kaddr_t start, kaddr_t where)
 {
     for (; where >= start; where -= 4) {
-        uint32_t op = 0;
-        kread_buf(where, &op, sizeof(op));//*(uint32_t *)(buf + where);
-        if ((op & 0xFFC003FF) == 0x910003FD) {
-            unsigned delta = (op >> 10) & 0xFFF;
+        uint32_t insns[1];
+        
+        sec_read_buf(pfinder.sec_text, where, insns, sizeof(insns));
+        
+//        kread_buf(where, &op, sizeof(op));//*(uint32_t *)(buf + where);
+        if ((insns[0] & 0xFFC003FF) == 0x910003FD) {
+            unsigned delta = (insns[0] >> 10) & 0xFFF;
             //printf("0x%llx: ADD X29, SP, #0x%x\n", where + kerndumpbase, delta);
             if ((delta & 0xF) == 0) {
                 kaddr_t prev = where - ((delta >> 4) + 1) * 4;
-                uint32_t au = 0;
-                kread_buf(prev, &au, sizeof(au));//*(uint32_t *)(buf + prev);
+                uint32_t au[1];
+                
+                sec_read_buf(pfinder.sec_text, where, au, sizeof(au));
+                
+                //kread_buf(prev, &au, sizeof(au));//*(uint32_t *)(buf + prev);
                 //printf("0x%llx: (%llx & %llx) == %llx\n", prev + kerndumpbase, au, 0x3BC003E0, au & 0x3BC003E0);
-                if ((au & 0x3BC003E0) == 0x298003E0) {
+                if ((au[0] & 0x3BC003E0) == 0x298003E0) {
                     //printf("%x: STP x, y, [SP,#-imm]!\n", prev);
                     return prev;
-                } else if ((au & 0x7F8003FF) == 0x510003FF) {
+                } else if ((au[0] & 0x7F8003FF) == 0x510003FF) {
                     //printf("%x: SUB SP, SP, #imm\n", prev);
                     return prev;
                 }
                 for (kaddr_t diff = 4; diff < delta/4+4; diff+=4) {
-                    uint32_t ai = 0;
-                    kread_buf(where - diff, &ai, sizeof(ai));//*(uint32_t *)(buf + where - diff);
+                    uint32_t ai[1];
+                    
+                    sec_read_buf(pfinder.sec_text, where, ai, sizeof(ai));
+                    
+                    
+//                    kread_buf(where - diff, &ai, sizeof(ai));//*(uint32_t *)(buf + where - diff);
                     // SUB SP, SP, #imm
                     //printf("0x%llx: (%llx & %llx) == %llx\n", where - diff + kerndumpbase, ai, 0x3BC003E0, ai & 0x3BC003E0);
-                    if ((ai & 0x7F8003FF) == 0x510003FF) {
+                    if ((ai[0] & 0x7F8003FF) == 0x510003FF) {
                         return where - diff;
                     }
                     // Not stp and not str
-                    if (((ai & 0xFFC003E0) != 0xA90003E0) && (ai&0xFFC001F0) != 0xF90001E0) {
+                    if (((ai[0] & 0xFFC003E0) != 0xA90003E0) && (ai[0]&0xFFC001F0) != 0xF90001E0) {
                         break;
                     }
                 }
@@ -860,14 +884,17 @@ pfinder_bof64(pfinder_t pfinder, kaddr_t start, kaddr_t where)
                 while (where > start) {
                     where -= 4;
 //                    au = *(uint32_t *)(buf + where);
-                    au = 0;
-                    kread_buf(where, &au, sizeof(au));
+//                    au = 0;
+                    au[0] = 0;
+                    
+                    sec_read_buf(pfinder.sec_text, where, au, sizeof(au));
+//                    kread_buf(where, &au, sizeof(au));
                     // SUB SP, SP, #imm
-                    if ((au & 0xFFC003FF) == 0xD10003FF && ((au >> 10) & 0xFFF) == delta + 0x10) {
+                    if ((au[0] & 0xFFC003FF) == 0xD10003FF && ((au[0] >> 10) & 0xFFF) == delta + 0x10) {
                         return where;
                     }
                     // STP x, y, [SP,#imm]
-                    if ((au & 0xFFC003E0) != 0xA90003E0) {
+                    if ((au[0] & 0xFFC003E0) != 0xA90003E0) {
                         where += 4;
                         break;
                     }
@@ -949,7 +976,7 @@ pfinder_cdevsw(pfinder_t pfinder) {
     if(!found)
         return 0;
     
-//    printf("1 ref: 0x%llx, ref-kslide: 0x%llx\n", ref, ref-get_kslide());
+//    printf("1 ref: 0x%llx, ref\n", ref);
     
     //2. Step into High address, and find adrp opcode.
     for(; sec_read_buf(pfinder.sec_text, ref, insns, sizeof(insns)) == KERN_SUCCESS; ref += sizeof(*insns)) {
@@ -1071,9 +1098,8 @@ pfinder_perfmon_dev_open_2(pfinder_t pfinder)
     
     ref = pfinder_bof64(pfinder, pfinder.sec_text.s64.addr, ref);
     
-    uint32_t op = 0;//*(uint32_t *)(kernel + addr - 4);
-    kread_buf(ref-4, &op, sizeof(op));
-    if(op == 0xD503237F) {
+    sec_read_buf(pfinder.sec_text, ref-4, insns, sizeof(insns));
+    if(insns[0] == 0xD503237F) {
         ref -= 4;
     }
     
@@ -1104,9 +1130,8 @@ pfinder_perfmon_dev_open(pfinder_t pfinder)
     
     ref = pfinder_bof64(pfinder, pfinder.sec_text.s64.addr, ref);
     
-    uint32_t op = 0;//*(uint32_t *)(kernel + addr - 4);
-    kread_buf(ref-4, &op, sizeof(op));
-    if(op == 0xD503237F) {
+    sec_read_buf(pfinder.sec_text, ref-4, insns, sizeof(insns));
+    if(insns[0] == 0xD503237F) {
         ref -= 4;
     }
     
@@ -1197,9 +1222,8 @@ pfinder_vn_kqfilter_2(pfinder_t pfinder)
     
     ref = pfinder_bof64(pfinder, pfinder.sec_text.s64.addr, ref);
     
-    uint32_t op = 0;//*(uint32_t *)(kernel + addr - 4);
-    kread_buf(ref-4, &op, sizeof(op));
-    if(op == 0xD503237F) {
+    sec_read_buf(pfinder.sec_text, ref-4, insns, sizeof(insns));
+    if(insns[0] == 0xD503237F) {
         ref -= 4;
     }
     
@@ -1228,9 +1252,8 @@ pfinder_vn_kqfilter(pfinder_t pfinder)
     
     ref = pfinder_bof64(pfinder, pfinder.sec_text.s64.addr, ref);
     
-    uint32_t op = 0;//*(uint32_t *)(kernel + addr - 4);
-    kread_buf(ref-4, &op, sizeof(op));
-    if(op == 0xD503237F) {
+    sec_read_buf(pfinder.sec_text, ref-4, insns, sizeof(insns));
+    if(insns[0] == 0xD503237F) {
         ref -= 4;
     }
     
@@ -1263,6 +1286,7 @@ pfinder_proc_object_size(pfinder_t pfinder) {
     }
     
     ref = follow_adrpLdr(ref, insns[0], insns[1]);
+    printf("proc_object_size addr: 0x%llx\n", ref);
     
     uint64_t val = 0;
     kread_buf(ref, &val, sizeof(val));
