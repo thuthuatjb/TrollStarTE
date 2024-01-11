@@ -33,7 +33,7 @@
 
 // Forward declarations for helper functions.
 void krkw_helper_init(struct kfd* kfd, struct krkw* krkw);
-void krkw_helper_grab_free_pages(struct kfd* kfd);
+int krkw_helper_grab_free_pages(struct kfd* kfd);
 void krkw_helper_run_allocate(struct kfd* kfd, struct krkw* krkw);
 void krkw_helper_run_deallocate(struct kfd* kfd, struct krkw* krkw);
 void krkw_helper_free(struct kfd* kfd, struct krkw* krkw);
@@ -92,9 +92,10 @@ void krkw_init(struct kfd* kfd, u64 kread_method, u64 kwrite_method)
     krkw_helper_init(kfd, &kfd->kwrite);
 }
 
-void krkw_run(struct kfd* kfd)
+int krkw_run(struct kfd* kfd)
 {
-    krkw_helper_grab_free_pages(kfd);
+    if(krkw_helper_grab_free_pages(kfd))
+        return -1;
 
     timer_start();
     krkw_helper_run_allocate(kfd, &kfd->kread);
@@ -102,6 +103,8 @@ void krkw_run(struct kfd* kfd)
     krkw_helper_run_deallocate(kfd, &kfd->kread);
     krkw_helper_run_deallocate(kfd, &kfd->kwrite);
     timer_end();
+    
+    return 0;
 }
 
 void krkw_kread(struct kfd* kfd, u64 kaddr, void* uaddr, u64 size)
@@ -129,7 +132,7 @@ void krkw_helper_init(struct kfd* kfd, struct krkw* krkw)
     krkw->krkw_method_ops.init(kfd);
 }
 
-void krkw_helper_grab_free_pages(struct kfd* kfd)
+int krkw_helper_grab_free_pages(struct kfd* kfd)
 {
     timer_start();
 
@@ -147,13 +150,14 @@ void krkw_helper_grab_free_pages(struct kfd* kfd)
                 if (++grabbed_puaf_pages == grabbed_puaf_pages_goal) {
                     print_u64(grabbed_free_pages);
                     timer_end();
-                    return;
+                    return 0;
                 }
             }
         }
     }
 
     print_warning("failed to grab free pages goal");
+    return -1;
 }
 
 void krkw_helper_run_allocate(struct kfd* kfd, struct krkw* krkw)
