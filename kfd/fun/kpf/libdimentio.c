@@ -1248,7 +1248,7 @@ pfinder_vn_kqfilter(pfinder_t pfinder)
         }
     }
     if(!found)
-        return 0;
+        return pfinder_vn_kqfilter_2(pfinder);
     
     ref = pfinder_bof64(pfinder, pfinder.sec_text.s64.addr, ref);
     
