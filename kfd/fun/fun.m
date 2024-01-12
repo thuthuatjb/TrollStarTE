@@ -290,7 +290,9 @@ int do_fun(void) {
     _offsets_init();
     
     uint64_t kslide = get_kslide();
-    uint64_t kbase = 0xfffffff007004000 + kslide;
+    uint64_t vm_kernel_link_addr = get_vm_kernel_link_addr();
+    
+    uint64_t kbase = vm_kernel_link_addr + kslide;
     printf("[i] Kernel base: 0x%llx\n", kbase);
     printf("[i] Kernel slide: 0x%llx\n", kslide);
     uint64_t kheader64 = kread64(kbase);

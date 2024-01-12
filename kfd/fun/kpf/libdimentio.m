@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "patchfinder.h"
 #include "libdimentio.h"
 #include <compression.h>
 #include <dlfcn.h>
@@ -741,6 +742,8 @@ int set_kernel_path(char* _path) {
 kern_return_t
 pfinder_init(pfinder_t *pfinder) {
     kern_return_t ret = KERN_FAILURE;
+    
+    vm_kernel_link_addr = get_vm_kernel_link_addr();
     
     pfinder_reset(pfinder);
     
