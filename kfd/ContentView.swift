@@ -58,7 +58,6 @@ struct ContentView: View {
                     HStack {
                         Button("kopen") {
                             puaf_pages = puaf_pages_options[puaf_pages_index]
-//                            do_static_patchfinder_libdimentio()
                             
                             kfd = do_kopen(UInt64(puaf_pages), UInt64(puaf_method), UInt64(kread_method), UInt64(kwrite_method))
                             do_fun()
