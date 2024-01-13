@@ -116,7 +116,6 @@ const char* get_kernversion(void) {
     char kern_version[512] = {};
     size_t size = sizeof(kern_version);
     sysctlbyname("kern.version", &kern_version, &size, NULL, 0);
-    printf("current kern.version: %s\n", kern_version);
     
     return strdup(kern_version);;
 }
