@@ -46,8 +46,8 @@ void removeIfExist(const char* path) {
     if(access(path, F_OK) == 0) remove(path);
 }
 
-int do_dynamic_patchfinder(uint64_t kfd, uint64_t kbase) {
-    printf("[!] Starting dynamic patchfinder (Thanks 0x7ff)\n");
+int do_kfd_patchfinder(uint64_t kfd, uint64_t kbase) {
+    printf("[!] Starting kfd patchfinder (Thanks 0x7ff)\n");
     
     uint64_t vm_kernel_link_addr = get_vm_kernel_link_addr();
     uint64_t kslide = kbase - vm_kernel_link_addr;

@@ -143,11 +143,11 @@ void kread_sem_open_find_proc(struct kfd* kfd)
         uint64_t vm_kernel_link_addr = get_vm_kernel_link_addr();
         printf("defeated kaslr, kbase: 0x%llx, kslide: 0x%llx\n", kbase, kbase - vm_kernel_link_addr);
         
-        //Step 2. run dynamic patchfinder
-        do_dynamic_patchfinder((u64)kfd, kbase);
+        //Step 2. run patchfinder
+        do_kfd_patchfinder((u64)kfd, kbase);
     }
     
-    //Step 3. set offsets from patchfinder or import_kfd_offsets().
+    //Step 3. set offsets from patchfinder / import_kfd_offsets().
     kern_versions[kfd->info.env.vid].kernelcache__cdevsw = off_cdevsw;
     kern_versions[kfd->info.env.vid].kernelcache__gPhysBase = off_gPhysBase;
     kern_versions[kfd->info.env.vid].kernelcache__gPhysSize = off_gPhysSize;
