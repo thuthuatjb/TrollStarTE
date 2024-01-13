@@ -77,13 +77,9 @@
 #define IS_SUBS_X(a) (((a) & 0xFF200000U) == 0xEB000000U)
 #define LDR_W_UNSIGNED_IMM(a) (extract32(a, 10, 12) << 2U)
 #define LDR_X_UNSIGNED_IMM(a) (extract32(a, 10, 12) << 3U)
-#define kBootNoncePropertyKey "com.apple.System.boot-nonce"
-#define kIONVRAMDeletePropertyKey "IONVRAM-DELETE-PROPERTY"
-#define kIONVRAMSyncNowPropertyKey "IONVRAM-SYNCNOW-PROPERTY"
 #define IS_LDR_W_UNSIGNED_IMM(a) (((a) & 0xFFC00000U) == 0xB9400000U)
 #define IS_LDR_X_UNSIGNED_IMM(a) (((a) & 0xFFC00000U) == 0xF9400000U)
 #define ADR_IMM(a) ((sextract64(a, 5, 19) << 2U) | extract32(a, 29, 2))
-#define kIONVRAMForceSyncNowPropertyKey "IONVRAM-FORCESYNCNOW-PROPERTY"
 
 #ifndef SECT_CSTRING
 #    define SECT_CSTRING "__cstring"
@@ -107,41 +103,11 @@ typedef kern_return_t (*kernrw_0_kbase_func_t)(kaddr_t *);
 typedef io_object_t io_service_t, io_connect_t, io_registry_entry_t;
 typedef int (*krw_0_kbase_func_t)(kaddr_t *), (*krw_0_kread_func_t)(kaddr_t, void *, size_t), (*krw_0_kwrite_func_t)(const void *, kaddr_t, size_t), (*kernrw_0_req_kernrw_func_t)(void);
 
-kern_return_t
-IOServiceClose(io_connect_t);
-
-kern_return_t
-IOObjectRelease(io_object_t);
-
-CFMutableDictionaryRef
-IOServiceMatching(const char *);
-
 int
 proc_pidinfo(int, int, uint64_t, void *, int);
 
-CFDictionaryRef
-OSKextCopyLoadedKextInfo(CFArrayRef, CFArrayRef);
-
-io_registry_entry_t
-IORegistryEntryFromPath(mach_port_t, const io_string_t);
-
-io_service_t
-IOServiceGetMatchingService(mach_port_t, CFDictionaryRef);
-
-kern_return_t
-IOServiceOpen(io_service_t, task_port_t, uint32_t, io_connect_t *);
-
-kern_return_t
-IORegistryEntrySetCFProperty(io_registry_entry_t, CFStringRef, CFTypeRef);
-
 kern_return_t
 mach_vm_write(vm_map_t, mach_vm_address_t, vm_offset_t, mach_msg_type_number_t);
-
-kern_return_t
-IOConnectCallStructMethod(io_connect_t, uint32_t, const void *, size_t, void *, size_t *);
-
-CFTypeRef
-IORegistryEntryCreateCFProperty(io_registry_entry_t, CFStringRef, CFAllocatorRef, IOOptionBits);
 
 kern_return_t
 mach_vm_read_overwrite(vm_map_t, mach_vm_address_t, mach_vm_size_t, mach_vm_address_t, mach_vm_size_t *);

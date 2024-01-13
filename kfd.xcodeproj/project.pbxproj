@@ -38,6 +38,7 @@
 		6E011B172B4C619E0020F821 /* section.c in Sources */ = {isa = PBXBuildFile; fileRef = 6E011B042B4C619D0020F821 /* section.c */; };
 		6E011B182B4C619E0020F821 /* sep.c in Sources */ = {isa = PBXBuildFile; fileRef = 6E011B062B4C619D0020F821 /* sep.c */; };
 		6E011B192B4C619E0020F821 /* asn1.c in Sources */ = {isa = PBXBuildFile; fileRef = 6E011B072B4C619D0020F821 /* asn1.c */; };
+		6E6A69A02B533E790034CD0C /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E9204A42B331124001D38E5 /* IOKit.framework */; };
 		6E9204982B330FAB001D38E5 /* fun.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E9204892B330FAB001D38E5 /* fun.m */; };
 		6E9204992B330FAB001D38E5 /* vm_unaligned_copy_switch_race.c in Sources */ = {isa = PBXBuildFile; fileRef = 6E92048A2B330FAB001D38E5 /* vm_unaligned_copy_switch_race.c */; };
 		6E92049A2B330FAB001D38E5 /* grant_full_disk_access.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E92048B2B330FAB001D38E5 /* grant_full_disk_access.m */; };
@@ -49,7 +50,6 @@
 		6E9204A02B330FAB001D38E5 /* offsets.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E9204912B330FAB001D38E5 /* offsets.m */; };
 		6E9204A12B330FAB001D38E5 /* vnode.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E9204922B330FAB001D38E5 /* vnode.m */; };
 		6E9204A22B330FAB001D38E5 /* proc.c in Sources */ = {isa = PBXBuildFile; fileRef = 6E9204932B330FAB001D38E5 /* proc.c */; };
-		6E9204A52B331124001D38E5 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E9204A42B331124001D38E5 /* IOKit.framework */; };
 		6ED3B80A2B4D8A24008251E5 /* patchfinder64.m in Sources */ = {isa = PBXBuildFile; fileRef = 6ED3B8092B4D8A24008251E5 /* patchfinder64.m */; };
 		6ED3B80D2B4DC14A008251E5 /* libgrabkernel.m in Sources */ = {isa = PBXBuildFile; fileRef = 6ED3B80C2B4DC14A008251E5 /* libgrabkernel.m */; };
 		6ED3B8202B4DC2D4008251E5 /* libcurl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6ED3B81D2B4DC2D4008251E5 /* libcurl.a */; };
@@ -189,12 +189,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6E9204A52B331124001D38E5 /* IOKit.framework in Frameworks */,
 				6ED3B8272B4DC3E5008251E5 /* libz.tbd in Frameworks */,
 				6ED3B8222B4DC2D4008251E5 /* libfragmentzip.a in Frameworks */,
 				6ED3B8212B4DC2D4008251E5 /* libgrabkernel.a in Frameworks */,
 				6ED3B8252B4DC3C2008251E5 /* libMobileGestalt.tbd in Frameworks */,
 				6ED3B8202B4DC2D4008251E5 /* libcurl.a in Frameworks */,
+				6E6A69A02B533E790034CD0C /* IOKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
