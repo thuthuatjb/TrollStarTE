@@ -530,19 +530,19 @@ pfinder_init_file(pfinder_t *pfinder, const char *filename) {
     return ret;
 }
 
-int set_kbase(uint64_t _kbase) {
+int set_libdimentio_kbase(uint64_t _kbase) {
     kbase = _kbase;
     
     return 0;
 }
 
-int set_kfd(uint64_t _kfd) {
+int set_libdimentio_kfd(uint64_t _kfd) {
     kfd = _kfd;
     
     return 0;
 }
 
-int set_kernel_path(char* _path) {
+int set_libdimentio_kernpath(char* _path) {
     kernel_path = _path;
     
     return 0;

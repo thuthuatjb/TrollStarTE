@@ -51,13 +51,13 @@ kern_return_t
 pfinder_init(pfinder_t *pfinder);
 
 int
-set_kbase(uint64_t _kbase);
+set_libdimentio_kbase(uint64_t _kbase);
 
 int
-set_kfd(uint64_t kfd);
+set_libdimentio_kfd(uint64_t kfd);
 
 int
-set_kernel_path(char* _path);
+set_libdimentio_kernpath(char* _path);
 
 void
 pfinder_term(pfinder_t *pfinder);

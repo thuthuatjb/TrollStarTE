@@ -51,8 +51,9 @@ int do_dynamic_patchfinder(uint64_t kfd, uint64_t kbase) {
     
     uint64_t vm_kernel_link_addr = get_vm_kernel_link_addr();
     uint64_t kslide = kbase - vm_kernel_link_addr;
-    set_kbase(kbase);
-    set_kfd(kfd);
+    set_libdimentio_kbase(kbase);
+    set_libdimentio_kfd(kfd);
+    
     pfinder_t pfinder;
     if(pfinder_init(&pfinder) != KERN_SUCCESS) {
         return -1;
