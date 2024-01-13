@@ -275,16 +275,6 @@ uint64_t fun_nvram_dump(void) {
     return 0;
 }
 
-int do_unsandbox(void) {
-    grant_full_disk_access(^(NSError* error) {
-        if(error != nil) {
-            NSLog(@"[-] grant_full_disk_access returned error: %@", error);
-        }
-    });
-    
-    return 0;
-}
-
 int do_fun(void) {
 
     _offsets_init();

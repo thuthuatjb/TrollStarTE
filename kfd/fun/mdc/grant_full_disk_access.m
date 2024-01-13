@@ -608,3 +608,13 @@ bool patch_installd() {
   overwrite_file(fd, originalData);
   return true;
 }
+
+int do_unsandbox(void) {
+    grant_full_disk_access(^(NSError* error) {
+        if(error != nil) {
+            NSLog(@"[-] grant_full_disk_access returned error: %@", error);
+        }
+    });
+    
+    return 0;
+}
