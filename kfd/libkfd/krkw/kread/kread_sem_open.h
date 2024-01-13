@@ -102,9 +102,7 @@ void kread_sem_open_find_proc(struct kfd* kfd)
     u64 semaphore_kaddr = static_kget(struct pseminfo, psem_semobject, pseminfo_kaddr);
     u64 task_kaddr = static_kget(struct semaphore, owner, semaphore_kaddr);
     
-
-    bool EXPERIMENTAL_DYNAMIC_PATCHFINDER = true;
-    if(import_kfd_offsets() == -1 && EXPERIMENTAL_DYNAMIC_PATCHFINDER) {
+    if(import_kfd_offsets() == -1) {
         //Step 1. break kaslr
         printf("kernel_task: 0x%llx\n", task_kaddr);
         
