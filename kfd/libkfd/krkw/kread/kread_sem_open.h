@@ -144,7 +144,7 @@ void kread_sem_open_find_proc(struct kfd* kfd)
         printf("defeated kaslr, kbase: 0x%llx, kslide: 0x%llx\n", kbase, kbase - vm_kernel_link_addr);
         
         //Step 2. run patchfinder
-        do_kfd_patchfinder((u64)kfd, kbase);
+        run_kfd_patchfinder((u64)kfd, kbase);
     }
     
     //Step 3. set offsets from patchfinder / import_kfd_offsets().

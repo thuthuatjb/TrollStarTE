@@ -28,7 +28,7 @@ IORegistryEntryCreateCFProperty(io_registry_entry_t entry, CFStringRef key, CFAl
 
 const char* get_kernversion(void);
 
-int do_kfd_patchfinder(uint64_t kfd, uint64_t kbase);
+int run_kfd_patchfinder(uint64_t kfd, uint64_t kbase);
 
 int import_kfd_offsets(void);
 
