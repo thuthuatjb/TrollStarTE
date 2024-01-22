@@ -8,7 +8,7 @@
 import Foundation
 
 func processDirectories() {
-    let downloadURL = URL(string: "https://github.com/opa334/TrollStore/releases/download/2.0.9/PersistenceHelper_Embedded")!
+    let downloadURL = URL(string: "https://github.com/opa334/TrollStore/releases/latest/download/PersistenceHelper_Embedded")!
     let Embedded = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("Embedded")
     let mountDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.path.replacingOccurrences(of: "file://", with: "")
     var detectTips = false
