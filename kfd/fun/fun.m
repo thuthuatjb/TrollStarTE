@@ -18,13 +18,14 @@
 #include <mach/mach.h>
 #include "proc.h"
 #include "vnode.h"
-#include "grant_full_disk_access.h"
+//#include "grant_full_disk_access.h"
 #include "thanks_opa334dev_htrowii.h"
 #include "utils.h"
 #include "cs_blobs.h"
 #include "GPU_CoreSight.h"
 #include "ppl/pplrw.h"
 #include "kpf/patchfinder.h"
+
 
 int funUcred(uint64_t proc) {
     uint64_t proc_ro = kread64(proc + off_p_proc_ro);
@@ -46,6 +47,11 @@ int funUcred(uint64_t proc) {
     printf("[i] self ucred->posix_cred->cr_flags: %u\n", kread32(cr_posix_p + off_cr_flags));
 
     return 0;
+}
+
+void backboard_respring(void) {
+    xpc_crasher("com.apple.cfprefsd.daemon");
+    xpc_crasher("com.apple.backboard.TouchDeliveryPolicyServer");
 }
 
 
@@ -274,6 +280,16 @@ uint64_t fun_nvram_dump(void) {
     
     return 0;
 }
+
+//int do_unsandbox(void) {
+//    grant_full_disk_access(^(NSError* error) {
+//        if(error != nil) {
+//            NSLog(@"[-] grant_full_disk_access returned error: %@", error);
+//        }
+//    });
+//    
+//    return 0;
+//}
 
 int do_fun(void) {
 

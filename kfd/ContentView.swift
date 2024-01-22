@@ -5,79 +5,115 @@
 import SwiftUI
 
 struct ContentView: View {
-    init() {
-    }
-    
     @State private var kfd: UInt64 = 0
+    @State private var puafPagesIndex = 7
+    @State private var puafPages = 0
+    @State private var puafMethod = 2
+    @State private var kreadMethod = 1
+    @State private var kwriteMethod = 1
+    @State private var installationStatus = false
+    @State private var kopenStatus = false
 
-    private var puaf_pages_options = [16, 32, 64, 128, 256, 512, 1024, 2048]
-    @State private var puaf_pages_index = 7
-    @State private var puaf_pages = 0
-
-    private var puaf_method_options = ["physpuppet", "smith", "landa"]
-    @State private var puaf_method = 2
-
-    private var kread_method_options = ["kqueue_workloop_ctl", "sem_open"]
-    @State private var kread_method = 1
-
-    private var kwrite_method_options = ["dup", "sem_open"]
-    @State private var kwrite_method = 1
+    private let puafPagesOptions = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 32768]
+    private let puafMethodOptions = ["physpuppet", "smith", "landa"]
+    private let kreadMethodOptions = ["kqueue_workloop_ctl", "sem_open"]
+    private let kwriteMethodOptions = ["dup", "sem_open"]
 
     var body: some View {
         NavigationView {
             Form {
-                Section {
-                    Picker(selection: $puaf_pages_index, label: Text("puaf pages:")) {
-                        ForEach(0 ..< puaf_pages_options.count, id: \.self) {
-                            Text(String(self.puaf_pages_options[$0]))
+                Section(header: Text("Configuration")) {
+                    Picker("puaf pages:", selection: $puafPagesIndex) {
+                        ForEach(0 ..< puafPagesOptions.count, id: \.self) {
+                            Text("\(self.puafPagesOptions[$0])")
+                        }
+                    }.disabled(kfd != 0)
+
+                    Picker("puaf method:", selection: $puafMethod) {
+                        ForEach(0 ..< puafMethodOptions.count, id: \.self) {
+                            Text(self.puafMethodOptions[$0])
+                        }
+                    }.disabled(kfd != 0)
+
+                    Picker("kread method:", selection: $kreadMethod) {
+                        ForEach(0 ..< kreadMethodOptions.count, id: \.self) {
+                            Text(self.kreadMethodOptions[$0])
+                        }
+                    }.disabled(kfd != 0)
+
+                    Picker("kwrite method:", selection: $kwriteMethod) {
+                        ForEach(0 ..< kwriteMethodOptions.count, id: \.self) {
+                            Text(self.kwriteMethodOptions[$0])
                         }
                     }.disabled(kfd != 0)
                 }
-                Section {
-                    Picker(selection: $puaf_method, label: Text("puaf method:")) {
-                        ForEach(0 ..< puaf_method_options.count, id: \.self) {
-                            Text(self.puaf_method_options[$0])
-                        }
-                    }.disabled(kfd != 0)
+
+                Section(header: Text("Actions")) {
+                    //HStack {
+                        Button("Click here to start!") {
+                            UIApplication.shared.alert(title: "Exploiting Kernel...", body: "well, waiting for kopen...", withButton: false)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                puafPages = puafPagesOptions[puafPagesIndex]
+                                kfd = do_kopen(UInt64(puafPages), UInt64(puafMethod), UInt64(kreadMethod), UInt64(kwriteMethod))
+                                do_fun()
+                                
+                                // Show kopen status and reset installationStatus
+                                kopenStatus = true
+                                installationStatus = false
+                                UIApplication.shared.dismissAlert(animated: true)
+                            }
+                        }.disabled(kfd != 0)
+                        //.buttonStyle(.bordered)
+                        .frame(minWidth: 0, maxWidth: .infinity)
+                    //}
                 }
-                Section {
-                    Picker(selection: $kread_method, label: Text("kread method:")) {
-                        ForEach(0 ..< kread_method_options.count, id: \.self) {
-                            Text(self.kread_method_options[$0])
-                        }
-                    }.disabled(kfd != 0)
-                }
-                Section {
-                    Picker(selection: $kwrite_method, label: Text("kwrite method:")) {
-                        ForEach(0 ..< kwrite_method_options.count, id: \.self) {
-                            Text(self.kwrite_method_options[$0])
-                        }
-                    }.disabled(kfd != 0)
-                }
-                Section {
-                    HStack {
-                        Button("kopen") {
-                            puaf_pages = puaf_pages_options[puaf_pages_index]
+
+
+                Section(header: Text("Utilities")) {
+                    Button("Install TrollStore Helper to Tips") {
+                        UIApplication.shared.alert(title: "Installing TrollHelper...", body: "imagine how the Tips app is useful in its own way...", withButton: false)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            processDirectories()
                             
-                            kfd = do_kopen(UInt64(puaf_pages), UInt64(puaf_method), UInt64(kread_method), UInt64(kwrite_method))
-                            do_fun()
-                        }.disabled(kfd != 0).frame(minWidth: 0, maxWidth: .infinity)
-                        Button("kclose") {
-                            do_kclose()
-                            puaf_pages = 0
-                            kfd = 0
-                        }.disabled(kfd == 0).frame(minWidth: 0, maxWidth: .infinity)
-                    }.buttonStyle(.bordered)
-                }.listRowBackground(Color.clear)
-                if kfd != 0 {
-                    Section {
-                        VStack {
-                            Text("Success!").foregroundColor(.green)
-                            Text("Look at output in Xcode")
-                        }.frame(minWidth: 0, maxWidth: .infinity)
-                    }.listRowBackground(Color.clear)
+                            // Show installation log messages and reset kopenStatus
+                            installationStatus = true
+                            kopenStatus = false
+                        }
+                    }.disabled(kfd == 0)
+
+                    Button("Respring to Apply") {
+                        do_kclose()
+                        backboard_respring()
+                    }.disabled(kfd == 0)
                 }
-            }.navigationBarTitle(Text("kfd"), displayMode: .inline)
+
+                Section(header: Text("Status")) {
+                    VStack {
+                        if kopenStatus {
+                            Text("kopen success!").foregroundColor(.green)
+                            Text("Now press on \"Install Trollstore Helper to Tips\"")
+                        }
+                        if installationStatus {
+                            Text("Please press \"Respring to Apply\".\n\nIf Tips still not TrollHelper, reinstall Tips from AppStore (do not open) then reboot and try again")
+                        }
+                        if !(installationStatus || kopenStatus) {
+                            HStack(alignment: .center) {
+                                VStack {
+                                    Text("Made by Little34306 and straight-tamago")
+                                        .font(.caption)
+                                    Text("\nv" + (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String))
+                                        .font(.caption)
+                                }
+                                //Spacer()
+                            }
+                        }
+                    }
+                    .foregroundColor(.yellow)
+                    .frame(minWidth: 0, maxWidth: .infinity)
+                }
+
+            }
+            .navigationBarTitle(Text("TrollStore Installer Helper"), displayMode: .inline)
         }
     }
 }

