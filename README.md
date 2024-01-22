@@ -9,7 +9,7 @@ Probably iOS 16.0 to 16.6.1 on all iOS/iPadOS (arm64/arm64e/M1/M2 supported)
 #### Install TrollStore Helper to Tips
 ---
 ## Preview
-[](TrollStar/Preview.PNG)
+<img src="https://raw.githubusercontent.com/34306/TrollStar/main/Preview.PNG">
 
 # kfd
 
