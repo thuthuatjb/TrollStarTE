@@ -1,3 +1,8 @@
+TrollStarTE is a reworked version based on TrollStar with changed UI and added ESign+ installation feature.
+## Preview
+<img src="https://raw.githubusercontent.com/thuthuatjb/TrollStarTE/main/Preview-TE.PNG">
+
+Original readme
 # kfund (Post-Exploitation)
 kfund, short for my [fun](kfd/fun) with kfd exploit. Original by @wh1te4ever, modify for TrollStore installation and called TrollStar by [34306 (me)](https://github.com/34306) and [straight-tamago](https://github.com/straight-tamago)
 
