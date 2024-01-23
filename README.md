@@ -1,9 +1,11 @@
+# Info
 TrollStarTE is a reworked version based on TrollStar with changed UI and added ESign+ installation feature.
 ## Preview
 <img src="https://raw.githubusercontent.com/thuthuatjb/TrollStarTE/main/Preview-TE.PNG">
 
-Original readme
-# kfund (Post-Exploitation)
+# Original readme
+
+## kfund (Post-Exploitation)
 kfund, short for my [fun](kfd/fun) with kfd exploit. Original by @wh1te4ever, modify for TrollStore installation and called TrollStar by [34306 (me)](https://github.com/34306) and [straight-tamago](https://github.com/straight-tamago)
 
 ## What are the supported OS versions and devices?
@@ -16,7 +18,7 @@ Probably iOS 16.0 to 16.6.1 on all iOS/iPadOS (arm64/arm64e/M1/M2 supported)
 ## Preview
 <img src="https://raw.githubusercontent.com/34306/TrollStar/main/Preview.PNG">
 
-# kfd
+## kfd
 
 kfd, short for kernel file descriptor, is a project to read and write kernel memory on Apple
 devices. It leverages various vulnerabilities that can be exploited to obtain dangling PTEs, which
